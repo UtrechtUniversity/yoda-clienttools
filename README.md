@@ -6,10 +6,10 @@ Client-side Yoda tools - mainly intended for data managers and key users
 
 * yreport\_dataobjectspercollection: prints a report of the number of subcollections and data objects
   per collection. The output is in CSV format. List of columns:
-..1. Number of subcollections in collection (nonrecursive).
-..2. Number of data objects in collection (nonrecursive).
-..3. Total number of subcollections and data objects in collection (nonrecursive)
-..4. Name of collection
+    1. Number of subcollections in collection (nonrecursive).
+    2. Number of data objects in collection (nonrecursive).
+    3. Total number of subcollections and data objects in collection (nonrecursive)
+    4. Name of collection
 
 ## Installation
 
