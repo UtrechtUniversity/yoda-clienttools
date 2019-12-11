@@ -6,7 +6,7 @@ import sys
 from itertools import chain
 from irods.column import Like
 from irods.models import Collection, DataObject
-from yclienttools import session
+from yclienttools import common_queries, session
 
 def entry():
     '''Entry point'''
@@ -19,25 +19,6 @@ def _get_args():
     parser.add_argument("-r", "--root", default="/",
                         help='show only collections in this root collection (default: show all collections')
     return parser.parse_args()
-
-
-def _get_collections(session, root):
-    '''Get a generator of collections within a root collection'''
-
-    if root.endswith("/"):
-        searchstring = "{}%%".format(root)
-    else:
-        searchstring = "{}/%%".format(root)
-
-    generator_collection = (session.query(Collection.id, Collection.name)
-                            .filter(Collection.name == root)
-                            .get_results()
-                            )
-    generator_subcollections = (session.query(Collection.id, Collection.name)
-                                .filter(Like(Collection.name, searchstring ))
-                                .get_results()
-                                )
-    return chain(generator_collection, generator_subcollections)
 
 
 def _get_subcollections(session, collection_name):
@@ -57,7 +38,7 @@ def _get_dataobjects_in_collection(session, collection_name):
 def report_collections(root, session):
     '''Print list of number of subcollections and data objects per collection'''
     output = csv.writer(sys.stdout, delimiter=',')
-    for collection in _get_collections(session, root):
+    for collection in common_queries.get_collections_in_root(session, root):
         collection_name = collection[Collection.name]
         num_collections = len(
             list(
