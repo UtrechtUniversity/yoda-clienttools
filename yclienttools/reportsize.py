@@ -4,7 +4,7 @@ import argparse
 import humanize
 import csv
 import sys
-from irods.models import Collection, DataObject
+from irods.models import Collection, DataObject, User
 from yclienttools import common_queries, session, exceptions
 
 
@@ -26,6 +26,8 @@ def _get_args():
                                help='Show total size of data objects in this collection and its subcollections')
     subject_group.add_argument("-H", "--all-collections-in-home", action='store_true',
                                help='Show total size of data objects in each collection in /zoneName/home, including its subcollections.')
+    subject_group.add_argument("-C", "--all-collections-in-community",
+                               help='Show total size of data objects in each research and vault collection in a Yoda community')
     return parser.parse_args()
 
 
@@ -78,6 +80,37 @@ def _get_all_collections_in_home(session):
     return [c[Collection.name] for c in collections]
 
 
+def _get_all_root_collections_in_community(session, community):
+    '''Returns a list of all root collections in a Yoda community/category.'''
+    results = []
+    # Community information is stored by Yoda in user objects. So first search
+    # for user objects, and get the collection names from there.
+    for user in session.query(User.name).get_results():
+        metadata = session.metadata.get(User, user[User.name])
+        categories = [m.value for m in metadata if m.name == 'category']
+
+        if community in categories:
+
+            research_collection = "/{}/home/{}".format(
+                session.zone, user[User.name])
+            results.append(research_collection)
+
+            if user[User.name].startswith("research-"):
+                vault_collection = "/{}/home/{}".format(
+                    session.zone, user[User.name].replace("research-", "vault-", 1))
+
+                if len(list(session.query(Collection.name).filter(
+                        Collection.name == vault_collection).get_results())) > 0:
+                    # If a matching vault collection exists, add it to the
+                    # list as well.
+                    results.append(vault_collection)
+
+    if len(results) == 0:
+        raise exceptions.NotFoundException
+
+    return results
+
+
 def report_size(args, session):
     if args.collection:
         _report_size_collections(
@@ -86,3 +119,15 @@ def report_size(args, session):
     elif args.all_collections_in_home:
         _report_size_collections(session, args.human_readable,
                                  _get_all_collections_in_home(session))
+    elif args.all_collections_in_community:
+        try:
+            collections = _get_all_root_collections_in_community(session,
+                                                                 args.all_collections_in_community)
+        except exceptions.NotFoundException:
+            print(
+                "Error: community {} not found.".format(
+                    args.all_collections_in_community),
+                file=sys.stderr)
+            sys.exit(1)
+
+        _report_size_collections(session, args.human_readable, collections)

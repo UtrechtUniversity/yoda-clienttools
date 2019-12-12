@@ -9,7 +9,8 @@ Client-side Yoda tools - mainly intended for data managers and key users
 Shows a report of the size of all data objects in a collection and its subcollections
 
 ```
-usage: yreport_collectionsize [--help] [-h] (-c COLLECTION | -H)
+usage: yreport_collectionsize [--help] [-h]
+                              (-c COLLECTION | -H | -C ALL_COLLECTIONS_IN_COMMUNITY)
 
 optional arguments:
   --help                show help information
@@ -21,6 +22,10 @@ optional arguments:
   -H, --all-collections-in-home
                         Show total size of data objects in each collection in
                         /zoneName/home, including its subcollections.
+  -C ALL_COLLECTIONS_IN_COMMUNITY, --all-collections-in-community ALL_COLLECTIONS_IN_COMMUNITY
+                        Show total size of data objects in each research and
+                        vault collection in a Yoda community
+
 ```
 
 ### yreport\_dataobjectspercollection
