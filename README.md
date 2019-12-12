@@ -9,10 +9,12 @@ Client-side Yoda tools - mainly intended for data managers and key users
 Shows a report of the size of all data objects in a collection and its subcollections
 
 ```
-usage: yreport_collectionsize [-h] -c COLLECTION
+usage: yreport_collectionsize [--help] [-h] (-c COLLECTION | -H)
 
 optional arguments:
   --help                show help information
+  -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
+                        instead of 1000000
   -c COLLECTION, --collection COLLECTION
                         Show total size of data objects in this collection and
                         its subcollections

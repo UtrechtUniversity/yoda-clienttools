@@ -2,3 +2,4 @@ getpass
 python_irodsclient
 enum34
 six
+humanize>=0.5

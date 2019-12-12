@@ -1,6 +1,7 @@
 '''Shows a report of the size of all data objects in a (set of) collections'''
 
 import argparse
+import humanize
 import csv
 import sys
 from irods.models import Collection, DataObject
@@ -18,6 +19,8 @@ def _get_args():
     # custom -h option.
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
     parser.add_argument('--help', action='help', help='show help information')
+    parser.add_argument('-h', '--human-readable', action='store_true', default=False,
+                        help="Show sizes in human readable format, e.g. 1.0MB instead of 1000000")
     subject_group = parser.add_mutually_exclusive_group(required=True)
     subject_group.add_argument("-c", "--collection",
                                help='Show total size of data objects in this collection and its subcollections')
@@ -45,12 +48,22 @@ def _get_collection_size(session, collection_name):
     return total_size
 
 
-def _report_size_collections(session, collections):
+def _report_size_collections(session, human_readable, collections):
+    '''Prints a list of collections, along with the total size of their data objects,
+       including any data objects in subcollections.'''
     output = csv.writer(sys.stdout, delimiter=',')
     for collection in collections:
         try:
+
             size = _get_collection_size(session, collection)
-            output.writerow([collection, str(size)])
+
+            if human_readable:
+                display_size = str(humanize.naturalsize(size))
+            else:
+                display_size = str(size)
+
+            output.writerow([collection, display_size])
+
         except exceptions.NotFoundException:
             print("Error: collection {} not found.".format(
                 collection), file=sys.stderr)
@@ -67,7 +80,9 @@ def _get_all_collections_in_home(session):
 
 def report_size(args, session):
     if args.collection:
-        _report_size_collections(session, [args.collection])
+        _report_size_collections(
+            session, args.human_readable, [
+                args.collection])
     elif args.all_collections_in_home:
-        _report_size_collections(session,
+        _report_size_collections(session, args.human_readable,
                                  _get_all_collections_in_home(session))

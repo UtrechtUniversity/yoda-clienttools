@@ -7,7 +7,8 @@ setup(
     install_requires=[
         'python-irodsclient',
         'enum34',
-        'six'
+        'six',
+        'humanize>=0.5'
     ],
     name='yclienttools',
     packages=['yclienttools', 'irodsutils'],
