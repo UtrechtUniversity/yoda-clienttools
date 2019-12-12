@@ -16,7 +16,7 @@ optional arguments:
   -c COLLECTION, --collection COLLECTION
                         Show total size of data objects in this collection and
                         its subcollections
-  -h, --all-collections-in-home
+  -H, --all-collections-in-home
                         Show total size of data objects in each collection in
                         /zoneName/home, including its subcollections.
 ```

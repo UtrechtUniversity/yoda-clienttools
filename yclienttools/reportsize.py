@@ -21,7 +21,7 @@ def _get_args():
     subject_group = parser.add_mutually_exclusive_group(required=True)
     subject_group.add_argument("-c", "--collection",
                                help='Show total size of data objects in this collection and its subcollections')
-    subject_group.add_argument("-h", "--all-collections-in-home", action='store_true',
+    subject_group.add_argument("-H", "--all-collections-in-home", action='store_true',
                                help='Show total size of data objects in each collection in /zoneName/home, including its subcollections.')
     return parser.parse_args()
 
