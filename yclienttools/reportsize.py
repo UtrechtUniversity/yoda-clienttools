@@ -4,7 +4,7 @@ import argparse
 import humanize
 import csv
 import sys
-from irods.models import Collection, DataObject, Resource, User
+from irods.models import Collection, DataObject, Resource, User, UserMeta
 from yclienttools import common_queries, session, exceptions
 
 
@@ -96,25 +96,22 @@ def _get_all_root_collections_in_community(session, community):
     results = []
     # Community information is stored by Yoda in user objects. So first search
     # for user objects, and get the collection names from there.
-    for user in session.query(User.name).get_results():
-        metadata = session.metadata.get(User, user[User.name])
-        categories = [m.value for m in metadata if m.name == 'category']
+    for user in session.query(User.name, UserMeta).filter(
+            UserMeta.name == 'category', UserMeta.value == community).get_results():
 
-        if community in categories:
+        research_collection = "/{}/home/{}".format(
+            session.zone, user[User.name])
+        results.append(research_collection)
 
-            research_collection = "/{}/home/{}".format(
-                session.zone, user[User.name])
-            results.append(research_collection)
+        if user[User.name].startswith("research-"):
+            vault_collection = "/{}/home/{}".format(
+                session.zone, user[User.name].replace("research-", "vault-", 1))
 
-            if user[User.name].startswith("research-"):
-                vault_collection = "/{}/home/{}".format(
-                    session.zone, user[User.name].replace("research-", "vault-", 1))
-
-                if len(list(session.query(Collection.name).filter(
-                        Collection.name == vault_collection).get_results())) > 0:
-                    # If a matching vault collection exists, add it to the
-                    # list as well.
-                    results.append(vault_collection)
+            if len(list(session.query(Collection.name).filter(
+               Collection.name == vault_collection).get_results())) > 0:
+                # If a matching vault collection exists, add it to the
+                # list as well.
+                results.append(vault_collection)
 
     if len(results) == 0:
         raise exceptions.NotFoundException
