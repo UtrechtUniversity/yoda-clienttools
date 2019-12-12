@@ -22,8 +22,6 @@ def _get_args():
 
 def _get_collection_size(session, collection_name):
     total_size = 0
-    all_collections = session.query(
-        Collection.id, Collection.name).get_results()
 
     for collection in common_queries.get_collections_in_root(
             session, collection_name):
