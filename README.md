@@ -12,10 +12,13 @@ Shows a report of the size of all data objects in a collection and its subcollec
 usage: yreport_collectionsize [-h] -c COLLECTION
 
 optional arguments:
-  -h, --help            show this help message and exit
+  --help                show help information
   -c COLLECTION, --collection COLLECTION
                         Show total size of data objects in this collection and
                         its subcollections
+  -h, --all-collections-in-home
+                        Show total size of data objects in each collection in
+                        /zoneName/home, including its subcollections.
 ```
 
 ### yreport\_dataobjectspercollection
