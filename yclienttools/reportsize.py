@@ -4,7 +4,8 @@ import argparse
 import csv
 import sys
 from irods.models import Collection, DataObject
-from yclienttools import common_queries, session
+from yclienttools import common_queries, session, exceptions
+
 
 def entry():
     '''Entry point'''
@@ -13,7 +14,8 @@ def entry():
 
 def _get_args():
     '''Parse command line arguments'''
-    # Add_help is False, because we the -h option would conflict with our custom -h option.
+    # Add_help is False, because we the -h option would conflict with our
+    # custom -h option.
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
     parser.add_argument('--help', action='help', help='show help information')
     subject_group = parser.add_mutually_exclusive_group(required=True)
@@ -26,6 +28,12 @@ def _get_args():
 
 def _get_collection_size(session, collection_name):
     total_size = 0
+
+    collections = common_queries.get_collections_in_root(
+        session, collection_name)
+
+    if len(list(collections)) == 0:
+        raise exceptions.NotFoundException
 
     for collection in common_queries.get_collections_in_root(
             session, collection_name):
@@ -40,19 +48,21 @@ def _get_collection_size(session, collection_name):
 def _report_size_collections(session, collections):
     output = csv.writer(sys.stdout, delimiter=',')
     for collection in collections:
-        output.writerow([
-            collection, str(
-                _get_collection_size(
-                    session, collection))])
+        try:
+            size = _get_collection_size(session, collection)
+            output.writerow([collection, str(size)])
+        except exceptions.NotFoundException:
+            print("Error: collection {} not found.".format(
+                collection), file=sys.stderr)
 
 
 def _get_all_collections_in_home(session):
     '''Returns a list of the names of all collection names in the home collection.'''
     home_collection = "/{}/home".format(session.zone)
     collections = (session.query(Collection.name)
-            .filter(Collection.parent_name == home_collection)
-            .get_results())
-    return [ c[Collection.name] for c in collections ]
+                   .filter(Collection.parent_name == home_collection)
+                   .get_results())
+    return [c[Collection.name] for c in collections]
 
 
 def report_size(args, session):
