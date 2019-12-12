@@ -4,7 +4,7 @@ import argparse
 import humanize
 import csv
 import sys
-from irods.models import Collection, DataObject, User
+from irods.models import Collection, DataObject, Resource, User
 from yclienttools import common_queries, session, exceptions
 
 
@@ -21,6 +21,9 @@ def _get_args():
     parser.add_argument('--help', action='help', help='show help information')
     parser.add_argument('-h', '--human-readable', action='store_true', default=False,
                         help="Show sizes in human readable format, e.g. 1.0MB instead of 1000000")
+    parser.add_argument("-r", '--count-all-replicas', action='store_true', default=False,
+                        help="Count the size of all replicas of a data object. By default, only " +
+                        "the size of one replica of each data object is counted.")
     subject_group = parser.add_mutually_exclusive_group(required=True)
     subject_group.add_argument("-c", "--collection",
                                help='Show total size of data objects in this collection and its subcollections')
@@ -31,7 +34,7 @@ def _get_args():
     return parser.parse_args()
 
 
-def _get_collection_size(session, collection_name):
+def _get_collection_size(session, collection_name, count_all_replicas):
     total_size = 0
 
     collections = common_queries.get_collections_in_root(
@@ -42,22 +45,30 @@ def _get_collection_size(session, collection_name):
 
     for collection in common_queries.get_collections_in_root(
             session, collection_name):
-        dataobjects = (session.query(Collection.name, DataObject.name, DataObject.size)
-                       .filter(Collection.name == collection[Collection.name])
-                       .get_results())
+        if count_all_replicas:
+            dataobjects = (session.query(Collection.name, DataObject.name, DataObject.size,
+                                         DataObject.path, Resource.name)
+                           .filter(Collection.name == collection[Collection.name])
+                           .get_results())
+        else:
+            dataobjects = (session.query(Collection.name, DataObject.name, DataObject.size)
+                           .filter(Collection.name == collection[Collection.name])
+                           .get_results())
         for dataobject in dataobjects:
             total_size = total_size + dataobject[DataObject.size]
     return total_size
 
 
-def _report_size_collections(session, human_readable, collections):
+def _report_size_collections(
+        session, human_readable, count_all_replicas, collections):
     '''Prints a list of collections, along with the total size of their data objects,
        including any data objects in subcollections.'''
     output = csv.writer(sys.stdout, delimiter=',')
     for collection in collections:
         try:
 
-            size = _get_collection_size(session, collection)
+            size = _get_collection_size(
+                session, collection, count_all_replicas)
 
             if human_readable:
                 display_size = str(humanize.naturalsize(size))
@@ -114,10 +125,10 @@ def _get_all_root_collections_in_community(session, community):
 def report_size(args, session):
     if args.collection:
         _report_size_collections(
-            session, args.human_readable, [
+            session, args.human_readable, args.count_all_replicas, [
                 args.collection])
     elif args.all_collections_in_home:
-        _report_size_collections(session, args.human_readable,
+        _report_size_collections(session, args.human_readable, args.count_all_replicas,
                                  _get_all_collections_in_home(session))
     elif args.all_collections_in_community:
         try:
@@ -130,4 +141,8 @@ def report_size(args, session):
                 file=sys.stderr)
             sys.exit(1)
 
-        _report_size_collections(session, args.human_readable, collections)
+        _report_size_collections(
+            session,
+            args.human_readable,
+            args.count_all_replicas,
+            collections)
