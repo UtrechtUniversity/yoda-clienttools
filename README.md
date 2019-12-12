@@ -2,9 +2,25 @@
 
 Client-side Yoda tools - mainly intended for data managers and key users
 
-## Current tools:
+## Overview of tools
 
-* yreport\_dataobjectspercollection: prints a report of the number of subcollections and data objects
+### yreport\_collectionsize
+
+Shows a report of the size of all data objects in a collection and its subcollections
+
+```
+usage: yreport_collectionsize [-h] -c COLLECTION
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c COLLECTION, --collection COLLECTION
+                        Show total size of data objects in this collection and
+                        its subcollections
+```
+
+### yreport\_dataobjectspercollection
+
+Prints a report of the number of subcollections and data objects
   per collection. The output is in CSV format. List of columns:
     1. Number of subcollections in collection (nonrecursive).
     2. Number of data objects in collection (nonrecursive).
