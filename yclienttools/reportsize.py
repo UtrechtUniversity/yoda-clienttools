@@ -102,11 +102,27 @@ def _get_collection_size(session, collection_name,
     return result
 
 
+def _print_entry(csv_output, collection, group,
+                 raw_size, group_by, human_readable):
+    '''Prints an entry of the collection size report.'''
+
+    if human_readable:
+        display_size = str(humanize.naturalsize(raw_size))
+    else:
+        display_size = str(raw_size)
+
+    if group_by == GroupByOption.none:
+        csv_output.writerow([collection, display_size])
+    else:
+        csv_output.writerow([collection, group, display_size])
+
+
 def _report_size_collections(
         session, human_readable, count_all_replicas, group_by, collections):
     '''Prints a list of collections, along with the total size of their data objects,
        including any data objects in subcollections.'''
     output = csv.writer(sys.stdout, delimiter=',')
+    totals = {}
     for collection in collections:
         try:
 
@@ -114,20 +130,37 @@ def _report_size_collections(
                 session, collection, count_all_replicas, group_by)
 
             for group, raw_size in size_result.items():
+                _print_entry(
+                    output,
+                    collection,
+                    group,
+                    raw_size,
+                    group_by,
+                    human_readable)
 
-                if human_readable:
-                    display_size = str(humanize.naturalsize(raw_size))
+                if group in totals:
+                    totals[group] = totals[group] + raw_size
                 else:
-                    display_size = str(raw_size)
-
-                if group_by == GroupByOption.none:
-                    output.writerow([collection, display_size])
-                else:
-                    output.writerow([collection, group, display_size])
+                    totals[group] = raw_size
 
         except exceptions.NotFoundException:
             print("Error: collection {} not found.".format(
                 collection), file=sys.stderr)
+
+    if len(list(collections)) > 1:
+        # Print total size per group if the output is about multiple
+        # collections.
+        if len(totals.items()) > 1:
+            totals.pop('all', None)
+
+        for group, raw_size in totals.items():
+            _print_entry(
+                output,
+                'total',
+                group,
+                raw_size,
+                group_by,
+                human_readable)
 
 
 def _get_all_collections_in_home(session):
