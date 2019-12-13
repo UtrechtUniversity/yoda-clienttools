@@ -1,11 +1,21 @@
 '''Shows a report of the size of all data objects in a (set of) collections'''
 
 import argparse
+from enum import Enum
 import humanize
 import csv
 import sys
 from irods.models import Collection, DataObject, Resource, User, UserMeta
 from yclienttools import common_queries, session, exceptions
+
+
+class GroupByOption(Enum):
+    none = 'none'
+    resource = 'resource'
+    location = 'location'
+
+    def __str__(self):
+        return self.name
 
 
 def entry():
@@ -24,6 +34,11 @@ def _get_args():
     parser.add_argument("-r", '--count-all-replicas', action='store_true', default=False,
                         help="Count the size of all replicas of a data object. By default, only " +
                         "the size of one replica of each data object is counted.")
+    parser.add_argument("-g", "--group-by", type=GroupByOption, default='none',
+                        help="Group collection sizes by resource or by location. Argument should be 'none' (the default), " +
+                             "'resource' or 'location'. Grouping by resource or location implies --count-all-replicas. " +
+                             "If a collection has no dataobjects and --group-by resource / location is enabled, its size " +
+                             "will be printed with group 'all'.")
     subject_group = parser.add_mutually_exclusive_group(required=True)
     subject_group.add_argument("-c", "--collection",
                                help='Show total size of data objects in this collection and its subcollections')
@@ -31,11 +46,22 @@ def _get_args():
                                help='Show total size of data objects in each collection in /zoneName/home, including its subcollections.')
     subject_group.add_argument("-C", "--all-collections-in-community",
                                help='Show total size of data objects in each research and vault collection in a Yoda community')
-    return parser.parse_args()
+
+    args = parser.parse_args()
+
+    if args.group_by != GroupByOption.none and not args.count_all_replicas:
+        print(
+            "Automatically enabled --count-all-replicas, because --group-by resource or location is enabled.",
+            file=sys.stderr)
+        args.r = True
+        args.count_all_replicas = True
+
+    return args
 
 
-def _get_collection_size(session, collection_name, count_all_replicas):
-    total_size = 0
+def _get_collection_size(session, collection_name,
+                         count_all_replicas, group_by):
+    result = {}
 
     collections = common_queries.get_collections_in_root(
         session, collection_name)
@@ -47,7 +73,7 @@ def _get_collection_size(session, collection_name, count_all_replicas):
             session, collection_name):
         if count_all_replicas:
             dataobjects = (session.query(Collection.name, DataObject.name, DataObject.size,
-                                         DataObject.path, Resource.name)
+                                         DataObject.path, Resource.name, Resource.location)
                            .filter(Collection.name == collection[Collection.name])
                            .get_results())
         else:
@@ -55,27 +81,49 @@ def _get_collection_size(session, collection_name, count_all_replicas):
                            .filter(Collection.name == collection[Collection.name])
                            .get_results())
         for dataobject in dataobjects:
-            total_size = total_size + dataobject[DataObject.size]
-    return total_size
+
+            if group_by == GroupByOption.none:
+                key = 'all'
+            elif group_by == GroupByOption.resource:
+                key = dataobject[Resource.name]
+            elif group_by == GroupByOption.location:
+                key = dataobject[Resource.location]
+            else:
+                raise Exception("Unknown group_by value {}".format(key))
+
+            if key in result:
+                result[key] = result[key] + dataobject[DataObject.size]
+            else:
+                result[key] = dataobject[DataObject.size]
+
+    if len(result.keys()) == 0:
+        result['all'] = 0
+
+    return result
 
 
 def _report_size_collections(
-        session, human_readable, count_all_replicas, collections):
+        session, human_readable, count_all_replicas, group_by, collections):
     '''Prints a list of collections, along with the total size of their data objects,
        including any data objects in subcollections.'''
     output = csv.writer(sys.stdout, delimiter=',')
     for collection in collections:
         try:
 
-            size = _get_collection_size(
-                session, collection, count_all_replicas)
+            size_result = _get_collection_size(
+                session, collection, count_all_replicas, group_by)
 
-            if human_readable:
-                display_size = str(humanize.naturalsize(size))
-            else:
-                display_size = str(size)
+            for group, raw_size in size_result.items():
 
-            output.writerow([collection, display_size])
+                if human_readable:
+                    display_size = str(humanize.naturalsize(raw_size))
+                else:
+                    display_size = str(raw_size)
+
+                if group_by == GroupByOption.none:
+                    output.writerow([collection, display_size])
+                else:
+                    output.writerow([collection, group, display_size])
 
         except exceptions.NotFoundException:
             print("Error: collection {} not found.".format(
@@ -122,10 +170,10 @@ def _get_all_root_collections_in_community(session, community):
 def report_size(args, session):
     if args.collection:
         _report_size_collections(
-            session, args.human_readable, args.count_all_replicas, [
+            session, args.human_readable, args.count_all_replicas, args.group_by, [
                 args.collection])
     elif args.all_collections_in_home:
-        _report_size_collections(session, args.human_readable, args.count_all_replicas,
+        _report_size_collections(session, args.human_readable, args.count_all_replicas, args.group_by,
                                  _get_all_collections_in_home(session))
     elif args.all_collections_in_community:
         try:
@@ -142,4 +190,5 @@ def report_size(args, session):
             session,
             args.human_readable,
             args.count_all_replicas,
+            args.group_by,
             collections)
