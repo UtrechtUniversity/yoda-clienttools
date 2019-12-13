@@ -6,7 +6,7 @@ Client-side Yoda tools - mainly intended for data managers and key users
 
 ### yreport\_collectionsize
 
-Shows a report of the size of all data objects in a collection and its subcollections
+Shows a report of the size of all data objects in a (set of) collections.
 
 ```
 usage: yreport_collectionsize [--help] [-h] [-r] [-R] [-g GROUP_BY]
