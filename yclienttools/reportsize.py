@@ -44,7 +44,7 @@ def _get_args():
                                help='Show total size of data objects in this collection and its subcollections')
     subject_group.add_argument("-H", "--all-collections-in-home", action='store_true',
                                help='Show total size of data objects in each collection in /zoneName/home, including its subcollections.')
-    subject_group.add_argument("-C", "--all-collections-in-community",
+    subject_group.add_argument("-C", "--community",
                                help='Show total size of data objects in each research and vault collection in a Yoda community')
 
     args = parser.parse_args()
@@ -175,14 +175,14 @@ def report_size(args, session):
     elif args.all_collections_in_home:
         _report_size_collections(session, args.human_readable, args.count_all_replicas, args.group_by,
                                  _get_all_collections_in_home(session))
-    elif args.all_collections_in_community:
+    elif args.community:
         try:
             collections = _get_all_root_collections_in_community(session,
-                                                                 args.all_collections_in_community)
+                                                                 args.community)
         except exceptions.NotFoundException:
             print(
                 "Error: community {} not found.".format(
-                    args.all_collections_in_community),
+                    args.community),
                 file=sys.stderr)
             sys.exit(1)
 

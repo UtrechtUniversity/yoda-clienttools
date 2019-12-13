@@ -33,7 +33,7 @@ optional arguments:
   -H, --all-collections-in-home
                         Show total size of data objects in each collection in
                         /zoneName/home, including its subcollections.
-  -C ALL_COLLECTIONS_IN_COMMUNITY, --all-collections-in-community ALL_COLLECTIONS_IN_COMMUNITY
+  -C COMMUNITY, --community COMMUNITY
                         Show total size of data objects in each research and
                         vault collection in a Yoda community
 ```
