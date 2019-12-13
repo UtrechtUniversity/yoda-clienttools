@@ -9,8 +9,8 @@ Client-side Yoda tools - mainly intended for data managers and key users
 Shows a report of the size of all data objects in a collection and its subcollections
 
 ```
-usage: yreport_collectionsize [--help] [-h] [-r] [-g GROUP_BY]
-                              (-c COLLECTION | -H | -C ALL_COLLECTIONS_IN_COMMUNITY)
+usage: yreport_collectionsize [--help] [-h] [-r] [-R] [-g GROUP_BY]
+                              (-c COLLECTION | -H | -C COMMUNITY)
 
 optional arguments:
   --help                show help information
@@ -20,6 +20,9 @@ optional arguments:
                         Count the size of all replicas of a data object. By
                         default, only the size of one replica of each data
                         object is counted.
+  -R, --include-revisions
+                        Include the size of stored revisions of data objects
+                        in the collection (if available).
   -g GROUP_BY, --group-by GROUP_BY
                         Group collection sizes by resource or by location.
                         Argument should be 'none' (the default), 'resource' or

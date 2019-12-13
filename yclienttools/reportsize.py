@@ -3,6 +3,7 @@
 import argparse
 from enum import Enum
 import humanize
+import itertools
 import csv
 import sys
 from irods.models import Collection, DataObject, Resource, User, UserMeta
@@ -43,6 +44,8 @@ def _get_args():
     parser.add_argument("-r", '--count-all-replicas', action='store_true', default=False,
                         help="Count the size of all replicas of a data object. By default, only " +
                         "the size of one replica of each data object is counted.")
+    parser.add_argument("-R", '--include-revisions', action='store_true', default=False,
+                        help="Include the size of stored revisions of data objects in the collection (if available).")
     parser.add_argument("-g", "--group-by", type=GroupByOption, default='none',
                         help="Group collection sizes by resource or by location. Argument should be 'none' (the default), " +
                              "'resource' or 'location'. Grouping by resource or location implies --count-all-replicas. " +
@@ -70,8 +73,27 @@ def _get_args():
     return args
 
 
+def _get_revision_collection_name(session, collection_name):
+    '''Returns the revision collection name of a collection if it exists, otherwise None. '''
+    expected_prefix = "/{}/home/".format(session.zone)
+    if collection_name.startswith(expected_prefix):
+        trimmed_collection_name = collection_name.replace(
+            expected_prefix, "", 1)
+        if "/" in trimmed_collection_name:
+            return None
+        else:
+            revision_collection_name = "/{}/yoda/revisions/{}".format(
+                session.zone, trimmed_collection_name)
+            if _collection_exists(session, revision_collection_name):
+                return revision_collection_name
+            else:
+                return None
+    else:
+        return None
+
+
 def _get_collection_size(session, collection_name,
-                         count_all_replicas, group_by):
+                         count_all_replicas, group_by, include_revisions):
     result = {}
 
     collections = common_queries.get_collections_in_root(
@@ -80,8 +102,20 @@ def _get_collection_size(session, collection_name,
     if len(list(collections)) == 0:
         raise exceptions.NotFoundException
 
-    for collection in common_queries.get_collections_in_root(
-            session, collection_name):
+    original_collections = common_queries.get_collections_in_root(
+        session, collection_name)
+    revision_collection_name = _get_revision_collection_name(
+        session, collection_name)
+
+    if revision_collection_name is None or not include_revisions:
+        all_collections = original_collections
+    else:
+        revision_collections = common_queries.get_collections_in_root(
+            session, revision_collection_name)
+        all_collections = itertools.chain(
+            original_collections, revision_collections)
+
+    for collection in all_collections:
         if count_all_replicas:
             dataobjects = (session.query(Collection.name, DataObject.name, DataObject.size,
                                          DataObject.path, Resource.name, Resource.location)
@@ -129,7 +163,7 @@ def _print_entry(csv_output, collection, group,
 
 
 def _report_size_collections(
-        session, human_readable, count_all_replicas, group_by, collections):
+        session, human_readable, count_all_replicas, group_by, include_revisions, collections):
     '''Prints a list of collections, along with the total size of their data objects,
        including any data objects in subcollections.'''
     output = csv.writer(sys.stdout, delimiter=',')
@@ -138,7 +172,7 @@ def _report_size_collections(
         try:
 
             size_result = _get_collection_size(
-                session, collection, count_all_replicas, group_by)
+                session, collection, count_all_replicas, group_by, include_revisions,)
 
             for group, raw_size in size_result.items():
                 _print_entry(
@@ -237,10 +271,10 @@ def _get_all_root_collections_in_community(session, community):
 def report_size(args, session):
     if args.collection:
         _report_size_collections(
-            session, args.human_readable, args.count_all_replicas, args.group_by, [
+            session, args.human_readable, args.count_all_replicas, args.group_by, args.include_revisions, [
                 args.collection])
     elif args.all_collections_in_home:
-        _report_size_collections(session, args.human_readable, args.count_all_replicas, args.group_by,
+        _report_size_collections(session, args.human_readable, args.count_all_replicas, args.group_by, args.include_revisions,
                                  _get_all_collections_in_home(session))
     elif args.community:
         try:
@@ -255,4 +289,5 @@ def report_size(args, session):
             args.human_readable,
             args.count_all_replicas,
             args.group_by,
+            args.include_revisions,
             collections)
