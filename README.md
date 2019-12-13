@@ -32,10 +32,12 @@ optional arguments:
                         its subcollections
   -H, --all-collections-in-home
                         Show total size of data objects in each collection in
-                        /zoneName/home, including its subcollections.
+                        /zoneName/home, including its subcollections. Note:
+                        you will only see the collections you have access to.
   -C COMMUNITY, --community COMMUNITY
                         Show total size of data objects in each research and
-                        vault collection in a Yoda community
+                        vault collection in a Yoda community. Note: you will
+                        only see the collections you have access to.
 ```
 
 ### yreport\_dataobjectspercollection

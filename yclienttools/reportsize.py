@@ -52,9 +52,11 @@ def _get_args():
     subject_group.add_argument("-c", "--collection",
                                help='Show total size of data objects in this collection and its subcollections')
     subject_group.add_argument("-H", "--all-collections-in-home", action='store_true',
-                               help='Show total size of data objects in each collection in /zoneName/home, including its subcollections.')
+                               help='Show total size of data objects in each collection in /zoneName/home, including its subcollections. ' +
+                               "Note: you will only see the collections you have access to.")
     subject_group.add_argument("-C", "--community",
-                               help='Show total size of data objects in each research and vault collection in a Yoda community')
+                               help='Show total size of data objects in each research and vault collection in a Yoda community. ' +
+                               "Note: you will only see the collections you have access to.")
 
     args = parser.parse_args()
 
@@ -153,7 +155,7 @@ def _report_size_collections(
                     totals[group] = raw_size
 
         except exceptions.NotFoundException:
-            exit_with_error(session, "Error: collection {} not found.".format(
+            exit_with_error(session, "Error: collection {} not found (or access denied).".format(
                 collection))
 
     if len(list(collections)) > 1:
@@ -181,6 +183,30 @@ def _get_all_collections_in_home(session):
     return [c[Collection.name] for c in collections]
 
 
+def _collection_exists(session, collection):
+    '''Returns a boolean value that indicates whether a collection with the provided name exists.'''
+    return len(list(session.query(Collection.name).filter(
+        Collection.name == collection).get_results())) > 0
+
+
+def _get_research_collection_for_username(session, name):
+    '''Returns the research collection name for a user name, e.g. research-foo ->
+    /zoneName/home/research-foo. '''
+    return "/{}/home/{}".format(session.zone, name)
+
+
+def _get_vault_collection_for_username(session, name):
+    '''Returns the vault collection name for a user name, e.g. research-foo ->
+    /zoneName/home/vault-foo. '''
+    return "/{}/home/{}".format(session.zone,
+                                name.replace("research-", "vault-", 1))
+
+
+def _username_refers_to_research_collection(name):
+    '''Returns boolean value that says whether a user name appears to refer a research collection. '''
+    return name.startswith("research-")
+
+
 def _get_all_root_collections_in_community(session, community):
     '''Returns a list of all root collections in a Yoda community/category.'''
     results = []
@@ -189,18 +215,17 @@ def _get_all_root_collections_in_community(session, community):
     for user in session.query(User.name, UserMeta).filter(
             UserMeta.name == 'category', UserMeta.value == community).get_results():
 
-        research_collection = "/{}/home/{}".format(
-            session.zone, user[User.name])
-        results.append(research_collection)
+        research_collection = _get_research_collection_for_username(
+            session, user[User.name])
 
-        if user[User.name].startswith("research-"):
-            vault_collection = "/{}/home/{}".format(
-                session.zone, user[User.name].replace("research-", "vault-", 1))
+        if _collection_exists(session, research_collection):
+            results.append(research_collection)
 
-            if len(list(session.query(Collection.name).filter(
-               Collection.name == vault_collection).get_results())) > 0:
-                # If a matching vault collection exists, add it to the
-                # list as well.
+        if _username_refers_to_research_collection(user[User.name]):
+            vault_collection = _get_vault_collection_for_username(
+                session, user[User.name])
+
+            if _collection_exists(session, vault_collection):
                 results.append(vault_collection)
 
     if len(results) == 0:
