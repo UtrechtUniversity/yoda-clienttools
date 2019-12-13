@@ -20,7 +20,16 @@ class GroupByOption(Enum):
 
 def entry():
     '''Entry point'''
-    report_size(_get_args(), session.setup_session())
+    s = session.setup_session()
+    report_size(_get_args(), s)
+    s.cleanup()
+
+
+def exit_with_error(session, message):
+    '''Closes iRODS API session, and exits with an error message.'''
+    session.cleanup()
+    print(message, file=sys.stderr)
+    sys.exit(1)
 
 
 def _get_args():
@@ -144,8 +153,8 @@ def _report_size_collections(
                     totals[group] = raw_size
 
         except exceptions.NotFoundException:
-            print("Error: collection {} not found.".format(
-                collection), file=sys.stderr)
+            exit_with_error(session, "Error: collection {} not found.".format(
+                collection))
 
     if len(list(collections)) > 1:
         # Print total size per group if the output is about multiple
@@ -213,11 +222,8 @@ def report_size(args, session):
             collections = _get_all_root_collections_in_community(session,
                                                                  args.community)
         except exceptions.NotFoundException:
-            print(
-                "Error: community {} not found.".format(
-                    args.community),
-                file=sys.stderr)
-            sys.exit(1)
+            exit_with_error(session, "Error: community {} not found.".format(
+                args.community))
 
         _report_size_collections(
             session,
