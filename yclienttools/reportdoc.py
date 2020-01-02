@@ -10,7 +10,10 @@ from yclienttools import common_queries, session
 
 def entry():
     '''Entry point'''
-    report_collections(_get_args().root, session.setup_session())
+    try:
+        report_collections(_get_args().root, session.setup_session())
+    except KeyboardInterrupt:
+        print("Script interrupted by user.\n", file = sys.stderr)
 
 
 def _get_args():

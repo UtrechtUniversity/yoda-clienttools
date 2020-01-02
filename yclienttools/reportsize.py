@@ -21,9 +21,12 @@ class GroupByOption(Enum):
 
 def entry():
     '''Entry point'''
-    s = session.setup_session()
-    report_size(_get_args(), s)
-    s.cleanup()
+    try:
+        s = session.setup_session()
+        report_size(_get_args(), s)
+        s.cleanup()
+    except KeyboardInterrupt:
+        print("Script interrupted by user.\n", file = sys.stderr)
 
 
 def exit_with_error(session, message):
