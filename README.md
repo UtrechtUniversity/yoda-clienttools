@@ -52,6 +52,24 @@ per collection. The output is in CSV format. List of columns:
 3. Total number of subcollections and data objects in collection (nonrecursive)
 4. Name of collection
 
+### yreport\_intake
+
+Prints an intake collection report. This report is only relevant for environments
+that use the intake module.
+
+```
+
+usage: yreport_intake [-h] -s STUDY
+
+Generates a report of the contents of an intake collection.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s STUDY, --study STUDY
+                        Study to process
+
+```
+
 ## Installation
 
 The Yoda clienttools require Python 3. They have been tested with Python 3.6. 

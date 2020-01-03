@@ -105,6 +105,18 @@ def get_revision_collection_name(session, collection_name):
     else:
         return None
 
+def get_dataobject_count(session, collection_name):
+    '''Returns the number of data objects in a collection (including its subcollections).'''
+    total_count = 0
+
+    for collection in get_collections_in_root(session, collection_name):
+        dataobjects = ( session.query(Collection.name, DataObject.name)
+                        .filter(Collection.name == collection[Collection.name])
+                        .get_results() )
+        total_count += len(list(dataobjects))
+
+    return total_count
+
 
 def collection_exists(session, collection):
     '''Returns a boolean value that indicates whether a collection with the provided name exists.'''
