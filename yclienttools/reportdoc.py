@@ -3,8 +3,6 @@
 import argparse
 import csv
 import sys
-from itertools import chain
-from irods.column import Like
 from irods.models import Collection, DataObject
 from yclienttools import common_queries, session
 
