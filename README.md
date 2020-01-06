@@ -59,12 +59,13 @@ that use the intake module.
 
 ```
 
-usage: yreport_intake [-h] -s STUDY
+usage: yreport_intake [-h] [-p] -s STUDY
 
 Generates a report of the contents of an intake collection.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
                         Study to process
 

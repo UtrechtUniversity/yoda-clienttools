@@ -14,6 +14,8 @@ from yclienttools.session import setup_session
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-p', '--progress', action='store_true',
+                        help='Show progress updates.')
     parser.add_argument('-s', '--study', required=True,
                         help='Study to process')
     return parser.parse_args()
@@ -34,9 +36,9 @@ def main():
         print("Error: no vault collection {} found for study {}.".format(
             vault_collection, args.study), file=sys.stderr)
         sys.exit(1)
-    vault_dataset_count = _get_vault_dataset_count(session, vault_collection)
+    vault_dataset_count = _get_vault_dataset_count(session, vault_collection, args.progress)
     aggregated_dataset_info = _get_aggregated_dataset_info(
-        session, vault_collection)
+        session, vault_collection, args.progress)
     for category in ["raw", "processed"]:
         _print_vault_dataset_count(vault_dataset_count, category)
     for category in ["raw", "processed", "total"]:
@@ -66,10 +68,13 @@ def _get_datasets_with_metadata(session, root):
     return datasets
 
 
-def _get_vault_dataset_count(session, intakecollection):
+def _get_vault_dataset_count(session, intakecollection, progress):
     '''Returns a nested dictionary with counts of datasets per experiment type, wave and version in an intake
        folder.'''
     counts = defaultdict(lambda: defaultdict(dict))
+
+    if progress:
+        _print_progress_update("Retrieving list of of datasets and their metadata ...")
 
     for collection, metadata in _get_datasets_with_metadata(
             session, intakecollection).items():
@@ -82,12 +87,18 @@ def _get_vault_dataset_count(session, intakecollection):
             else:
                 counts[et][wave][version] = 1
 
+    if progress:
+        _print_progress_update("Counting datasets in vault finished.")
+
     return counts
 
 
-def _get_aggregated_dataset_info(session, intakecollection):
+def _get_aggregated_dataset_info(session, intakecollection, progress):
     '''Returns a nested dictionary with three dictionaries containing aggregated data of all raw datasets, all processed
        datasets, as well as of overall (total) statistics.'''
+
+    if progress:
+        _print_progress_update("Starting collection of aggregated dataset information ...")
 
     results = defaultdict(lambda: defaultdict(dict))
     for category in ["raw", "processed"]:
@@ -103,6 +114,9 @@ def _get_aggregated_dataset_info(session, intakecollection):
             # Collection is only considered a dataset if it has the
             # dataset_date_created field
             continue
+
+        if progress:
+            _print_progress_update("Collecting statistics for collection {} ...".format(collection))
 
         if metadata["version"] == "raw":
             category = "raw"
@@ -134,12 +148,17 @@ def _get_aggregated_dataset_info(session, intakecollection):
         results["total"][variable] = results["raw"][variable] + \
             results["processed"][variable]
 
+    if progress:
+        _print_progress_update("Finished collection of aggregated dataset information.")
+
     return results
 
 
 def _get_vault_collection(session, study):
     return "/{}/home/grp-vault-{}".format(session.zone, study)
 
+def _print_progress_update(message):
+    print("Progress: {}".format(message), file=sys.stderr)
 
 def _print_vault_dataset_count(vault_dataset_count, category):
     print()
