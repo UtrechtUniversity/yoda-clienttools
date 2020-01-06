@@ -1,14 +1,67 @@
 '''Generates a report of the contents of an intake collection.'''
 
 import argparse
+import csv
+from glob import glob
 import humanize
+import os
 import sys
-import time
+from time import time
 from collections import OrderedDict, defaultdict
 from irods.models import Collection
 from yclienttools import common_queries
 from yclienttools.options import GroupByOption
 from yclienttools.session import setup_session
+
+
+class DatasetStatisticsCache:
+    '''This object stores statistics of a dataset in files in a local cache directory.'''
+
+    def __init__(self, dir):
+        self.dir = dir
+        self.memstore = {}
+        self.load()
+
+    def load(self):
+        '''Load statistics from the on-disk cache directory into the cache.'''
+        self.filestore = {}
+        for filename in glob(os.path.join(self.dir, "dsscache.*.dat")):
+            with open(filename) as cache_file:
+                for line in csv.reader(cache_file):
+                    data = {"num": int(line[1]), "size": int(line[2])}
+                    self.filestore[line[0]] = data
+
+    def save(self):
+        '''Store statistics that have been added to the cache using the put function on disk in the cache directory.'''
+        if len(self.memstore.keys()) == 0:
+            return
+
+        filename = os.path.join(self.dir, "dsscache.{}.dat".format(time()))
+
+        with open(filename, "w") as cache_file:
+            writer = csv.writer(cache_file)
+            for path, data in self.memstore.items():
+                writer.writerow([path, str(data["num"]), str(data["size"])])
+                self.filestore[path] = data
+
+        self.memstore = {}
+
+    def get(self, pathname):
+        '''Fetch statistics of a dataset from cache.'''
+        if pathname in self.filestore:
+            return self.filestore[pathname]
+        elif pathname in self.memstore:
+            return self.memstore[pathname]
+        else:
+            return None
+
+    def has(self, pathname):
+        '''Returns boolean value that says whether the cache has an entry for this dataset.'''
+        return pathname in self.filestore or pathname in self.memstore
+
+    def put(self, pathname, num_objects, total_size):
+        '''Put statistics of a dataset in the cache.'''
+        self.memstore[pathname] = {"num": num_objects, "size": total_size}
 
 
 def _get_args():
@@ -18,7 +71,18 @@ def _get_args():
                         help='Show progress updates.')
     parser.add_argument('-s', '--study', required=True,
                         help='Study to process')
-    return parser.parse_args()
+    parser.add_argument('-c', '--cache', default=None,
+                        help='Local cache directory. Can be used to retrieve previously collected information on datasets, in order to speed up report generation. The script will also store newly collected dataset information in the cache.')
+
+    args = parser.parse_args()
+
+    if args.cache is not None and not os.path.isdir(args.cache):
+        print(
+            "Error: cache argument is not a valid directory.",
+            file=sys.stderr)
+        sys.exit(1)
+
+    return args
 
 
 def entry():
@@ -38,6 +102,13 @@ def main():
             vault_collection, args.study), file=sys.stderr)
         sys.exit(1)
 
+    if args.cache:
+        if args.progress:
+            _print_progress_update("Loading dataset statistics cache ...")
+        cache = DatasetStatisticsCache(args.cache)
+    else:
+        cache = None
+
     if args.progress:
         _print_progress_update("Compiling list of datasets in vault ...")
     datasets = _get_datasets_with_metadata(session, vault_collection).items()
@@ -47,12 +118,15 @@ def main():
     vault_dataset_count = _get_vault_dataset_count(
         session, datasets, vault_collection, args.progress)
     aggregated_dataset_info = _get_aggregated_dataset_info(
-        session, datasets, vault_collection, args.progress)
+        session, datasets, vault_collection, args.progress, cache)
 
     for category in ["raw", "processed"]:
         _print_vault_dataset_count(vault_dataset_count, category)
     for category in ["raw", "processed", "total"]:
         _print_aggregated_dataset_info(aggregated_dataset_info, category)
+
+    if args.cache:
+        cache.save()
 
 
 def _get_subcollections(session, collection):
@@ -104,7 +178,7 @@ def _get_vault_dataset_count(session, datasets, intakecollection, progress):
 
 
 def _get_aggregated_dataset_info(
-        session, datasets, intakecollection, progress):
+        session, datasets, intakecollection, progress, cache):
     '''Returns a nested dictionary with three dictionaries containing aggregated data of all raw datasets, all processed
        datasets, as well as of overall (total) statistics.'''
 
@@ -118,17 +192,13 @@ def _get_aggregated_dataset_info(
                          "file_count", "total_filesize", "filesize_growth"]:
             results[category][variable] = 0
 
-    ref_lastmonth = time.time() - 30 * 24 * 3600
+    ref_lastmonth = time() - 30 * 24 * 3600
 
     for collection, metadata in datasets:
         if "dataset_date_created" not in metadata:
             # Collection is only considered a dataset if it has the
             # dataset_date_created field
             continue
-
-        if progress:
-            _print_progress_update(
-                "Collecting statistics for collection {} ...".format(collection))
 
         if metadata["version"] == "raw":
             category = "raw"
@@ -137,12 +207,31 @@ def _get_aggregated_dataset_info(
 
         results[category]["dataset_count"] += 1
 
-        file_count = common_queries.get_dataobject_count(session, collection)
-        results[category]["file_count"] += file_count
+        if cache is not None and cache.has(collection):
 
-        filesize_dict = common_queries.get_collection_size(
-            session, collection, False, GroupByOption.none, False)
-        total_filesize = filesize_dict["all"]
+            cache_entry = cache.get(collection)
+            file_count = cache_entry["num"]
+            total_filesize = cache_entry["size"]
+
+            if progress:
+                _print_progress_update(
+                    "Retrieved statistics of collection {} from cache.".format(collection))
+        else:
+
+            if progress:
+                _print_progress_update(
+                    "Calculating statistics for collection {} ...".format(collection))
+
+            file_count = common_queries.get_dataobject_count(
+                session, collection)
+            filesize_dict = common_queries.get_collection_size(
+                session, collection, False, GroupByOption.none, False)
+            total_filesize = filesize_dict["all"]
+
+            if cache is not None:
+                cache.put(collection, file_count, total_filesize)
+
+        results[category]["file_count"] += file_count
         results[category]["total_filesize"] += total_filesize
 
         pseudocode = metadata["pseudocode"]

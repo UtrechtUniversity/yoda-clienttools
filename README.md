@@ -57,9 +57,13 @@ per collection. The output is in CSV format. List of columns:
 Prints an intake collection report. This report is only relevant for environments
 that use the intake module.
 
+On systems with a significant number of datasets, it is recommended to use the
+--cache parameter to keep a local cache of dataset statistics in order to speed
+up report generation.
+
 ```
 
-usage: yreport_intake [-h] [-p] -s STUDY
+usage: yreport_intake [-h] [-p] -s STUDY [-c CACHE]
 
 Generates a report of the contents of an intake collection.
 
@@ -68,6 +72,11 @@ optional arguments:
   -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
                         Study to process
+  -c CACHE, --cache CACHE
+                        Local cache directory. Can be used to retrieve
+                        previously collected information on datasets, in order
+                        to speed up report generation. The script will also
+                        store newly collected dataset information in the cache.
 
 ```
 
