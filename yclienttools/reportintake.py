@@ -31,15 +31,24 @@ def entry():
 def main():
     args = _get_args()
     session = setup_session()
+
     vault_collection = _get_vault_collection(session, args.study)
     if not common_queries.collection_exists(session, vault_collection):
         print("Error: no vault collection {} found for study {}.".format(
             vault_collection, args.study), file=sys.stderr)
         sys.exit(1)
+
+    if args.progress:
+        _print_progress_update("Compiling list of datasets in vault ...")
+    datasets = _get_datasets_with_metadata(session, vault_collection).items()
+    if args.progress:
+        _print_progress_update("Compiling list of datasets in vault finished.")
+
     vault_dataset_count = _get_vault_dataset_count(
-        session, vault_collection, args.progress)
+        session, datasets, vault_collection, args.progress)
     aggregated_dataset_info = _get_aggregated_dataset_info(
-        session, vault_collection, args.progress)
+        session, datasets, vault_collection, args.progress)
+
     for category in ["raw", "processed"]:
         _print_vault_dataset_count(vault_dataset_count, category)
     for category in ["raw", "processed", "total"]:
@@ -69,17 +78,16 @@ def _get_datasets_with_metadata(session, root):
     return datasets
 
 
-def _get_vault_dataset_count(session, intakecollection, progress):
+def _get_vault_dataset_count(session, datasets, intakecollection, progress):
     '''Returns a nested dictionary with counts of datasets per experiment type, wave and version in an intake
        folder.'''
     counts = defaultdict(lambda: defaultdict(dict))
 
     if progress:
         _print_progress_update(
-            "Retrieving list of of datasets and their metadata ...")
+            "Counting number of datasets in vault ...")
 
-    for collection, metadata in _get_datasets_with_metadata(
-            session, intakecollection).items():
+    for collection, metadata in datasets:
         if "dataset_date_created" in metadata:
             et = metadata['experiment_type']
             wave = metadata['wave']
@@ -95,7 +103,8 @@ def _get_vault_dataset_count(session, intakecollection, progress):
     return counts
 
 
-def _get_aggregated_dataset_info(session, intakecollection, progress):
+def _get_aggregated_dataset_info(
+        session, datasets, intakecollection, progress):
     '''Returns a nested dictionary with three dictionaries containing aggregated data of all raw datasets, all processed
        datasets, as well as of overall (total) statistics.'''
 
@@ -111,8 +120,7 @@ def _get_aggregated_dataset_info(session, intakecollection, progress):
 
     ref_lastmonth = time.time() - 30 * 24 * 3600
 
-    for collection, metadata in _get_datasets_with_metadata(
-            session, intakecollection).items():
+    for collection, metadata in datasets:
         if "dataset_date_created" not in metadata:
             # Collection is only considered a dataset if it has the
             # dataset_date_created field
