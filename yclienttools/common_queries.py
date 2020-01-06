@@ -4,6 +4,7 @@ from irods.models import Collection, DataObject, Resource
 from yclienttools.options import GroupByOption
 from yclienttools import exceptions
 
+
 def get_collections_in_root(session, root):
     '''Get a generator of collections within a root collection, including the root collection itself.'''
 
@@ -17,13 +18,14 @@ def get_collections_in_root(session, root):
                             .get_results()
                             )
     generator_subcollections = (session.query(Collection.id, Collection.name)
-                                .filter(Like(Collection.name, searchstring ))
+                                .filter(Like(Collection.name, searchstring))
                                 .get_results()
                                 )
     return chain(generator_collection, generator_subcollections)
 
+
 def get_collection_size(session, collection_name,
-                         count_all_replicas, group_by, include_revisions):
+                        count_all_replicas, group_by, include_revisions):
     '''Get total size of all data objects in collection (including its subcollections).
        Options:
        - count_all_replicas (boolean): specifies whether to count the size of each data
@@ -87,6 +89,7 @@ def get_collection_size(session, collection_name,
 
     return result
 
+
 def get_revision_collection_name(session, collection_name):
     '''Returns the revision collection name of a collection if it exists, otherwise None. '''
     expected_prefix = "/{}/home/".format(session.zone)
@@ -105,14 +108,15 @@ def get_revision_collection_name(session, collection_name):
     else:
         return None
 
+
 def get_dataobject_count(session, collection_name):
     '''Returns the number of data objects in a collection (including its subcollections).'''
     total_count = 0
 
     for collection in get_collections_in_root(session, collection_name):
-        dataobjects = ( session.query(Collection.name, DataObject.name)
-                        .filter(Collection.name == collection[Collection.name])
-                        .get_results() )
+        dataobjects = (session.query(Collection.name, DataObject.name)
+                       .filter(Collection.name == collection[Collection.name])
+                       .get_results())
         total_count += len(list(dataobjects))
 
     return total_count

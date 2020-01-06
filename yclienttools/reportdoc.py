@@ -6,12 +6,13 @@ import sys
 from irods.models import Collection, DataObject
 from yclienttools import common_queries, session
 
+
 def entry():
     '''Entry point'''
     try:
         report_collections(_get_args().root, session.setup_session())
     except KeyboardInterrupt:
-        print("Script interrupted by user.\n", file = sys.stderr)
+        print("Script interrupted by user.\n", file=sys.stderr)
 
 
 def _get_args():
@@ -53,4 +54,4 @@ def report_collections(root, session):
             str(num_collections),
             str(num_dataobjects),
             str(num_collections + num_dataobjects),
-            collection_name ])
+            collection_name])

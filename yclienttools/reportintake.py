@@ -36,7 +36,8 @@ def main():
         print("Error: no vault collection {} found for study {}.".format(
             vault_collection, args.study), file=sys.stderr)
         sys.exit(1)
-    vault_dataset_count = _get_vault_dataset_count(session, vault_collection, args.progress)
+    vault_dataset_count = _get_vault_dataset_count(
+        session, vault_collection, args.progress)
     aggregated_dataset_info = _get_aggregated_dataset_info(
         session, vault_collection, args.progress)
     for category in ["raw", "processed"]:
@@ -74,7 +75,8 @@ def _get_vault_dataset_count(session, intakecollection, progress):
     counts = defaultdict(lambda: defaultdict(dict))
 
     if progress:
-        _print_progress_update("Retrieving list of of datasets and their metadata ...")
+        _print_progress_update(
+            "Retrieving list of of datasets and their metadata ...")
 
     for collection, metadata in _get_datasets_with_metadata(
             session, intakecollection).items():
@@ -98,7 +100,8 @@ def _get_aggregated_dataset_info(session, intakecollection, progress):
        datasets, as well as of overall (total) statistics.'''
 
     if progress:
-        _print_progress_update("Starting collection of aggregated dataset information ...")
+        _print_progress_update(
+            "Starting collection of aggregated dataset information ...")
 
     results = defaultdict(lambda: defaultdict(dict))
     for category in ["raw", "processed"]:
@@ -116,7 +119,8 @@ def _get_aggregated_dataset_info(session, intakecollection, progress):
             continue
 
         if progress:
-            _print_progress_update("Collecting statistics for collection {} ...".format(collection))
+            _print_progress_update(
+                "Collecting statistics for collection {} ...".format(collection))
 
         if metadata["version"] == "raw":
             category = "raw"
@@ -149,7 +153,8 @@ def _get_aggregated_dataset_info(session, intakecollection, progress):
             results["processed"][variable]
 
     if progress:
-        _print_progress_update("Finished collection of aggregated dataset information.")
+        _print_progress_update(
+            "Finished collection of aggregated dataset information.")
 
     return results
 
@@ -157,8 +162,10 @@ def _get_aggregated_dataset_info(session, intakecollection, progress):
 def _get_vault_collection(session, study):
     return "/{}/home/grp-vault-{}".format(session.zone, study)
 
+
 def _print_progress_update(message):
     print("Progress: {}".format(message), file=sys.stderr)
+
 
 def _print_vault_dataset_count(vault_dataset_count, category):
     print()
@@ -169,7 +176,12 @@ def _print_vault_dataset_count(vault_dataset_count, category):
         print("{:20}{:10}{:10}".format("Type", "Wave", "Count"))
         print("-" * 40)
     else:
-        print("{:20}{:20}{:10}{:10}".format("Type", "Version", "Wave", "Count"))
+        print(
+            "{:20}{:20}{:10}{:10}".format(
+                "Type",
+                "Version",
+                "Wave",
+                "Count"))
         print("-" * 60)
 
     for et in sorted(vault_dataset_count.keys()):

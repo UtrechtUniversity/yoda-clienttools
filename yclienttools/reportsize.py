@@ -17,7 +17,7 @@ def entry():
         report_size(_get_args(), s)
         s.cleanup()
     except KeyboardInterrupt:
-        print("Script interrupted by user.\n", file = sys.stderr)
+        print("Script interrupted by user.\n", file=sys.stderr)
 
 
 def exit_with_error(session, message):
