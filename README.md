@@ -46,11 +46,34 @@ optional arguments:
 ### yreport\_dataobjectspercollection
 
 Prints a report of the number of subcollections and data objects
-per collection. The output is in CSV format. List of columns:
+per collection. The output is in CSV format.
+
+```
+usage: yreport_dataobjectspercollection [-h] [-r ROOT] [-e]
+
+Shows a report of number of data objects and subcollections per collection
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r ROOT, --root ROOT  show only collections in this root collection
+                        (default: show all collections
+  -e, --by-extension    show number of data objects by extension for each
+                        collection
+```
+
+List of columns in regular mode:
 1. Number of subcollections in collection (nonrecursive).
 2. Number of data objects in collection (nonrecursive).
 3. Total number of subcollections and data objects in collection (nonrecursive)
 4. Name of collection
+
+List of columns if --by-extension is enabled:
+1. Number of subcollections in collection (nonrecursive).
+2. Number of data objects in collection with the listed extension (nonrecursive).
+3. Total number of subcollections and data objects with the listed extension
+   in collection (nonrecursive)
+4. Extension
+5. Name of collection
 
 ### yreport\_intake
 
@@ -82,7 +105,7 @@ optional arguments:
 
 ## Installation
 
-The Yoda clienttools require Python 3. They have been tested with Python 3.6. 
+The Yoda clienttools require Python 3. They have been tested with Python 3.6.
 
 It is recommended to install the tools in a virtual environment, like this:
 
