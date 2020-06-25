@@ -20,6 +20,7 @@ def entry():
             sys.exit(1)
 
         report_collections(args, session)
+        session.cleanup()
 
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
