@@ -4,13 +4,23 @@ import argparse
 import csv
 import sys
 from irods.models import Collection, DataObject
-from yclienttools import common_queries, session
+from yclienttools import common_queries
+from yclienttools import session as s
 
 
 def entry():
     '''Entry point'''
     try:
-        report_collections(_get_args(), session.setup_session())
+        session = s.setup_session()
+        args = _get_args()
+
+        if args.root and not common_queries.collection_exists(session, args.root):
+            print ("Error: collection {} does not exist (or you don't have access)".format(args.root),
+                    file=sys.stderr)
+            sys.exit(1)
+
+        report_collections(args, session)
+
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
 
