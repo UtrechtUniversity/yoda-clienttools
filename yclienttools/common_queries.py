@@ -1,4 +1,6 @@
 from itertools import chain
+import os
+
 from irods.column import Like
 from irods.models import Collection, DataObject, Resource
 from yclienttools.options import GroupByOption
@@ -111,18 +113,30 @@ def get_revision_collection_name(session, collection_name):
 
 def get_dataobject_count(session, collection_name):
     '''Returns the number of data objects in a collection (including its subcollections).'''
-    total_count = 0
+    return len(get_dataobjects_in_collection(session, collection_name))
+
+def get_dataobjects_in_collection(session, collection_name):
+    result = []
 
     for collection in get_collections_in_root(session, collection_name):
         dataobjects = (session.query(Collection.name, DataObject.name)
                        .filter(Collection.name == collection[Collection.name])
                        .get_results())
-        total_count += len(list(dataobjects))
+        result.extend(map(
+            lambda d : "{}/{}".format(d[Collection.name], d[DataObject.name]),
+            dataobjects))
 
-    return total_count
+    return result
 
 
 def collection_exists(session, collection):
     '''Returns a boolean value that indicates whether a collection with the provided name exists.'''
     return len(list(session.query(Collection.name).filter(
         Collection.name == collection).get_results())) > 0
+
+def dataobject_exists(session, path):
+    '''Returns a boolean value that indicates whether a data object with the provided name exists.'''
+    collection_name, dataobject_name = os.path.split(path)
+    return len(list(session.query(Collection.name, DataObject.name).filter(
+        DataObject.name == dataobject_name).filter(
+        Collection.name == collection_name).get_results())) > 0

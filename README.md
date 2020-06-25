@@ -103,6 +103,24 @@ optional arguments:
 
 ```
 
+### yreport\_linecount
+
+Prints a report of the number of lines per data object.
+
+```
+usage: yreport_linecount [-h] (-c COLLECTION | -d DATA_OBJECT)
+
+Shows a report of the line counts of data objects.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c COLLECTION, --collection COLLECTION
+                        show line counts of all data objects in this
+                        collection (recursive)
+  -d DATA_OBJECT, --data-object DATA_OBJECT
+                        show line count of only this data object
+```
+
 ## Installation
 
 The Yoda clienttools require Python 3. They have been tested with Python 3.6.
