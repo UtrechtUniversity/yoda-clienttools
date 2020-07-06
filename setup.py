@@ -17,7 +17,8 @@ setup(
             'yreport_dataobjectspercollection= yclienttools.reportdoc:entry',
             'yreport_collectionsize= yclienttools.reportsize:entry',
             'yreport_intake= yclienttools.reportintake:entry',
-            'yreport_linecount= yclienttools.reportlinecount:entry'
+            'yreport_linecount= yclienttools.reportlinecount:entry',
+            'ycleanup_files= yclienttools.cleanupfiles:entry',
         ]
     },
     version='0.0.1'

@@ -4,6 +4,29 @@ Client-side Yoda tools - mainly intended for data managers and key users
 
 ## Overview of tools
 
+### ycleanup\_files
+
+```
+usage: ycleanup_files [-h] -r ROOT
+
+Recursively finds data objects in a collection that will typically have to be
+cleaned up when a dataset is archived, and deletes them.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r ROOT, --root ROOT  Delete unwanted files in this collection, as well as
+                        its subcollections
+
+```
+
+Overview of files to be removed:
+
+| file      | meaning                        |   |   |   |
+|-----------|--------------------------------|---|---|---|
+| .\_*      | MacOS resource fork            |   |   |   |
+| .DS_Store | MacOS custom folder attributes |   |   |   |
+| Thumbs.db | Windows thumbnail data         |   |   |   |
+
 ### yreport\_collectionsize
 
 Shows a report of the size of all data objects in a (set of) collections.
