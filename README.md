@@ -144,6 +144,22 @@ optional arguments:
                         show line count of only this data object
 ```
 
+### ywhichgroups
+
+Prints a list of all groups a user is a member of.
+
+```
+usage: ywhichgroups [-h] username
+
+Returns a list of groups of which a user is a member
+
+positional arguments:
+  username    The username
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
 ## Installation
 
 The Yoda clienttools require Python 3. They have been tested with Python 3.6.

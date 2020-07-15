@@ -19,6 +19,7 @@ setup(
             'yreport_intake= yclienttools.reportintake:entry',
             'yreport_linecount= yclienttools.reportlinecount:entry',
             'ycleanup_files= yclienttools.cleanupfiles:entry',
+            'ywhichgroups=yclienttools.whichgroups:entry',
         ]
     },
     version='0.0.1'
