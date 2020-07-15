@@ -28,11 +28,6 @@ def setup_session():
         )
         password = getpass(prompt="Please provide your irods password:")
 
-    print(
-        "Connecting to irods at {irods_host}:{irods_port} as {irods_user_name}"
-        .format(**irods_env), file=sys.stderr
-    )
-
     session = iRODSSession(
         host=irods_env["irods_host"],
         port=irods_env["irods_port"],
