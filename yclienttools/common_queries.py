@@ -2,7 +2,7 @@ from itertools import chain
 import os
 
 from irods.column import Like
-from irods.models import Collection, DataObject, Resource, User
+from irods.models import Collection, DataObject, Resource, User, UserGroup
 from yclienttools.options import GroupByOption
 from yclienttools import exceptions
 
@@ -144,3 +144,8 @@ def dataobject_exists(session, path):
 def user_exists(session, username):
     '''Returns a boolean value that indicates whether a user with the provided name exists.'''
     return len(list(session.query(User.name).filter(User.name == username).get_results())) > 0
+
+def group_exists(session, groupname):
+    '''Returns a boolean value that indicates whether a user group with the provided name exists.'''
+    return (len(list(session.query(UserGroup.name).filter(
+        UserGroup.name == groupname).get_results())) > 0 )

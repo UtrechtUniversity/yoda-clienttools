@@ -20,7 +20,8 @@ setup(
             'yreport_linecount= yclienttools.reportlinecount:entry',
             'ycleanup_files= yclienttools.cleanupfiles:entry',
             'ywhichgroups=yclienttools.whichgroups:entry',
-            'ygrepgroups=yclienttools.grepgroups:entry'
+            'ygrepgroups=yclienttools.grepgroups:entry',
+            'ygroupinfo=yclienttools.groupinfo:entry'
         ]
     },
     version='0.0.1'

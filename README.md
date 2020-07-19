@@ -42,6 +42,23 @@ optional arguments:
   -a, --all     Show all groups (not just research and vault groups)
 ```
 
+### ygroupinfo
+
+Prints the category and subcategory of a Yoda research group.
+
+```
+usage: ygroupinfo [-h] groupname
+
+Shows information about a Yoda group
+
+positional arguments:
+  groupname
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+
 ### yreport\_collectionsize
 
 Shows a report of the size of all data objects in a (set of) collections.
