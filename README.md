@@ -27,6 +27,21 @@ Overview of files to be removed:
 | .DS_Store | MacOS custom folder attributes |   |   |   |
 | Thumbs.db | Windows thumbnail data         |   |   |   |
 
+### ygrepgroups
+
+```
+usage: ygrepgroups [-h] [-a] searchstring
+
+Searches for groups by a search string
+
+positional arguments:
+  searchstring  The string to search for
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -a, --all     Show all groups (not just research and vault groups)
+```
+
 ### yreport\_collectionsize
 
 Shows a report of the size of all data objects in a (set of) collections.
