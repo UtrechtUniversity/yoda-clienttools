@@ -15,7 +15,7 @@ from yclienttools import session as s
 def parse_csv_file(input_file):
     extracted_data = []
 
-    with open(input_file) as csv_file:
+    with open(input_file, mode="r", encoding="utf-8-sig") as csv_file:
 
         dialect = csv.Sniffer().sniff(csv_file.read(), delimiters=';,')
         csv_file.seek(0)
