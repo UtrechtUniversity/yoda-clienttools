@@ -17,10 +17,12 @@ def parse_csv_file(input_file):
 
     with open(input_file) as csv_file:
 
+        dialect = csv.Sniffer().sniff(csv_file.read(), delimiters=';,')
+        csv_file.seek(0)
+
         reader = csv.DictReader(
             csv_file,
-            delimiter=',',
-            quotechar='"',
+            dialect=dialect,
             restval='',
             restkey='OTHERDATA')
         row_number = 1  # header row already read
