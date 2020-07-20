@@ -58,6 +58,49 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
+### yimportgroups
+
+```
+usage: yimportgroups [-h] -i INTERNAL_DOMAINS
+                     [--offline-check | --online-check] [--allow-update]
+                     [--verbose]
+                     csvfile
+
+Creates a list of groups based on a CSV file
+
+positional arguments:
+  csvfile               Name of the CSV file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
+                        Comma-separated list of internal email domains to the Yoda server
+  --offline-check, -c   Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups
+  --online-check, -C    Check mode (online): verify CSV format and that groups do not exist. Does not create groups.
+  --allow-update, -u    Allows existing groups to be updated
+  --verbose, -v         Show information as extracted from CSV file
+
+        The CSV file is expected to include the following labels in its header (the first row):
+        'category'    = category for the group
+        'subcategory' = subcategory for the group
+        'groupname'   = name of the group (without the "research-" prefix)
+
+        The remainder of the columns should have a label that starts with a prefix which
+        indicates the role of each group member:
+
+        'manager:'    = user that will be given the role of manager
+        'member:'     = user that will be given the role of member with read/write
+        'viewer:'     = user that will be given the role of viewer with read
+
+        Notes:
+        - Columns may appear in any order
+        - Empty data cells are ignored: groups can differ in number of members
+
+        Example:
+        category,subcategory,groupname,manager:manager,member:member1,member:member2
+        departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,n.member@example.com
+        departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,
+```
 
 ### yreport\_collectionsize
 

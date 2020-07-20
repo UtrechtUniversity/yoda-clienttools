@@ -3,6 +3,7 @@ import os
 
 from irods.column import Like
 from irods.models import Collection, DataObject, Resource, User, UserGroup
+from irods.rule import Rule
 from yclienttools.options import GroupByOption
 from yclienttools import exceptions
 
@@ -149,3 +150,35 @@ def group_exists(session, groupname):
     '''Returns a boolean value that indicates whether a user group with the provided name exists.'''
     return (len(list(session.query(UserGroup.name).filter(
         UserGroup.name == groupname).get_results())) > 0 )
+
+'''Call an iRODS rule with a specific rulename.
+   params should be an OrderedDict with the parameters of the rule
+   number_output is the number of output parameters of the rule (usually 1 or 2)
+'''
+def call_rule(session, rulename, params, number_outputs):
+    body = 'myRule {{\n {} ('.format(rulename)
+
+    for input_var in params.keys():
+        body += "*{},".format(input_var)
+
+    outparams = list(map(lambda n : '*outparam{}'.format(str(n+1)), range(number_outputs)))
+    body += '{}); writeLine("stdout","{}")}}'.format(
+        ",".join(outparams),
+        "\n".join(outparams))
+
+    input_params = { "*{}".format(k) : '"{}"'.format(v) for (k,v) in params.items() }
+    output_params = 'ruleExecOut'
+
+    myrule = Rule(
+        session,
+        body=body,
+        params=input_params,
+        output=output_params)
+
+    outArray = myrule.execute()
+    buf = outArray.MsParam_PI[0].inOutStruct.stdoutBuf.buf.decode(
+        'utf-8').splitlines()
+
+    return buf[:number_outputs]
+
+

@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    author="Sietse Snel",
-    author_email="s.t.snel@uu.nl",
+    author="Sietse Snel, Ton Smeele",
+    author_email="s.t.snel@uu.nl, a.p.m.smeele@uu.nl",
     description=('Client-side tools for Yoda / iRODS'),
     install_requires=[
         'python-irodsclient',
@@ -21,7 +21,8 @@ setup(
             'ycleanup_files= yclienttools.cleanupfiles:entry',
             'ywhichgroups=yclienttools.whichgroups:entry',
             'ygrepgroups=yclienttools.grepgroups:entry',
-            'ygroupinfo=yclienttools.groupinfo:entry'
+            'ygroupinfo=yclienttools.groupinfo:entry',
+            'yimportgroups=yclienttools.importgroups:entry'
         ]
     },
     version='0.0.1'
