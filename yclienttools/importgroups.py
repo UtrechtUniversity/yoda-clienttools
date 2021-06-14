@@ -140,6 +140,8 @@ def validate_data(session, args, data):
 
 def apply_data(session, args, data):
     for (category, subcategory, groupname, managers, members, viewers) in data:
+        new_group = False
+
         if args.verbose:
             print('Adding and updating group: {}'.format(groupname))
 
@@ -157,6 +159,8 @@ def apply_data(session, args, data):
                     groupname,
                     status,
                     msg))
+        else:
+            new_group = True
 
         # Now add the users and set their role if other than member
         allusers = managers + members + viewers
@@ -205,6 +209,18 @@ def apply_data(session, args, data):
                             role))
                     print("Status: {} , Message: {}".format(status, msg))
 
+        # Always remove the rods user for new groups, unless it is in the
+        # CSV file.
+        if ( new_group and "rods" not in allusers and
+             call_uuGroupGetMemberType(session, groupname, "rods") != "none" ):
+             (status,msg) = call_uuGroupUserRemove(session, groupname, "rods")
+             if status == "0":
+                 if args.verbose:
+                     print("Notice: removed rods user from group " + groupname)
+             else:
+                 if status !=0:
+                     print ("Warning: error while attempting to remove user {} from group {}".format(user,groupname))
+                     print("Status: {} , Message: {}".format(status, msg))
                         print("Status: {} , Message: {}".format(status, msg))
 
 
@@ -256,6 +272,13 @@ def call_uuUserExists(session, username):
     parms = OrderedDict([('username', username)])
     [out] = common_queries.call_rule(session, 'uuUserExists', parms, 1)
     return out == 'true'
+
+
+def call_uuGroupUserRemove(session, groupname, user):
+    parms = OrderedDict([
+        ( 'groupname', groupname),
+        ( 'user', user) ])
+    return common_queries.call_rule(session, 'uuGroupUserRemove', parms, 2)
 
 
 def call_uuGroupGetMemberType(session, groupname, user):
