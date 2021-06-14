@@ -221,6 +221,24 @@ def apply_data(session, args, data):
                  if status !=0:
                      print ("Warning: error while attempting to remove user {} from group {}".format(user,groupname))
                      print("Status: {} , Message: {}".format(status, msg))
+
+        # Remove users not in sheet
+        if args.delete:
+            currentusers = call_uuGroupGetMembers(session, groupname)
+            for user in currentusers:
+                if user not in allusers:
+                    if user in managers:
+                        if len(managers) == 1:
+                            print("Error: cannot remove user {} from group {}, because he/she is the only group manager".format(
+                                user,groupname))
+                            continue
+                        else:
+                            managers.remove(user)
+                    if args.verbose:
+                        print("Removing user {} from group {}".format(user,groupname))
+                    (status,msg) = call_uuGroupUserRemove(session, groupname, user)
+                    if status != "0":
+                        print ("Warning: error while attempting to remove user {} from group {}".format(user,groupname))
                         print("Status: {} , Message: {}".format(status, msg))
 
 
@@ -274,6 +292,19 @@ def call_uuUserExists(session, username):
     return out == 'true'
 
 
+def _string_list_to_list(s):
+    if s.startswith("[") and s.endswith("]"):
+        return s[1:-1].split(",")
+    else:
+        raise ValueError("Unable to convert string representation of list to list")
+
+def call_uuGroupGetMembers(session, groupname):
+    parms = OrderedDict([
+        ( 'groupname', groupname)] )
+    [out] = common_queries.call_rule(session, 'uuGroupGetMembers', parms, 1)
+    return _string_list_to_list(out)
+
+
 def call_uuGroupUserRemove(session, groupname, user):
     parms = OrderedDict([
         ( 'groupname', groupname),
@@ -314,6 +345,9 @@ def entry():
     if args.offline_check or args.verbose:
         print_parsed_data(data)
 
+    if args.delete and not args.allow_update:
+        _exit_with_error("Using the --delete option without the --allow-update option is not supported.")
+
     if args.offline_check:
         sys.exit(0)
 
@@ -350,8 +384,10 @@ def _get_args():
                              help='Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups')
     actiongroup.add_argument('--online-check', '-C', action='store_true',
                              help='Check mode (online): verify CSV format and that groups do not exist. Does not create groups.')
-    parser.add_argument('--allow-update', "-u", action='store_true',
+    parser.add_argument('--allow-update', "-u", action='store_true', default=False,
                         help='Allows existing groups to be updated')
+    parser.add_argument('--delete', '-d', action='store_true', default=False,
+                        help='Delete group members not in CSV file')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Show information as extracted from CSV file')
 
