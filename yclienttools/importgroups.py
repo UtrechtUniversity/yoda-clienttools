@@ -93,6 +93,21 @@ def _process_csv_line(line):
     return row_data, None
 
 
+def _are_roles_equivalent(a,b):
+    """Checks whether two roles are equivalent. Needed because Yoda and Yoda-clienttools
+       use slightly different names for the roles."""
+    r_role_names = [ "viewer", "reader" ]
+    m_role_names = [ "member", "normal" ]
+
+    if a == b:
+        return True
+    elif a in r_role_names and b in r_role_names:
+        return True
+    elif a in m_role_names and b in m_role_names:
+        return True
+    else:
+        return False
+
 def is_email(username):
     return re.search(r'@.*[^\.]+\.[^\.]+$', username) is not None
 
@@ -146,15 +161,23 @@ def apply_data(session, args, data):
         # Now add the users and set their role if other than member
         allusers = managers + members + viewers
         for username in list(set(allusers)):   # duplicates removed
-            [status, msg] = call_uuGroupUserAdd(session, groupname, username)
+            currentrole = call_uuGroupGetMemberType(session, groupname, username)
 
-            if status != '0':
-                # maybe user already existed as a member? Let's continue
-                # processing
-                print("Warning: error occurred while attempting to add user {} to group {}".format(
-                    username,
-                    groupname))
-                print("Status: {} , Message: {}".format(status, msg))
+            if currentrole == "none":
+                [status, msg] = call_uuGroupUserAdd(session, groupname, username)
+
+                if status == '0':
+                     currentrole = "member"
+                     if args.verbose:
+                         print("Notice: added user {} to group {}".format(username,groupname))
+                else:
+                    print("Warning: error occurred while attempting to add user {} to group {}".format(
+                         username,
+                         groupname))
+                    print("Status: {} , Message: {}".format(status, msg))
+            else:
+                if args.verbose:
+                    print("Notice: user {} is already present in group {}.".format(username,groupname))
 
             # Set requested role. Note that user could be listed in multiple roles.
             # In case of multiple roles, manager takes precedence over normal,
@@ -164,16 +187,25 @@ def apply_data(session, args, data):
                 role = 'normal'
             if username in managers:
                 role = 'manager'
-            [status, msg] = call_uuGroupUserChangeRole(
-                session, groupname, username, role)
 
-            if status != '0':
-                print(
-                    "Warning: error while attempting to change role of user {} in group {} to {}".format(
-                        username,
-                        groupname,
-                        role))
-                print("Status: {} , Message: {}".format(status, msg))
+            if _are_roles_equivalent(role, currentrole):
+                if args.verbose:
+                    print("Notice: user {} already has role {} in group {}.".format(username, role, groupname))
+            else:
+                [status, msg] = call_uuGroupUserChangeRole(
+                    session, groupname, username, role)
+                if status == '0':
+                    if args.verbose:
+                        print("Notice: changed role of user {} in group {} to {}".format(username, groupname, role))
+                else:
+                    print(
+                        "Warning: error while attempting to change role of user {} in group {} to {}".format(
+                            username,
+                            groupname,
+                            role))
+                    print("Status: {} , Message: {}".format(status, msg))
+
+                        print("Status: {} , Message: {}".format(status, msg))
 
 
 def call_uuGroupAdd(session, groupname, category,
@@ -224,6 +256,13 @@ def call_uuUserExists(session, username):
     parms = OrderedDict([('username', username)])
     [out] = common_queries.call_rule(session, 'uuUserExists', parms, 1)
     return out == 'true'
+
+
+def call_uuGroupGetMemberType(session, groupname, user):
+    parms = OrderedDict([
+        ( 'groupname', groupname),
+        ( 'user', user) ])
+    return common_queries.call_rule(session, 'uuGroupGetMemberType', parms, 1)[0]
 
 
 def print_parsed_data(data):
