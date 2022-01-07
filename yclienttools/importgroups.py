@@ -4,9 +4,8 @@ import csv
 import sys
 import re
 
-from collections import OrderedDict
-
 from yclienttools import common_queries
+from yclienttools import common_rules as cr
 from yclienttools import session as s
 
 # Based on yoda-batch-add script by Ton Smeele
@@ -124,14 +123,14 @@ def is_internal_user(username, internal_domains):
 def validate_data(session, args, data):
     errors = []
     for (category, subcategory, groupname, managers, members, viewers) in data:
-        if call_uuGroupExists(session, groupname) and not args.allow_update:
+        if cr.call_uuGroupExists(session, groupname) and not args.allow_update:
             errors.append('Group "{}" already exists'.format(groupname))
 
         for user in managers + members + viewers:
             if not is_internal_user(user, args.internal_domains.split(",")):
                 # ensure that external users already have an iRODS account
                 # we do not want to be the actor that creates them
-                if not call_uuUserExists(session, user):
+                if not cr.call_uuUserExists(session, user):
                     errors.append(
                         'Group {} has nonexisting external user {}'.format(groupname, user))
 
@@ -147,7 +146,7 @@ def apply_data(session, args, data):
 
         # First create the group. Note that the rodsadmin actor will become a
         # groupmanager.
-        [status, msg] = call_uuGroupAdd(
+        [status, msg] = cr.call_uuGroupAdd(
             session, groupname, category, subcategory, '', 'unspecified')
 
         if ((status == '-1089000') | (status == '-809000')) and args.allow_update:
@@ -165,10 +164,10 @@ def apply_data(session, args, data):
         # Now add the users and set their role if other than member
         allusers = managers + members + viewers
         for username in list(set(allusers)):   # duplicates removed
-            currentrole = call_uuGroupGetMemberType(session, groupname, username)
+            currentrole = cr.call_uuGroupGetMemberType(session, groupname, username)
 
             if currentrole == "none":
-                [status, msg] = call_uuGroupUserAdd(session, groupname, username)
+                [status, msg] = cr.call_uuGroupUserAdd(session, groupname, username)
 
                 if status == '0':
                      currentrole = "member"
@@ -196,7 +195,7 @@ def apply_data(session, args, data):
                 if args.verbose:
                     print("Notice: user {} already has role {} in group {}.".format(username, role, groupname))
             else:
-                [status, msg] = call_uuGroupUserChangeRole(
+                [status, msg] = cr.call_uuGroupUserChangeRole(
                     session, groupname, username, role)
                 if status == '0':
                     if args.verbose:
@@ -212,8 +211,8 @@ def apply_data(session, args, data):
         # Always remove the rods user for new groups, unless it is in the
         # CSV file.
         if ( new_group and "rods" not in allusers and
-             call_uuGroupGetMemberType(session, groupname, "rods") != "none" ):
-             (status,msg) = call_uuGroupUserRemove(session, groupname, "rods")
+             cr.call_uuGroupGetMemberType(session, groupname, "rods") != "none" ):
+             (status,msg) = cr.call_uuGroupUserRemove(session, groupname, "rods")
              if status == "0":
                  if args.verbose:
                      print("Notice: removed rods user from group " + groupname)
@@ -224,7 +223,7 @@ def apply_data(session, args, data):
 
         # Remove users not in sheet
         if args.delete:
-            currentusers = call_uuGroupGetMembers(session, groupname)
+            currentusers = cr.call_uuGroupGetMembers(session, groupname)
             for user in currentusers:
                 if user not in allusers:
                     if user in managers:
@@ -236,87 +235,10 @@ def apply_data(session, args, data):
                             managers.remove(user)
                     if args.verbose:
                         print("Removing user {} from group {}".format(user,groupname))
-                    (status,msg) = call_uuGroupUserRemove(session, groupname, user)
+                    (status,msg) = cr.call_uuGroupUserRemove(session, groupname, user)
                     if status != "0":
                         print ("Warning: error while attempting to remove user {} from group {}".format(user,groupname))
                         print("Status: {} , Message: {}".format(status, msg))
-
-
-def call_uuGroupAdd(session, groupname, category,
-                    subcategory, description, classification):
-    # returns (status, message)
-    # status != 0 is error
-    # status = -1089000 means groupname already exists
-    parms = OrderedDict([
-        ('groupname', groupname),
-        ('category', category),
-        ('subcategory', subcategory),
-        ('description', description),
-        ('classification', classification)])
-    return common_queries.call_rule(session, 'uuGroupAdd', parms, 2)
-
-
-def call_uuGroupUserAdd(session, groupname, username):
-    # returns (status, message)
-    # status !=0 is error
-    parms = OrderedDict([
-        ('groupname', groupname),
-        ('username', username)])
-    return common_queries.call_rule(session, 'uuGroupUserAdd', parms, 2)
-
-
-def call_uuGroupUserChangeRole(session, groupname, username, newrole):
-    # role can be "manager", "reader", "normal"
-    # returns (status, message)
-    # status != 0 is error
-    parms = OrderedDict([
-        ('groupname', groupname),
-        ('username', username),
-        ('newrole', newrole)])
-    return common_queries.call_rule(session, 'uuGroupUserChangeRole', parms, 2)
-
-
-def call_uuGroupExists(session, groupname):
-    # returns (exists)
-    # exists is false or true
-    parms = OrderedDict([('groupname', groupname)])
-    [out] = common_queries.call_rule(session, 'uuGroupExists', parms, 1)
-    return out == 'true'
-
-
-def call_uuUserExists(session, username):
-    # returns (exists)
-    # exists is false or true
-    parms = OrderedDict([('username', username)])
-    [out] = common_queries.call_rule(session, 'uuUserExists', parms, 1)
-    return out == 'true'
-
-
-def _string_list_to_list(s):
-    if s.startswith("[") and s.endswith("]"):
-        return s[1:-1].split(",")
-    else:
-        raise ValueError("Unable to convert string representation of list to list")
-
-def call_uuGroupGetMembers(session, groupname):
-    parms = OrderedDict([
-        ( 'groupname', groupname)] )
-    [out] = common_queries.call_rule(session, 'uuGroupGetMembers', parms, 1)
-    return _string_list_to_list(out)
-
-
-def call_uuGroupUserRemove(session, groupname, user):
-    parms = OrderedDict([
-        ( 'groupname', groupname),
-        ( 'user', user) ])
-    return common_queries.call_rule(session, 'uuGroupUserRemove', parms, 2)
-
-
-def call_uuGroupGetMemberType(session, groupname, user):
-    parms = OrderedDict([
-        ( 'groupname', groupname),
-        ( 'user', user) ])
-    return common_queries.call_rule(session, 'uuGroupGetMemberType', parms, 1)[0]
 
 
 def print_parsed_data(data):
