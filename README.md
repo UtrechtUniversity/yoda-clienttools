@@ -47,6 +47,42 @@ Overview of files to be removed:
 | .DS_Store | MacOS custom folder attributes |   |   |   |
 | Thumbs.db | Windows thumbnail data         |   |   |   |
 
+### yensuremembers
+
+```usage: yensuremembers [-h] [--offline-check | --online-check] [--verbose]
+                      [--dry-run]
+                      userfile groupfile
+
+Ensures each research group in a list has a common set of members with a particular role. For example:
+   one user has a manager role in all groups.
+
+positional arguments:
+  userfile             Name of the user file
+  groupfile            Name of the group file
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --offline-check, -c  Only checks user file format
+  --online-check, -C   Check mode (online): Verifies that all users in the user file exist.
+  --verbose, -v        Verbose mode: print additional debug information.
+  --dry-run, -d        Dry run mode: show what action would be taken.
+
+        The user file is a text file. Each line has a role and an existing user account name,
+        separated by ':':
+
+        Roles are:
+
+        'manager:'    = user that will be given the role of manager
+        'member:'     = user that will be given the role of member with read/write
+        'viewer:'     = user that will be given the role of viewer with read
+
+        Example lines:
+        manager:m.manager@uu.nl
+        viewer:v.viewer@uu.nl
+
+        The group file should have one group name on each line.
+```
+
 ### ygrepgroups
 
 ```

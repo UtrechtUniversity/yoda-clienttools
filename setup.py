@@ -22,7 +22,8 @@ setup(
             'ywhichgroups=yclienttools.whichgroups:entry',
             'ygrepgroups=yclienttools.grepgroups:entry',
             'ygroupinfo=yclienttools.groupinfo:entry',
-            'yimportgroups=yclienttools.importgroups:entry'
+            'yimportgroups=yclienttools.importgroups:entry',
+            'yensuremembers=yclienttools.ensuremembers:entry'
         ]
     },
     version='0.0.1'
