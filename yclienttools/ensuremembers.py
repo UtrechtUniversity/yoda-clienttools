@@ -2,6 +2,7 @@
    one user has a manager role in all groups."""
 
 import argparse
+import contextlib
 import os
 import sys
 
@@ -16,7 +17,7 @@ def _get_args():
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('userfile', help='Name of the user file')
-    parser.add_argument('groupfile', help='Name of the group file')
+    parser.add_argument('groupfile', help='Name of the group file ("-" for standard input)')
     actiongroup = parser.add_mutually_exclusive_group()
     actiongroup.add_argument('--offline-check', '-c', action='store_true',
                              help='Only checks user file format')
@@ -187,13 +188,26 @@ def parse_user_file(userfile):
 
     return users
 
+@contextlib.contextmanager
+def _open_file_or_stdin(filename, mode):
+    if filename == '-':
+        f = sys.stdin
+    elif not os.path.isfile(filename):
+        _exit_with_error("File {} does not exist or is not a regular file.".format(filename))
+    else:
+        f = open(filename, mode)
+
+    try:
+        yield f
+    finally:
+        if filename != '-':
+            f.close()
+
 
 def parse_group_file(groupfile):
     groups = []
 
-    if not os.path.isfile(groupfile):
-        _exit_with_error("Group file {} does not exist or is not a regular file.".format(groupfile))
-    with open(groupfile, "r") as input:
+    with _open_file_or_stdin(groupfile, "r") as input:
         for line in input:
             if line != "":
                 groups.append(line.rstrip())
