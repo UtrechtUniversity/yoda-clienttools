@@ -7,6 +7,7 @@ import re
 from yclienttools import common_queries
 from yclienttools import common_rules as cr
 from yclienttools import session as s
+from yclienttools.exceptions import SizeNotSupportedException
 
 # Based on yoda-batch-add script by Ton Smeele
 
@@ -223,7 +224,14 @@ def apply_data(session, args, data):
 
         # Remove users not in sheet
         if args.delete:
-            currentusers = cr.call_uuGroupGetMembers(session, groupname)
+
+            try:
+                currentusers = cr.call_uuGroupGetMembers(session, groupname)
+            except SizeNotSupportedException:
+                print("Unable to check whether members of group {} need to be deleted.".format(groupname))
+                print("Number of current members group is too large.")
+                continue
+
             for user in currentusers:
                 if user not in allusers:
                     if user in managers:

@@ -8,6 +8,7 @@ from collections import OrderedDict
 from irods.rule import Rule
 
 from yclienttools import common_queries
+from yclienttools.exceptions import SizeNotSupportedException
 
 def call_rule(session, rulename, params, number_outputs):
     body = 'myRule {{\n {} ('.format(rulename)
@@ -47,6 +48,8 @@ def call_uuGroupGetMembers(session, groupname):
     parms = OrderedDict([
         ( 'groupname', groupname)] )
     [out] = call_rule(session, 'uuGroupGetMembers', parms, 1)
+    if len(out) >= 1023 and not out.endswith("]"):
+        raise SizeNotSupportedException("Group member list exceeds 1023 bytes")
     return _string_list_to_list(out)
 
 
