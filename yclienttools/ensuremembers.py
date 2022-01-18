@@ -9,6 +9,7 @@ import sys
 from yclienttools import common_rules as cr
 from yclienttools import session as s
 
+
 def _get_args():
     '''Parse command line arguments'''
 
@@ -65,44 +66,50 @@ def validate_data(session, args, userdata, groupdata):
 
 def apply_data(session, args, userdata, groupdata, verbose, dry_run):
     for group in groupdata:
-        current_members = cr.call_uuGroupGetMembers(session, group)
+        apply_data_to_group(session, args, userdata, group, verbose, dry_run)
+
+
+def apply_data_to_group(session, args, userdata, group, verbose, dry_run):
+
+    if verbose or dry_run:
+        print("Checking group {} ...".format(group))
+
+    for user in sorted(userdata):
+        role = userdata[user]
         if verbose or dry_run:
-            print("Checking group {} ...".format(group))
-        for user in sorted(userdata):
-            role = userdata[user]
-            if verbose or dry_run:
-                print(" Checking user {} ...".format(user))
-                current_role = cr.call_uuGroupGetMemberType(session, group, user)
+            print(" Checking user {} ...".format(user))
 
-                # If user is not in group yet, add him/her
-                if current_role == "none":
-                    if verbose:
-                        print("Adding user {} to group {} ...".format(user, group))
+        current_role = cr.call_uuGroupGetMemberType(session, group, user)
 
-                    if dry_run:
-                        print("Would add user {} to group {} ...".format(user,group))
-                    else:
-                        [status, msg ] = cr.call_uuGroupUserAdd(session, group, user)
+        # If user is not in group yet, add him/her
+        if current_role == "none":
+            if verbose and not dry_run:
+                print("Adding user {} to group {} ...".format(user, group))
 
-                        if status == "0":
-                            current_role = "member"
-                        else:
-                            print("Failed to add user {} to group {} ({}).".format(user, group, msg))
+            if dry_run:
+                print("Would add user {} to group {} ...".format(user,group))
+            else:
+                [status, msg ] = cr.call_uuGroupUserAdd(session, group, user)
 
-                # Adjust user role, if needed
-                if _are_roles_equivalent(role, current_role):
-                    if verbose:
-                        print("Role user {} for group {} is already {} (okay)".format(user, group, role))
+                if status == "0":
+                    current_role = "member"
                 else:
-                    if verbose:
-                        print("Changing role of user {} for group {} to {} ...".format(user, group, role))
+                    print("Failed to add user {} to group {} ({}).".format(user, group, msg))
 
-                    if dry_run:
-                        print("Would change role of user {} for group {} from {} to {}".format(user, group, current_role, role))
-                    else:
-                        [status, msg] = cr.call_uuGroupUserChangeRole(session, group, user, _to_yoda_role_name(role))
-                        if status != "0":
-                            _exit_with_error("Failed to change role of user {} for group: {} ({})".format(user, group, msg))
+        # Adjust user role, if needed
+        if _are_roles_equivalent(role, current_role):
+            if verbose:
+                print("Role user {} for group {} is already {} (okay)".format(user, group, role))
+        else:
+            if verbose and not dry_run:
+                print("Changing role of user {} for group {} to {} ...".format(user, group, role))
+
+            if dry_run:
+                print("Would change role of user {} for group {} from {} to {}".format(user, group, current_role, role))
+            else:
+                [status, msg] = cr.call_uuGroupUserChangeRole(session, group, user, _to_yoda_role_name(role))
+                if status != "0":
+                    _exit_with_error("Failed to change role of user {} for group: {} ({})".format(user, group, msg))
 
 
 def _to_yoda_role_name(role):
@@ -218,8 +225,12 @@ def parse_group_file(groupfile):
     return groups
 
 
-def _exit_with_error(message):
+def _print_error(message):
     print("Error: {}".format(message), file=sys.stderr)
+
+
+def _exit_with_error(message):
+    _print_error(message)
     sys.exit(1)
 
 
