@@ -135,6 +135,7 @@ optional arguments:
   --offline-check, -c   Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups
   --online-check, -C    Check mode (online): verify CSV format and that groups do not exist. Does not create groups.
   --allow-update, -u    Allows existing groups to be updated
+  --delete, -d          Delete group members not in CSV file
   --verbose, -v         Show information as extracted from CSV file
 
         The CSV file is expected to include the following labels in its header (the first row):
