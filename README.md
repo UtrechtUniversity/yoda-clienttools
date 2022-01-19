@@ -49,7 +49,8 @@ Overview of files to be removed:
 
 ### yensuremembers
 
-```usage: yensuremembers [-h] [--offline-check | --online-check] [--verbose]
+```
+usage: yensuremembers [-h] [--offline-check | --online-check] [--verbose]
                       [--dry-run]
                       userfile groupfile
 
