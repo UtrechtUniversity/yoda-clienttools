@@ -1,5 +1,5 @@
 getpass
-python_irodsclient
+python_irodsclient==1.0.0
 enum34
 six
 humanize>=0.5
