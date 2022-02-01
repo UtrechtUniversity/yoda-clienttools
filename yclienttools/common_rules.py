@@ -2,6 +2,7 @@
    params should be an OrderedDict with the parameters of the rule
    number_output is the number of output parameters of the rule (usually 1 or 2)
 '''
+from io import StringIO
 
 from collections import OrderedDict
 
@@ -26,7 +27,7 @@ def call_rule(session, rulename, params, number_outputs):
 
     myrule = Rule(
         session,
-        body=body,
+        rule_file = StringIO(body),
         params=input_params,
         output=output_params)
 
