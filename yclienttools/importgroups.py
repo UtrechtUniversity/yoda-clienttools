@@ -86,8 +86,18 @@ def _process_csv_line(line):
     # perform additional data validations
     if (len(category) == 0) | (len(subcategory) == 0) | (len(groupname) == 0):
         return None, "Row has no group name, category or subcategory"
+
     if len(managers) == 0:
         return None, "Group must have a group manager"
+
+    if not is_valid_category(category):
+        return None, '"{}" is not a valid category name.'.format(category)
+
+    if not is_valid_category(subcategory):
+        return None, '"{}" is not a valid subcategory name.'.format(subcategory)
+
+    if not is_valid_groupname(groupname):
+        return None, '"{}" is not a valid group name.'.format(groupname)
 
     row_data = (category, subcategory, groupname, managers, members, viewers)
     return row_data, None
@@ -111,6 +121,13 @@ def _are_roles_equivalent(a,b):
 def is_email(username):
     return re.search(r'@.*[^\.]+\.[^\.]+$', username) is not None
 
+def is_valid_category(name):
+    """Is this name a valid (sub)category name?"""
+    return re.search(r"^[a-zA-Z0-9\-_]+$", name) is not None
+
+def is_valid_groupname(name):
+    """Is this name a valid group name (prefix such as "research-" can be omitted"""
+    return re.search(r"^[a-zA-Z0-9\-]+$", name) is not None
 
 def is_internal_user(username, internal_domains):
     for domain in internal_domains:
