@@ -27,10 +27,14 @@ def parse_csv_file(input_file):
             restkey='OTHERDATA')
         row_number = 1  # header row already read
 
-        for label in _get_csv_prefined_labels():
+        for label in _get_csv_predefined_labels():
             if label not in reader.fieldnames:
                 _exit_with_error(
                     'CSV header is missing compulsory field "{}"'.format(label))
+
+        duplicate_columns = _get_duplicate_columns(reader.fieldnames)
+        if ( len(duplicate_columns) > 0 ):
+            _exit_with_error("File has duplicate column(s): " + str(duplicate_columns) )
 
         for line in reader:
             row_number += 1
@@ -45,8 +49,23 @@ def parse_csv_file(input_file):
     return extracted_data
 
 
-def _get_csv_prefined_labels():
+def _get_csv_predefined_labels():
     return ['category', 'subcategory', 'groupname']
+
+
+def _get_duplicate_columns(fields_list):
+    fields_seen = set()
+    duplicate_fields = set()
+
+    for field in fields_list:
+        if ( field in _get_csv_predefined_labels() or
+             field.startswith( ("manager:", "viewer:", "member:"))):
+            if field in fields_seen:
+                duplicate_fields.add(field)
+            else:
+                fields_seen.add(field)
+
+    return duplicate_fields
 
 
 def _process_csv_line(line):
@@ -60,7 +79,7 @@ def _process_csv_line(line):
     for column_name in line.keys():
         if column_name == '':
             return None, 'Column cannot have an empty label'
-        elif column_name in _get_csv_prefined_labels():
+        elif column_name in _get_csv_predefined_labels():
             continue
 
         username = line.get(column_name)
