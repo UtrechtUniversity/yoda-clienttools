@@ -109,6 +109,8 @@ def _process_csv_line(line):
             members.append(username)
         elif column_name.lower().startswith('viewer:'):
             viewers.append(username)
+        else:
+            return None, "Column label '{}' is neither predefined nor a valid role label.".format(column_name)
 
     # perform additional data validations
     if (len(category) == 0) | (len(subcategory) == 0) | (len(groupname) == 0):
