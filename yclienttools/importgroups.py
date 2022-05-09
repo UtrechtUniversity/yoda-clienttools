@@ -4,13 +4,19 @@ import csv
 import sys
 import re
 
+import dns.resolver as resolver
+
+try:
+    from functools import lru_cache
+except ImportError:
+    from backports.functools_lru_cache import lru_cache
+
 from yclienttools import common_queries
 from yclienttools import common_rules as cr
 from yclienttools import session as s
 from yclienttools.exceptions import SizeNotSupportedException
 
 # Based on yoda-batch-add script by Ton Smeele
-
 
 def parse_csv_file(input_file):
     extracted_data = []
@@ -92,8 +98,10 @@ def _process_csv_line(line):
         if username == '':    # empty value
             continue
         elif not is_email(username):
-            return None, 'Username "{}" is not a valid email address'.format(
+            return None, 'Username "{}" is not a valid email address.'.format(
                 username)
+        elif not is_valid_domain(username.split('@')[1]):
+            return None, 'Username "{}" failed DNS domain validation - domain does not exist or has no MX records.'.format(username)
 
         if column_name.lower().startswith('manager:'):
             managers.append(username)
@@ -139,6 +147,13 @@ def _are_roles_equivalent(a,b):
 
 def is_email(username):
     return re.search(r'@.*[^\.]+\.[^\.]+$', username) is not None
+
+@lru_cache(maxsize=100)
+def is_valid_domain(domain):
+    try:
+      return bool(resolver.query(domain, 'MX'))
+    except (resolver.NXDOMAIN, resolver.NoAnswer):
+      return False
 
 def is_valid_category(name):
     """Is this name a valid (sub)category name?"""

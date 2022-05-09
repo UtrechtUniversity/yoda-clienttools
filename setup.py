@@ -8,7 +8,9 @@ setup(
         'python-irodsclient==1.1.1',
         'enum34',
         'six',
-        'humanize>=0.5'
+        'humanize>=0.5',
+        'dnspython>=2.2.0',
+        'backports.functools-lru-cache>=1.6.4'
     ],
     name='yclienttools',
     packages=['yclienttools', 'irodsutils'],
