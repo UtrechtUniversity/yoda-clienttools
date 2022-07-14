@@ -13,8 +13,11 @@ from yclienttools.options import GroupByOption
 def entry():
     '''Entry point'''
     try:
-        s = session.setup_session()
-        report_size(_get_args(), s)
+        args = _get_args()
+        s = session.setup_session(args,
+            require_ssl = False if args.yoda_version == "1.7" else True)
+
+        report_size(args, s)
         s.cleanup()
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
@@ -32,6 +35,8 @@ def _get_args():
     # Add_help is False, because we the -h option would conflict with our
     # custom -h option.
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+                        help="Yoda version on the server (default: 1.7)")
     parser.add_argument('--help', action='help', help='show help information')
     parser.add_argument('-h', '--human-readable', action='store_true', default=False,
                         help="Show sizes in human readable format, e.g. 1.0MB instead of 1000000")

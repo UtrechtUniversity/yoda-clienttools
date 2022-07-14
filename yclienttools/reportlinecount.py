@@ -13,7 +13,8 @@ def entry():
     try:
         args = _get_args()
         output = csv.writer(sys.stdout, delimiter=',')
-        session = s.setup_session()
+        session = s.setup_session(args,
+            require_ssl = False if args.yoda_version == "1.7" else True)
 
         if args.collection: 
             if not common_queries.collection_exists(session, args.collection):
@@ -40,6 +41,8 @@ def entry():
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+                        help="Yoda version on the server (default: 1.7)")
     fileorcollection = parser.add_mutually_exclusive_group(required=True)
     fileorcollection.add_argument("-c", "--collection", default=None,
                         help='show line counts of all data objects in this collection (recursive)')

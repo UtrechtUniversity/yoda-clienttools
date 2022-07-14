@@ -13,8 +13,9 @@ from yclienttools import session as s
 def entry():
     '''Entry point'''
     try:
-        session = s.setup_session()
         args = _get_args()
+        session = s.setup_session(args,
+            require_ssl = False if args.yoda_version == "1.7" else True)
 
         if not common_queries.collection_exists(session, args.root):
             print ("Error: collection {} does not exist (or you don't have access)".format(args.root),
@@ -48,6 +49,8 @@ def _get_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-r", "--root", default="/", required=True,
                         help='Delete unwanted files in this collection, as well as its subcollections')
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+                        help="Yoda version on the server (default: 1.7)")
     return parser.parse_args()
 
 def _wildcard_to_like_query(name):

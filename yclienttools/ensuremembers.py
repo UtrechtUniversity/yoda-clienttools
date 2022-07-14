@@ -6,8 +6,8 @@ import contextlib
 import os
 import sys
 
-from yclienttools import common_rules as cr
 from yclienttools import session as s
+from yclienttools.common_rules import RuleInterface
 
 
 def _get_args():
@@ -19,6 +19,8 @@ def _get_args():
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('userfile', help='Name of the user file')
     parser.add_argument('groupfile', help='Name of the group file ("-" for standard input)')
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+                        help="Yoda version on the server (default: 1.7)")
     actiongroup = parser.add_mutually_exclusive_group()
     actiongroup.add_argument('--offline-check', '-c', action='store_true',
                              help='Only checks user file format')
@@ -50,26 +52,26 @@ def _get_format_help_text():
     '''
 
 
-def validate_data(session, args, userdata, groupdata):
+def validate_data(rule_interface, args, userdata, groupdata):
     errors = []
 
     for user in userdata:
-        if not cr.call_uuUserExists(session, user):
+        if not rule_interface.call_uuUserExists(user):
             errors.append("User {} does not exist.".format(user))
 
     for group in groupdata:
-        if not cr.call_uuGroupExists(session, group):
+        if not rule_interface.call_uuGroupExists(group):
             errors.append("Group {} does not exist.".format(group))
 
     return errors
 
 
-def apply_data(session, args, userdata, groupdata, verbose, dry_run):
+def apply_data(rule_interface, args, userdata, groupdata, verbose, dry_run):
     for group in groupdata:
-        apply_data_to_group(session, args, userdata, group, verbose, dry_run)
+        apply_data_to_group(rule_interface, args, userdata, group, verbose, dry_run)
 
 
-def apply_data_to_group(session, args, userdata, group, verbose, dry_run):
+def apply_data_to_group(rule_interface, args, userdata, group, verbose, dry_run):
 
     if verbose or dry_run:
         print("Checking group {} ...".format(group))
@@ -79,7 +81,7 @@ def apply_data_to_group(session, args, userdata, group, verbose, dry_run):
         if verbose or dry_run:
             print(" Checking user {} ...".format(user))
 
-        current_role = cr.call_uuGroupGetMemberType(session, group, user)
+        current_role = rule_interface.call_uuGroupGetMemberType(group, user)
 
         # If user is not in group yet, add him/her
         if current_role == "none":
@@ -89,7 +91,7 @@ def apply_data_to_group(session, args, userdata, group, verbose, dry_run):
             if dry_run:
                 print("Would add user {} to group {} ...".format(user,group))
             else:
-                [status, msg ] = cr.call_uuGroupUserAdd(session, group, user)
+                [status, msg ] = rule_interface.call_uuGroupUserAdd(group, user)
 
                 if status == "0":
                     current_role = "member"
@@ -107,7 +109,7 @@ def apply_data_to_group(session, args, userdata, group, verbose, dry_run):
             if dry_run:
                 print("Would change role of user {} for group {} from {} to {}".format(user, group, current_role, role))
             else:
-                [status, msg] = cr.call_uuGroupUserChangeRole(session, group, user, _to_yoda_role_name(role))
+                [status, msg] = rule_interface.call_uuGroupUserChangeRole(group, user, _to_yoda_role_name(role))
                 if status != "0":
                     _exit_with_error("Failed to change role of user {} for group: {} ({})".format(user, group, msg))
 
@@ -158,16 +160,19 @@ def entry():
         print_parsed_data(userdata, groupdata)
         sys.exit(0)
 
-    session = s.setup_session()
+    session = s.setup_session(args,
+        require_ssl = False if args.yoda_version == "1.7" else True)
+    rule_interface = RuleInterface(session,
+        set_re = False if args.yoda_version == "1.7" else True)
 
     try:
-        validation_errors = validate_data(session, args, userdata, groupdata)
+        validation_errors = validate_data(rule_interface, args, userdata, groupdata)
 
         if len(validation_errors) > 0:
             _exit_with_validation_errors(validation_errors)
 
         if not args.online_check:
-            apply_data(session, args, userdata, groupdata, args.verbose, args.dry_run)
+            apply_data(rule_interface, args, userdata, groupdata, args.verbose, args.dry_run)
 
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)

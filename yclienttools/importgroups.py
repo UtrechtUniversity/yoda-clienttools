@@ -11,9 +11,8 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
-from yclienttools import common_queries
-from yclienttools import common_rules as cr
 from yclienttools import session as s
+from yclienttools.common_rules import RuleInterface
 from yclienttools.exceptions import SizeNotSupportedException
 
 # Based on yoda-batch-add script by Ton Smeele
@@ -174,24 +173,24 @@ def is_internal_user(username, internal_domains):
     return False
 
 
-def validate_data(session, args, data):
+def validate_data(rule_interface, args, data):
     errors = []
     for (category, subcategory, groupname, managers, members, viewers) in data:
-        if cr.call_uuGroupExists(session, groupname) and not args.allow_update:
+        if rule_interface.call_uuGroupExists(groupname) and not args.allow_update:
             errors.append('Group "{}" already exists'.format(groupname))
 
         for user in managers + members + viewers:
             if not is_internal_user(user, args.internal_domains.split(",")):
                 # ensure that external users already have an iRODS account
                 # we do not want to be the actor that creates them
-                if not cr.call_uuUserExists(session, user):
+                if not rule_interface.call_uuUserExists(user):
                     errors.append(
                         'Group {} has nonexisting external user {}'.format(groupname, user))
 
     return errors
 
 
-def apply_data(session, args, data):
+def apply_data(rule_interface, args, data):
     for (category, subcategory, groupname, managers, members, viewers) in data:
         new_group = False
 
@@ -200,8 +199,8 @@ def apply_data(session, args, data):
 
         # First create the group. Note that the rodsadmin actor will become a
         # groupmanager.
-        [status, msg] = cr.call_uuGroupAdd(
-            session, groupname, category, subcategory, '', 'unspecified')
+        [status, msg] = rule_interface.call_uuGroupAdd(
+            groupname, category, subcategory, '', 'unspecified')
 
         if ((status == '-1089000') | (status == '-809000')) and args.allow_update:
             print(
@@ -218,10 +217,10 @@ def apply_data(session, args, data):
         # Now add the users and set their role if other than member
         allusers = managers + members + viewers
         for username in list(set(allusers)):   # duplicates removed
-            currentrole = cr.call_uuGroupGetMemberType(session, groupname, username)
+            currentrole = rule_interface.call_uuGroupGetMemberType(groupname, username)
 
             if currentrole == "none":
-                [status, msg] = cr.call_uuGroupUserAdd(session, groupname, username)
+                [status, msg] = rule_interface.call_uuGroupUserAdd(groupname, username)
 
                 if status == '0':
                      currentrole = "member"
@@ -249,8 +248,8 @@ def apply_data(session, args, data):
                 if args.verbose:
                     print("Notice: user {} already has role {} in group {}.".format(username, role, groupname))
             else:
-                [status, msg] = cr.call_uuGroupUserChangeRole(
-                    session, groupname, username, role)
+                [status, msg] = rule_interface.call_uuGroupUserChangeRole(
+                    groupname, username, role)
                 if status == '0':
                     if args.verbose:
                         print("Notice: changed role of user {} in group {} to {}".format(username, groupname, role))
@@ -265,8 +264,8 @@ def apply_data(session, args, data):
         # Always remove the rods user for new groups, unless it is in the
         # CSV file.
         if ( new_group and "rods" not in allusers and
-             cr.call_uuGroupGetMemberType(session, groupname, "rods") != "none" ):
-             (status,msg) = cr.call_uuGroupUserRemove(session, groupname, "rods")
+             rule_interface.call_uuGroupGetMemberType(groupname, "rods") != "none" ):
+             (status,msg) = rule_interface.call_uuGroupUserRemove(groupname, "rods")
              if status == "0":
                  if args.verbose:
                      print("Notice: removed rods user from group " + groupname)
@@ -279,7 +278,7 @@ def apply_data(session, args, data):
         if args.delete:
 
             try:
-                currentusers = cr.call_uuGroupGetMembers(session, groupname)
+                currentusers = rule_interface.call_uuGroupGetMembers(groupname)
             except SizeNotSupportedException:
                 print("Unable to check whether members of group {} need to be deleted.".format(groupname))
                 print("Number of current members group is too large.")
@@ -296,7 +295,7 @@ def apply_data(session, args, data):
                             managers.remove(user)
                     if args.verbose:
                         print("Removing user {} from group {}".format(user,groupname))
-                    (status,msg) = cr.call_uuGroupUserRemove(session, groupname, user)
+                    (status,msg) = rule_interface.call_uuGroupUserRemove(groupname, user)
                     if status != "0":
                         print ("Warning: error while attempting to remove user {} from group {}".format(user,groupname))
                         print("Status: {} , Message: {}".format(status, msg))
@@ -334,16 +333,19 @@ def entry():
     if args.offline_check:
         sys.exit(0)
 
-    session = s.setup_session()
+    session = s.setup_session(args,
+        require_ssl = False if args.yoda_version == "1.7" else True)
+    rule_interface = RuleInterface(session,
+        set_re = False if args.yoda_version == "1.7" else True)
 
     try:
-        validation_errors = validate_data(session, args, data)
+        validation_errors = validate_data(rule_interface, args, data)
 
         if len(validation_errors) > 0:
             _exit_with_validation_errors(validation_errors)
 
         if not args.online_check:
-            apply_data(session, args, data)
+            apply_data(rule_interface, args, data)
 
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
@@ -360,6 +362,8 @@ def _get_args():
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('csvfile', help='Name of the CSV file')
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+                        help="Yoda version on the server (default: 1.7)")
     parser.add_argument('-i', '--internal-domains', required=True,
                         help='Comma-separated list of internal email domains to the Yoda server')
     actiongroup = parser.add_mutually_exclusive_group()

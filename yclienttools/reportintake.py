@@ -67,6 +67,8 @@ class DatasetStatisticsCache:
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+                        help="Yoda version on the server (default: 1.7)")
     parser.add_argument('-p', '--progress', action='store_true',
                         help='Show progress updates.')
     parser.add_argument('-s', '--study', required=True,
@@ -94,7 +96,8 @@ def entry():
 
 def main():
     args = _get_args()
-    session = setup_session()
+    session = setup_session(args,
+        require_ssl = False if args.yoda_version == "1.7" else True)
 
     vault_collection = _get_vault_collection(session, args.study)
     if not common_queries.collection_exists(session, vault_collection):

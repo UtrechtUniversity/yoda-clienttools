@@ -5,7 +5,9 @@ intended for data managers and key users.
 
 ## Installation
 
-The Yoda clienttools require Python 3. They have been tested with Python 3.6.
+The Yoda clienttools require Python 3. They are compatible with Yoda 1.7 and Yoda 1.8.
+The tools need to be used with the '-y 1.8' option in order to work with
+Yoda 1.8 instances.
 
 It is recommended to install the tools in a virtual environment, like this:
 
@@ -27,7 +29,7 @@ pip3 install --upgrade git+https://github.com/cjsmeele/python-irodsclient@xml-co
 ### ycleanup\_files
 
 ```
-usage: ycleanup_files [-h] -r ROOT
+usage: ycleanup_files [-h] -r ROOT [-y {1.7,1.8}]
 
 Recursively finds data objects in a collection that will typically have to be
 cleaned up when a dataset is archived, and deletes them.
@@ -36,7 +38,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -r ROOT, --root ROOT  Delete unwanted files in this collection, as well as
                         its subcollections
-
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
 ```
 
 Overview of files to be removed:
@@ -50,23 +53,25 @@ Overview of files to be removed:
 ### yensuremembers
 
 ```
-usage: yensuremembers [-h] [--offline-check | --online-check] [--verbose]
-                      [--dry-run]
+usage: yensuremembers [-h] [-y {1.7,1.8}] [--offline-check | --online-check]
+                      [--verbose] [--dry-run]
                       userfile groupfile
 
 Ensures each research group in a list has a common set of members with a particular role. For example:
    one user has a manager role in all groups.
 
 positional arguments:
-  userfile             Name of the user file
-  groupfile            Name of the group file
+  userfile              Name of the user file
+  groupfile             Name of the group file ("-" for standard input)
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --offline-check, -c  Only checks user file format
-  --online-check, -C   Check mode (online): Verifies that all users in the user file exist.
-  --verbose, -v        Verbose mode: print additional debug information.
-  --dry-run, -d        Dry run mode: show what action would be taken.
+  -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
+  --offline-check, -c   Only checks user file format
+  --online-check, -C    Check mode (online): Verifies that all users in the user file exist.
+  --verbose, -v         Verbose mode: print additional debug information.
+  --dry-run, -d         Dry run mode: show what action would be taken.
 
         The user file is a text file. Each line has a role and an existing user account name,
         separated by ':':
@@ -82,21 +87,23 @@ optional arguments:
         viewer:v.viewer@uu.nl
 
         The group file should have one group name on each line.
-```
 
+```
 ### ygrepgroups
 
 ```
-usage: ygrepgroups [-h] [-a] searchstring
+usage: ygrepgroups [-h] [-y {1.7,1.8}] [-a] searchstring
 
 Searches for groups by a search string
 
 positional arguments:
-  searchstring  The string to search for
+  searchstring          The string to search for
 
 optional arguments:
-  -h, --help    show this help message and exit
-  -a, --all     Show all groups (not just research and vault groups)
+  -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
+  -a, --all             Show all groups (not just research and vault groups)
 ```
 
 ### ygroupinfo
@@ -104,23 +111,25 @@ optional arguments:
 Prints the category and subcategory of a Yoda research group.
 
 ```
-usage: ygroupinfo [-h] groupname
+usage: ygroupinfo [-h] [-y {1.7,1.8}] groupname
 
-Shows information about a Yoda group
+Shows information about a Yoda research group
 
 positional arguments:
   groupname
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
 ```
 
 ### yimportgroups
 
 ```
-usage: yimportgroups [-h] -i INTERNAL_DOMAINS
+usage: yimportgroups [-h] [-y {1.7,1.8}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
-                     [--verbose]
+                     [--delete] [--verbose]
                      csvfile
 
 Creates a list of groups based on a CSV file
@@ -130,6 +139,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server
   --offline-check, -c   Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups
@@ -165,10 +176,15 @@ optional arguments:
 Shows a report of the size of all data objects in a (set of) collections.
 
 ```
-usage: yreport_collectionsize [--help] [-h] [-r] [-R] [-g GROUP_BY]
+usage: yreport_collectionsize [-y {1.7,1.8}] [--help] [-h] [-r] [-R]
+                              [-g GROUP_BY]
                               (-c COLLECTION | -H | -C COMMUNITY)
 
+Shows a report of the size of all data objects in a (set of) collections
+
 optional arguments:
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
   --help                show help information
   -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
                         instead of 1000000
@@ -205,12 +221,14 @@ Prints a report of the number of subcollections and data objects
 per collection. The output is in CSV format.
 
 ```
-usage: yreport_dataobjectspercollection [-h] [-r ROOT] [-e]
+usage: yreport_dataobjectspercollection [-h] [-y {1.7,1.8}] [-r ROOT] [-e]
 
 Shows a report of number of data objects and subcollections per collection
 
 optional arguments:
   -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
   -r ROOT, --root ROOT  show only collections in this root collection
                         (default: show all collections
   -e, --by-extension    show number of data objects by extension for each
@@ -241,13 +259,14 @@ On systems with a significant number of datasets, it is recommended to use the
 up report generation.
 
 ```
-
-usage: yreport_intake [-h] [-p] -s STUDY [-c CACHE]
+usage: yreport_intake [-h] [-y {1.7,1.8}] [-p] -s STUDY [-c CACHE]
 
 Generates a report of the contents of an intake collection.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
   -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
                         Study to process
@@ -255,8 +274,8 @@ optional arguments:
                         Local cache directory. Can be used to retrieve
                         previously collected information on datasets, in order
                         to speed up report generation. The script will also
-                        store newly collected dataset information in the cache.
-
+                        store newly collected dataset information in the
+                        cache.
 ```
 
 ### yreport\_linecount
@@ -264,12 +283,14 @@ optional arguments:
 Prints a report of the number of lines per data object.
 
 ```
-usage: yreport_linecount [-h] (-c COLLECTION | -d DATA_OBJECT)
+usage: yreport_linecount [-h] [-y {1.7,1.8}] (-c COLLECTION | -d DATA_OBJECT)
 
 Shows a report of the line counts of data objects.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
   -c COLLECTION, --collection COLLECTION
                         show line counts of all data objects in this
                         collection (recursive)
@@ -282,13 +303,15 @@ optional arguments:
 Prints a list of all groups a user is a member of.
 
 ```
-usage: ywhichgroups [-h] username
+usage: ywhichgroups [-h] [-y {1.7,1.8}] username
 
 Returns a list of groups of which a user is a member
 
 positional arguments:
-  username    The username
+  username              The username
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
 ```
