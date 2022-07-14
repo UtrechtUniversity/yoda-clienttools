@@ -272,7 +272,7 @@ def apply_data(session, args, data):
                      print("Notice: removed rods user from group " + groupname)
              else:
                  if status !=0:
-                     print ("Warning: error while attempting to remove user {} from group {}".format(user,groupname))
+                     print ("Warning: error while attempting to remove user rods from group {}".format(groupname))
                      print("Status: {} , Message: {}".format(status, msg))
 
         # Remove users not in sheet
