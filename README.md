@@ -53,8 +53,9 @@ Overview of files to be removed:
 ### yensuremembers
 
 ```
-usage: yensuremembers [-h] [-y {1.7,1.8}] [--offline-check | --online-check]
-                      [--verbose] [--dry-run]
+usage: yensuremembers [-h] -i INTERNAL_DOMAINS [-y {1.7,1.8}]
+                      [--offline-check | --online-check] [--verbose]
+                      [--dry-run]
                       userfile groupfile
 
 Ensures each research group in a list has a common set of members with a particular role. For example:
@@ -66,6 +67,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
+                        Comma-separated list of internal email domains to the Yoda server
   -y {1.7,1.8}, --yoda-version {1.7,1.8}
                         Yoda version on the server (default: 1.7)
   --offline-check, -c   Only checks user file format
@@ -87,7 +90,6 @@ optional arguments:
         viewer:v.viewer@uu.nl
 
         The group file should have one group name on each line.
-
 ```
 ### ygrepgroups
 

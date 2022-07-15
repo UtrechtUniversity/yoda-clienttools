@@ -4,6 +4,7 @@
 import argparse
 import contextlib
 import os
+import re
 import sys
 
 from yclienttools import session as s
@@ -19,6 +20,8 @@ def _get_args():
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('userfile', help='Name of the user file')
     parser.add_argument('groupfile', help='Name of the group file ("-" for standard input)')
+    parser.add_argument('-i', '--internal-domains', required=True,
+                        help='Comma-separated list of internal email domains to the Yoda server')
     parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
                         help="Yoda version on the server (default: 1.7)")
     actiongroup = parser.add_mutually_exclusive_group()
@@ -56,14 +59,24 @@ def validate_data(rule_interface, args, userdata, groupdata):
     errors = []
 
     for user in userdata:
-        if not rule_interface.call_uuUserExists(user):
-            errors.append("User {} does not exist.".format(user))
+        if not is_internal_user(user, args.internal_domains.split(",")):
+            if not rule_interface.call_uuUserExists(user):
+                errors.append("External user {} does not exist.".format(user))
 
     for group in groupdata:
         if not rule_interface.call_uuGroupExists(group):
             errors.append("Group {} does not exist.".format(group))
 
     return errors
+
+
+def is_internal_user(username, internal_domains):
+    for domain in internal_domains:
+        domain_pattern = '@{}$'.format(domain)
+        if re.search(domain_pattern, username) is not None:
+            return True
+
+    return False
 
 
 def apply_data(rule_interface, args, userdata, groupdata, verbose, dry_run):
