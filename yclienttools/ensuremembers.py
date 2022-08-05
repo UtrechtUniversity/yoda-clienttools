@@ -206,7 +206,9 @@ def parse_user_file(userfile):
                 _exit_with_error("Line \"{}\" in use file has invalid format.".format(line))
             if fields[0] not in ["manager", "member", "viewer"]:
                 _exit_with_error("Role {} in user file is not a valid role.".format(fields[0]))
-            users[fields[1]] = fields[0]
+            username = fields[1].strip().lower()
+            users[username] = fields[0]
+
 
     if len(users) == 0:
         _exit_with_error("User file has no users.")
