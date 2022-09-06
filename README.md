@@ -300,6 +300,27 @@ optional arguments:
                         show line count of only this data object
 ```
 
+### yrmusers
+
+```
+usage: yrmusers [-h] [-y {1.7,1.8}] [--check] [--verbose] [--dry-run] userfile
+
+Removes a list of user accounts. This script needs to run locally on the environment.
+
+positional arguments:
+  userfile              Name of the user file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
+  --check, -c           Check mode: verifies user exist and home directories are empty
+  --verbose, -v         Verbose mode: print additional debug information.
+  --dry-run, -d         Dry run mode: show what action would be taken.
+
+The user file is a text file, with one user name on each line.
+```
+
 ### ywhichgroups
 
 Prints a list of all groups a user is a member of.

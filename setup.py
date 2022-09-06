@@ -25,7 +25,8 @@ setup(
             'ygrepgroups=yclienttools.grepgroups:entry',
             'ygroupinfo=yclienttools.groupinfo:entry',
             'yimportgroups=yclienttools.importgroups:entry',
-            'yensuremembers=yclienttools.ensuremembers:entry'
+            'yensuremembers=yclienttools.ensuremembers:entry',
+            'yrmusers=yclienttools.rmusers:entry'
         ]
     },
     version='0.0.1'
