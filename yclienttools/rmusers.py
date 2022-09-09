@@ -24,7 +24,7 @@ def _get_args():
     parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
                         help="Yoda version on the server (default: 1.7)")
     parser.add_argument('--check', '-c', action='store_true',
-                             help='Check mode: verifies user exist and home directories are empty')
+                             help='Check mode: verifies user exist and trash/home directories are empty')
     parser.add_argument('--verbose', '-v', action='store_true', default=False,
                              help='Verbose mode: print additional debug information.')
     parser.add_argument('--dry-run', '-d', action='store_true', default=False,
@@ -44,6 +44,8 @@ def validate_data(session, rule_interface, args, userdata):
             errors.append(f"User {user} does not exist.")
         if home_exists(session, user) and not home_is_empty(session, user):
             errors.append(f"Home directory of user {user} is not empty")
+        if trash_exists(session, user) and not trash_is_empty(session, user):
+            errors.append(f"Trash directory of user {user} is not empty")
 
     return errors
 
@@ -128,6 +130,17 @@ def home_is_empty(session, user):
     home_collection = f"/{session.zone}/home/{user}"
     num_collections = len(list(get_collections_in_root(session, home_collection)))
     num_objects = get_collection_size(session, home_collection, False, GroupByOption.none, False)['all']
+    return num_collections <= 1 and num_objects == 0
+
+def trash_exists(session, user):
+    trash_collection = f"/{session.zone}/trash/home/{user}"
+    return len(list(get_collections_in_root(session, trash_collection))) > 0
+
+
+def trash_is_empty(session, user):
+    trash_collection = f"/{session.zone}/trash/home/{user}"
+    num_collections = len(list(get_collections_in_root(session, trash_collection)))
+    num_objects = get_collection_size(session, trash_collection, False, GroupByOption.none, False)['all']
     return num_collections <= 1 and num_objects == 0
 
 
