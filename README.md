@@ -300,6 +300,30 @@ optional arguments:
                         show line count of only this data object
 ```
 
+### yrmgroups
+
+```
+usage: yrmgroups [-h] [-y {1.7,1.8}] [--remove-data] [--check] [--verbose]
+                 [--dry-run]
+                 groupfile
+
+Removes a list of (research) groups, along with any data they contain
+
+positional arguments:
+  groupfile             Name of the group file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -y {1.7,1.8}, --yoda-version {1.7,1.8}
+                        Yoda version on the server (default: 1.7)
+  --remove-data, -r     Remove any data from the group, if needed.
+  --check, -c           Check mode: verifies groups exist, and checks if they are empty
+  --verbose, -v         Verbose mode: print additional debug information.
+  --dry-run, -d         Dry run mode: show what action would be taken.
+
+The group file is a text file, with one group name (e.g.: research-foo) on each line
+```
+
 ### yrmusers
 
 ```

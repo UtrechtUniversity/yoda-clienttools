@@ -167,3 +167,13 @@ class RuleInterface:
            ('description', description),
            ('classification', classification)])
        return self.call_rule('uuGroupAdd', parms, 2)
+
+    def call_uuGroupRemove(self, groupname):
+       """Removes an empty group
+
+          :param groupname: name of group
+
+          :returns: (status, message). Status not 0 means error.
+       """
+       parms = OrderedDict([('groupname', groupname)])
+       return self.call_rule('uuGroupRemove', parms, 2)

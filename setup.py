@@ -26,7 +26,8 @@ setup(
             'ygroupinfo=yclienttools.groupinfo:entry',
             'yimportgroups=yclienttools.importgroups:entry',
             'yensuremembers=yclienttools.ensuremembers:entry',
-            'yrmusers=yclienttools.rmusers:entry'
+            'yrmusers=yclienttools.rmusers:entry',
+            'yrmgroups=yclienttools.rmgroups:entry'
         ]
     },
     version='0.0.1'
