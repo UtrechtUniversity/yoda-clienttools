@@ -68,6 +68,8 @@ def validate_data(session, rule_interface, args, groupdata):
     errors = []
 
     for group in groupdata:
+        if args.verbose:
+            print(f"Validating group {group} ...")
         if not rule_interface.call_uuGroupExists(group):
             errors.append(f"Group {group} does not exist.")
         elif not group_collection_exists(session, group):
