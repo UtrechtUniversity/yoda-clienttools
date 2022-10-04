@@ -4,3 +4,4 @@ six
 humanize>=0.5
 dnspython>=2.2.0
 backports.functools-lru-cache>=1.6.4
+typing_extensions==4.1.1
