@@ -74,7 +74,7 @@ def validate_data(session, rule_interface, args, groupdata):
             errors.append(f"Group {group} does not exist.")
         elif not group_collection_exists(session, group):
             errors.append(f"Group collection {group} does not exist")
-        if not (args.remove_data or group_is_empty(session, group)):
+        elif not (args.remove_data or group_is_empty(session, group)):
             message = f"Group {group} is not empty. Need to use --remove-data to remove its contents."
             errors.append(message)
 
