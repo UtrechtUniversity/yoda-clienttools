@@ -304,10 +304,10 @@ optional arguments:
 
 ```
 usage: yrmgroups [-h] [-y {1.7,1.8}] [--remove-data] [--check] [--verbose]
-                 [--dry-run]
+                 [--dry-run] [--continue-failure]
                  groupfile
 
-Removes a list of (research) groups, along with any data they contain
+Removes a list of (research) groups
 
 positional arguments:
   groupfile             Name of the group file
@@ -320,6 +320,8 @@ optional arguments:
   --check, -c           Check mode: verifies groups exist, and checks if they are empty
   --verbose, -v         Verbose mode: print additional debug information.
   --dry-run, -d         Dry run mode: show what action would be taken.
+  --continue-failure, -C
+                        Continue if operations to remove collections or data objects return an error code
 
 The group file is a text file, with one group name (e.g.: research-foo) on each line
 ```

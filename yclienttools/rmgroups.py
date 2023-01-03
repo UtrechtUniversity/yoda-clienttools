@@ -32,6 +32,8 @@ def _get_args():
                              help='Verbose mode: print additional debug information.')
     parser.add_argument('--dry-run', '-d', action='store_true', default=False,
                              help="Dry run mode: show what action would be taken.")
+    parser.add_argument('--continue-failure', '-C', action='store_true', default=False,
+                             help="Continue if operations to remove collections or data objects return an error code")
     return parser.parse_args()
 
 
@@ -56,7 +58,7 @@ def entry():
             _exit_with_validation_errors(validation_errors)
 
         if not args.check:
-            remove_groups(session, rule_interface, args, groupdata, args.verbose, args.dry_run, args.remove_data)
+            remove_groups(session, rule_interface, args, groupdata)
 
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
@@ -81,7 +83,7 @@ def validate_data(session, rule_interface, args, groupdata):
     return errors
 
 
-def remove_groups(session, rule_interface, args, groups, verbose, dry_run, remove_data):
+def remove_groups(session, rule_interface, args, groups):
     for group in groups:
 
         # Safety checks
@@ -90,35 +92,44 @@ def remove_groups(session, rule_interface, args, groups, verbose, dry_run, remov
         elif "/" in group or ".." in group:
             _exit_with_error(f"Refusing to process group name containing slash or dot dot, for safety reasons.")
 
-        if verbose:
+        if args.verbose:
             print(f"Processing group {group} ...")
             print(f"Verifying whether group {group} is empty ...")
 
         group_empty = group_is_empty(session, group)
-        if verbose:
+        if args.verbose:
             print(f"Group {group} is " + ( "empty" if group_empty else "not empty") )
 
         if not group_empty:
             group_coll = f"/{session.zone}/home/{group}"
 
-            if dry_run:
+            if args.dry_run:
                 print(f"Would remove data from {group_coll} ...")
-            elif verbose and not dry_run:
+            elif args.verbose and not args.dry_run:
                 print(f"Removing data from {group_coll} ...")
 
-            remove_group_contents(session, rule_interface, group, verbose, dry_run)
+            remove_group_contents(session,
+                                  rule_interface,
+                                  group,
+                                  args.verbose,
+                                  args.dry_run,
+                                  args.continue_failure)
 
-        if dry_run:
+        if args.dry_run:
             print(f"Would remove group {group} ...")
         else:
-            if verbose:
+            if args.verbose:
                 print(f"Removing group {group} ...")
             (status, err) = rule_interface.call_uuGroupRemove(group)
             if status != '0':
-               _print_error(f"Could not remove group {group}. Error: {err} (code {status})")
+               message = f"Could not remove group {group}. Error: {err} (code {status})"
+               if args.continue_failure:
+                   _print_error(message)
+               else:
+                   _exit_with_error(message)
 
 
-def remove_group_contents(session, rule_interface, group, verbose, dry_run):
+def remove_group_contents(session, rule_interface, group, verbose, dry_run, continue_failure):
     group_coll = f"/{session.zone}/home/{group}"
     rods_role = rule_interface.call_uuGroupGetMemberType(group, "rods")
     if rods_role == "none":
@@ -137,7 +148,7 @@ def remove_group_contents(session, rule_interface, group, verbose, dry_run):
             rule_interface.call_uuGroupUserChangeRole(group, "rods", "manager")
     if verbose:
         print(f"Removing data from group {group_coll} (dry run mode: { str(dry_run) } ...")
-    remove_collection_data(group_coll, verbose, dry_run, False)
+    remove_collection_data(group_coll, verbose, dry_run, continue_failure, False)
 
 
 def group_collection_exists(session, group):

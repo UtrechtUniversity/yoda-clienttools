@@ -8,14 +8,15 @@ import sys
     :param collection: collection name
     :param verbose: whether to print additional progress messages
     :param dry_run: whether to only show what collections would be removed, but not actually remove them
+    :param continue_failure: continue if irm returns a failure code
     :param remove_coll_itself: whether to remove the collection itself too
 """
-def remove_collection_data(collection, verbose, dry_run, remove_coll_itself):
+def remove_collection_data(collection, verbose, dry_run, continue_failure, remove_coll_itself):
     collection_tree = _get_subcollections_by_depth(collection)
-    _remove_leaf_to_stem(collection_tree, collection, dry_run, verbose, remove_coll_itself)
+    _remove_leaf_to_stem(collection_tree, collection, dry_run, verbose, continue_failure, remove_coll_itself)
 
 
-def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, remove_coll_itself):
+def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, continue_failure, remove_coll_itself):
    stem_depth = _get_depth(stempath)
    depths = sorted(collections.keys())
    depths.reverse()
@@ -26,7 +27,7 @@ def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, remove_coll_it
        else:
            if verbose:
                _print_v("Removing data object {} ...".format(object))
-           _irm_do(object)
+           _irm_do(object, continue_failure)
 
    for depth in depths:
        if depth == stem_depth and not remove_coll_itself:
@@ -41,7 +42,7 @@ def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, remove_coll_it
            else:
                if verbose:
                    _print_v("Removing collection {} ...".format(coll))
-               _irm_coll(coll)
+               _irm_coll(coll, continue_failure)
 
 
 def _exit_with_error(message):
@@ -53,18 +54,26 @@ def _print_v(message):
     print(message, file=sys.stderr)
 
 
-def _irm_coll(path):
+def _irm_coll(path, continue_failure):
    result = subprocess.Popen(["irm", "-r", path])
    returncode = result.wait()
    if returncode != 0:
-       _exit_with_error("Error: irm command for collection {} failed.".format(path))
+       message = "Error: irm command for collection {} failed.".format(path)
+       if continue_failure:
+           _print_v(message)
+       else:
+           _exit_with_error(message)
 
 
-def _irm_do(path):
+def _irm_do(path, continue_failure):
    result = subprocess.Popen(["irm", path])
    returncode = result.wait()
    if returncode != 0:
-       _exit_with_error("Error: irm command for data object {} failed.".format(path))
+       message = "Error: irm command for data object {} failed.".format(path)
+       if continue_failure:
+           _print_v(message)
+       else:
+           _exit_with_error(message)
 
 
 def _get_cmd_stdout_lines(args):
