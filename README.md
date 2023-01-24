@@ -131,7 +131,7 @@ optional arguments:
 ```
 usage: yimportgroups [-h] [-y {1.7,1.8}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
-                     [--delete] [--verbose]
+                     [--delete] [--verbose] [--no-validate-domains]
                      csvfile
 
 Creates a list of groups based on a CSV file
@@ -150,6 +150,8 @@ optional arguments:
   --allow-update, -u    Allows existing groups to be updated
   --delete, -d          Delete group members not in CSV file
   --verbose, -v         Show information as extracted from CSV file
+  --no-validate-domains, -n
+                        Do not validate email address domains
 
         The CSV file is expected to include the following labels in its header (the first row):
         'category'    = category for the group

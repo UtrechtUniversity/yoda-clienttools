@@ -17,7 +17,7 @@ from yclienttools.exceptions import SizeNotSupportedException
 
 # Based on yoda-batch-add script by Ton Smeele
 
-def parse_csv_file(input_file):
+def parse_csv_file(input_file, args):
     extracted_data = []
 
     with open(input_file, mode="r", encoding="utf-8-sig") as csv_file:
@@ -43,7 +43,7 @@ def parse_csv_file(input_file):
 
         for line in reader:
             row_number += 1
-            rowdata, error = _process_csv_line(line)
+            rowdata, error = _process_csv_line(line, args)
 
             if error is None:
                 extracted_data.append(rowdata)
@@ -73,7 +73,7 @@ def _get_duplicate_columns(fields_list):
     return duplicate_fields
 
 
-def _process_csv_line(line):
+def _process_csv_line(line, args):
     category = line['category'].strip().lower().replace('.', '')
     subcategory = line['subcategory'].strip()
     groupname = "research-" + line['groupname'].strip().lower()
@@ -99,7 +99,7 @@ def _process_csv_line(line):
         elif not is_email(username):
             return None, 'Username "{}" is not a valid email address.'.format(
                 username)
-        elif not is_valid_domain(username.split('@')[1]):
+        elif not (args.no_validate_domains or is_valid_domain(username.split('@')[1])):
             return None, 'Username "{}" failed DNS domain validation - domain does not exist or has no MX records.'.format(username)
 
         if column_name.lower().startswith('manager:'):
@@ -322,7 +322,7 @@ def print_parsed_data(data):
 def entry():
     '''Entry point'''
     args = _get_args()
-    data = parse_csv_file(args.csvfile)
+    data = parse_csv_file(args.csvfile, args)
 
     if args.offline_check or args.verbose:
         print_parsed_data(data)
@@ -377,7 +377,8 @@ def _get_args():
                         help='Delete group members not in CSV file')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Show information as extracted from CSV file')
-
+    parser.add_argument('--no-validate-domains', '-n', action='store_true',
+                        help='Do not validate email address domains')
     return parser.parse_args()
 
 
