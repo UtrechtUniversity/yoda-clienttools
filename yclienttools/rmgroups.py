@@ -22,7 +22,7 @@ def _get_args():
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('groupfile', help='Name of the group file')
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
                         help="Yoda version on the server (default: 1.7)")
     parser.add_argument("--remove-data", "-r", action='store_true',
                         help="Remove any data from the group, if needed.")

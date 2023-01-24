@@ -22,7 +22,7 @@ def _get_args():
     parser.add_argument('groupfile', help='Name of the group file ("-" for standard input)')
     parser.add_argument('-i', '--internal-domains', required=True,
                         help='Comma-separated list of internal email domains to the Yoda server')
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8", "1.9"],
                         help="Yoda version on the server (default: 1.7)")
     actiongroup = parser.add_mutually_exclusive_group()
     actiongroup.add_argument('--offline-check', '-c', action='store_true',
@@ -175,8 +175,7 @@ def entry():
 
     session = s.setup_session(args,
         require_ssl = False if args.yoda_version == "1.7" else True)
-    rule_interface = RuleInterface(session,
-        set_re = False if args.yoda_version == "1.7" else True)
+    rule_interface = RuleInterface(session, args.yoda_version)
 
     try:
         validation_errors = validate_data(rule_interface, args, userdata, groupdata)

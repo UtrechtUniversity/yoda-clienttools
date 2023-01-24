@@ -67,7 +67,7 @@ class DatasetStatisticsCache:
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
                         help="Yoda version on the server (default: 1.7)")
     parser.add_argument('-p', '--progress', action='store_true',
                         help='Show progress updates.')

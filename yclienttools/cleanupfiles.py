@@ -49,7 +49,7 @@ def _get_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-r", "--root", default="/", required=True,
                         help='Delete unwanted files in this collection, as well as its subcollections')
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8", "1.9"],
                         help="Yoda version on the server (default: 1.7)")
     return parser.parse_args()
 

@@ -35,7 +35,7 @@ def _get_args():
     # Add_help is False, because we the -h option would conflict with our
     # custom -h option.
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
                         help="Yoda version on the server (default: 1.7)")
     parser.add_argument('--help', action='help', help='show help information')
     parser.add_argument('-h', '--human-readable', action='store_true', default=False,

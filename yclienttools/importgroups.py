@@ -335,8 +335,7 @@ def entry():
 
     session = s.setup_session(args,
         require_ssl = False if args.yoda_version == "1.7" else True)
-    rule_interface = RuleInterface(session,
-        set_re = False if args.yoda_version == "1.7" else True)
+    rule_interface = RuleInterface(session, args.yoda_version)
 
     try:
         validation_errors = validate_data(rule_interface, args, data)
@@ -362,7 +361,7 @@ def _get_args():
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('csvfile', help='Name of the CSV file')
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8"],
+    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8", "1.9"],
                         help="Yoda version on the server (default: 1.7)")
     parser.add_argument('-i', '--internal-domains', required=True,
                         help='Comma-separated list of internal email domains to the Yoda server')

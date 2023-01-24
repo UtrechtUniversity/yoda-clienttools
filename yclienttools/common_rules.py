@@ -11,15 +11,18 @@ from yclienttools.exceptions import SizeNotSupportedException
 
 class RuleInterface:
 
-    def __init__(self, session, set_re = False):
+    def __init__(self, session, yoda_version= "1.7"):
         """constructor
 
            :param session: IrodsSession object to call
-           :param set_re: Whether to specify the rule engine on rule calls
+           :param yoda_version: which Yoda version to assume (1.7, 1.8, 1.9)
+
+Whether to specify the rule engine on rule calls
                           (enable for Yoda 1.8 and higher, disable for Yoda 1.7)
         """
         self.session = session
-        self.set_re = set_re
+        self.set_re = False if yoda_version == "1.7" else True
+        self.uuGroupAdd_version = "1.7" if yoda_version in ["1.7", "1.8"] else "1.9"
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
 
 
@@ -160,13 +163,24 @@ class RuleInterface:
           :returns: (status, message). Status not 0 means error,
                     -1089000 means group name already exists
        """
-       parms = OrderedDict([
-           ('groupname', groupname),
-           ('category', category),
-           ('subcategory', subcategory),
-           ('description', description),
-           ('classification', classification)])
-       return self.call_rule('uuGroupAdd', parms, 2)
+       if self.uuGroupAdd_version == "1.7":
+           parms = OrderedDict([
+               ('groupname', groupname),
+               ('category', category),
+               ('subcategory', subcategory),
+               ('description', description),
+               ('classification', classification)])
+       elif self.uuGroupAdd_version == "1.9":
+           parms = OrderedDict([
+               ('groupname', groupname),
+               ('category', category),
+               ('subcategory', subcategory),
+               ('schema_id', 'default-2'),
+               ('expirationdate', ''),
+               ('description', description),
+               ('classification', classification)])
+       else:
+           return self.call_rule('uuGroupAdd', parms, 2)
 
     def call_uuGroupRemove(self, groupname):
        """Removes an empty group
