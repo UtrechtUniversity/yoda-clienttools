@@ -12,16 +12,9 @@ Yoda 1.8 instances.
 It is recommended to install the tools in a virtual environment, like this:
 
 ```
-virtualenv --python /usr/bin/python3.6 --no-site-packages venv
+/usr/bin/python3.6 -m venv venv
 source venv/bin/activate
 pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
-```
-
-If your zone has data objects or collections with nonstandard characters, you should probably use
-a version of python-irodsclient that has a fix for known issues when dealing with such objects:
-
-```
-pip3 install --upgrade git+https://github.com/cjsmeele/python-irodsclient@xml-compatibility
 ```
 
 ## Overview of tools
