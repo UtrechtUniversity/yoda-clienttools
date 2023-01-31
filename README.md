@@ -17,13 +17,6 @@ source venv/bin/activate
 pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
 ```
 
-If your zone has data objects or collections with nonstandard characters, you should probably use
-a version of python-irodsclient that has a fix for known issues when dealing with such objects:
-
-```
-pip3 install --upgrade git+https://github.com/cjsmeele/python-irodsclient@xml-compatibility
-```
-
 ## Overview of tools
 
 ### ycleanup\_files
