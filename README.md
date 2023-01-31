@@ -12,7 +12,7 @@ Yoda 1.8 instances.
 It is recommended to install the tools in a virtual environment, like this:
 
 ```
-virtualenv --python /usr/bin/python3.6 --no-site-packages venv
+/usr/bin/python3.6 -m venv venv
 source venv/bin/activate
 pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
 ```
