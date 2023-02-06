@@ -179,8 +179,8 @@ Whether to specify the rule engine on rule calls
                ('expirationdate', ''),
                ('description', description),
                ('classification', classification)])
-       else:
-           return self.call_rule('uuGroupAdd', parms, 2)
+
+       return self.call_rule('uuGroupAdd', parms, 2)
 
     def call_uuGroupRemove(self, groupname):
        """Removes an empty group
