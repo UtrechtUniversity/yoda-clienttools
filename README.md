@@ -26,15 +26,15 @@ Once you have completed the previous steps and have Ubuntu up and running, run t
 ```
 sudo apt update
 sudo apt install python3
-sufo apt install python3-pip
-suso apt install python3.8-venv
+sudo apt install python3-pip
+sudo apt install python3.8-venv
 ```
 
 Then create the virtual environment (note that the wheel package is likely not available in the venv under WSL and may require the pip install below):
 
 ```
 /usr/bin/python3.8 -m venv yodatoolsvenv
-source ytoolsvenv/bin/activate
+source yodatoolsvenv/bin/activate
 pip install wheel
 pip install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
 
