@@ -17,6 +17,41 @@ source venv/bin/activate
 pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
 ```
 
+## Installation Windows users
+
+The Yoda clienttools are much easier to use under a Linux environment. For Windows users, please activate Windows Subsystem for Linux and install Ubuntu as described on the Microsoft page https://learn.microsoft.com/en-us/windows/wsl/install. You will also need to install iCommands within your Ubuntu distro as described at https://www.uu.nl/en/research/yoda/guide-to-yoda/i-am-using-yoda/using-icommands-for-large-datasets. You will additionally need to create a .irods folder in your Ubuntu home directory (`mkdir .irods`) and create an irods_environment.json file (`sudo nano irods_environment.json`). The contents of that json file can be found after logging in to the Yoda webportal and clicking on the Yoda version at the bottom of each page in the webportal (e.g., clicking on Yoda v1.8.6 or Yoda v1.9).
+
+Once you have completed the previous steps and have Ubuntu up and running, run the following lines:
+
+```
+sudo apt update
+sudo apt install python3
+sufo apt install python3-pip
+suso apt install python3.8-venv
+```
+
+Then create the virtual environment (note that the wheel package is likely not available in the venv under WSL and may require the pip install below):
+
+```
+/usr/bin/python3.8 -m venv yodatoolsvenv
+source ytoolsvenv/bin/activate
+pip install wheel
+pip install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
+
+```
+
+Next, the CA certificates locations needs to be set in the session.py file within the Yoda clienttools folder. Within Ubuntu the certificate location is often the location at "/etc/ssl/certs/ca-certificates.crt".
+
+```
+cd ~/yodatoolsvenv/lib/python3.8/site-packages/yclienttools
+nano session.py
+```
+
+With session.py open, adjust the `ca_file = "/etc/irods/localhost_and_chain.crt"` entry to `ca_file = "/etc/ssl/certs/ca-certificates.crt"`. Save the file (ctrl+x en accept) and return to your home folder `cd ~`.
+
+You are now good to go. When you call on the clienttools, make sure you first run `iinit` to sign in to Yoda first. 
+
+
 ## Overview of tools
 
 ### ycleanup\_files
