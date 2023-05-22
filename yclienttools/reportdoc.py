@@ -4,7 +4,7 @@ import argparse
 import csv
 import sys
 from irods.models import Collection, DataObject
-from yclienttools import common_queries
+from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 
 
@@ -12,8 +12,8 @@ def entry():
     '''Entry point'''
     try:
         args = _get_args()
-        session = s.setup_session(args,
-            require_ssl = False if args.yoda_version == "1.7" else True)
+        yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+        session = s.setup_session(yoda_version)
 
         if args.root and not common_queries.collection_exists(session, args.root):
             print ("Error: collection {} does not exist (or you don't have access)".format(args.root),
@@ -30,8 +30,7 @@ def entry():
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
-                        help="Yoda version on the server (default: 1.7)")
+    common_args.add_default_args(parser)
     parser.add_argument("-r", "--root", default="/",
                         help='show only collections in this root collection (default: show all collections')
     parser.add_argument("-e", "--by-extension", default=False, action='store_true',

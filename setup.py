@@ -10,7 +10,8 @@ setup(
         'six',
         'humanize>=0.5',
         'dnspython>=2.2.0',
-        'backports.functools-lru-cache>=1.6.4'
+        'backports.functools-lru-cache>=1.6.4',
+        'PyYaml'
     ],
     name='yclienttools',
     packages=['yclienttools', 'irodsutils'],

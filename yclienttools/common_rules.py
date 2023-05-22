@@ -11,7 +11,7 @@ from yclienttools.exceptions import SizeNotSupportedException
 
 class RuleInterface:
 
-    def __init__(self, session, yoda_version= "1.7"):
+    def __init__(self, session, yoda_version):
         """constructor
 
            :param session: IrodsSession object to call

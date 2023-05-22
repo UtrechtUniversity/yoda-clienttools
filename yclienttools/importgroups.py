@@ -6,6 +6,8 @@ import re
 
 import dns.resolver as resolver
 
+from yclienttools import common_args, common_config
+
 try:
     from functools import lru_cache
 except ImportError:
@@ -323,6 +325,7 @@ def entry():
     '''Entry point'''
     args = _get_args()
     data = parse_csv_file(args.csvfile, args)
+    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
 
     if args.offline_check or args.verbose:
         print_parsed_data(data)
@@ -333,9 +336,8 @@ def entry():
     if args.offline_check:
         sys.exit(0)
 
-    session = s.setup_session(args,
-        require_ssl = False if args.yoda_version == "1.7" else True)
-    rule_interface = RuleInterface(session, args.yoda_version)
+    session = s.setup_session(yoda_version)
+    rule_interface = RuleInterface(session, yoda_version)
 
     try:
         validation_errors = validate_data(rule_interface, args, data)
@@ -360,9 +362,8 @@ def _get_args():
         description=__doc__,
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter)
+    common_args.add_default_args(parser)
     parser.add_argument('csvfile', help='Name of the CSV file')
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8", "1.9"],
-                        help="Yoda version on the server (default: 1.7)")
     parser.add_argument('-i', '--internal-domains', required=True,
                         help='Comma-separated list of internal email domains to the Yoda server')
     actiongroup = parser.add_mutually_exclusive_group()

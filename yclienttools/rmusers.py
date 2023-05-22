@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 from yclienttools import session as s
+from yclienttools import common_args, common_config
 from yclienttools.common_queries import get_collections_in_root, get_collection_size
 from yclienttools.common_rules import RuleInterface
 from yclienttools.options import GroupByOption
@@ -20,9 +21,8 @@ def _get_args():
         description=__doc__,
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter)
+    common_args.add_default_args(parser)
     parser.add_argument('userfile', help='Name of the user file')
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
-                        help="Yoda version on the server (default: 1.7)")
     parser.add_argument('--check', '-c', action='store_true',
                              help='Check mode: verifies user exist and trash/home directories are empty')
     parser.add_argument('--verbose', '-v', action='store_true', default=False,
@@ -68,11 +68,11 @@ def remove_users(rule_interface, args, users, verbose, dry_run):
 def entry():
     '''Entry point'''
     args = _get_args()
+    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
     userdata = parse_user_file(args.userfile)
 
-    session = s.setup_session(args,
-        require_ssl = False if args.yoda_version == "1.7" else True)
-    rule_interface = RuleInterface(session, args.yoda_version)
+    session = s.setup_session(yoda_version)
+    rule_interface = RuleInterface(session, yoda_version)
 
     try:
         validation_errors = validate_data(session, rule_interface, args, userdata)

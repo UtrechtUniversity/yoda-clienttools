@@ -5,10 +5,15 @@ import sys
 from getpass import getpass
 from irods.session import iRODSSession
 from irodsutils import password_obfuscation
+from yclienttools import common_config
 
 
-def setup_session(args, require_ssl = False, ca_file = "/etc/irods/localhost_and_chain.crt"):
+def setup_session(yoda_version_override):
     """Use irods environment files to configure a iRODSSession"""
+
+    yoda_version = yoda_version_override if yoda_version_override is not None else common_config.get_default_yoda_version()
+    require_ssl = yoda_version != "1.7"
+    ca_file = common_config.get_ca_file()
 
     env_json = os.path.expanduser("~/.irods/irods_environment.json")
     try:

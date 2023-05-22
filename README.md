@@ -5,32 +5,33 @@ intended for data managers and key users.
 
 ## Installation
 
-The Yoda clienttools require Python 3. They are compatible with Yoda 1.7 and Yoda 1.8.
-The tools need to be used with the '-y 1.8' option in order to work with
-Yoda 1.8 instances.
+These tools require Python 3. They are compatible with Yoda 1.7 and Yoda 1.8.
+
+### Linux
 
 It is recommended to install the tools in a virtual environment, like this:
 
 ```
-/usr/bin/python3.6 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
 ```
 
-## Installation Windows users
+See also the `Configuration` section below.
 
-The Yoda clienttools are much easier to use under a Linux environment. For Windows users, please activate Windows Subsystem for Linux and install Ubuntu as described on the Microsoft page https://learn.microsoft.com/en-us/windows/wsl/install. You will also need to install iCommands within your Ubuntu distro as described at https://www.uu.nl/en/research/yoda/guide-to-yoda/i-am-using-yoda/using-icommands-for-large-datasets. You will additionally need to create a .irods folder in your Ubuntu home directory (`mkdir .irods`) and create an irods_environment.json file (`sudo nano irods_environment.json`). The contents of that json file can be found after logging in to the Yoda webportal and clicking on the Yoda version at the bottom of each page in the webportal (e.g., clicking on Yoda v1.8.6 or Yoda v1.9).
 
-Once you have completed the previous steps and have Ubuntu up and running, run the following lines:
+### Windows
+
+For Windows users, please activate Windows Subsystem for Linux and install Ubuntu as described on the Microsoft page https://learn.microsoft.com/en-us/windows/wsl/install. You will also need to install iCommands within your Ubuntu distro as described at https://www.uu.nl/en/research/yoda/guide-to-yoda/i-am-using-yoda/using-icommands-for-large-datasets. You will additionally need to create a .irods folder in your Ubuntu home directory (`mkdir .irods`) and create an irods_environment.json file (`sudo nano irods_environment.json`). The contents of that json file can be found after logging in to the Yoda webportal and clicking on the Yoda version at the bottom of each page in the webportal (e.g., clicking on Yoda `v1.8.6` or `Yoda v1.9`).
+
+Once you have completed the previous steps and have Ubuntu up and running, run the following commands:
 
 ```
 sudo apt update
-sudo apt install python3
-sudo apt install python3-pip
-sudo apt install python3.8-venv
+sudo apt install python3 python3-pip python3.8-venv
 ```
 
-Then create the virtual environment (note that the wheel package is likely not available in the venv under WSL and may require the pip install below):
+Then install the tools in a virtual environment:
 
 ```
 /usr/bin/python3.8 -m venv yodatoolsvenv
@@ -40,34 +41,49 @@ pip install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.
 
 ```
 
-Next, the CA certificates locations needs to be set in the session.py file within the Yoda clienttools folder. Within Ubuntu the certificate location is often the location at "/etc/ssl/certs/ca-certificates.crt".
+Create a configuration file named `.yodaclienttools.yml` in your home directory that overrides the CA path to the Ubuntu location, like so:
+
+```yaml
+ca_file: /etc/ssl/certs/ca-certificates.crt
+```
+
+You are now good to go. When you run the client tools, make sure you first run `iinit` to sign in to Yoda first
+
+## Configuration
+
+The Yoda client tools look for an optional configuration file in YAML format named `.yodaclienttools.yml` in the user's home directory
+
+Example:
 
 ```
-cd ~/yodatoolsvenv/lib/python3.8/site-packages/yclienttools
-nano session.py
+ca_file: /etc/ssl/certs/ca-certificates.crt
+default_yoda_version: 1.8
 ```
 
-With session.py open, adjust the `ca_file = "/etc/irods/localhost_and_chain.crt"` entry to `ca_file = "/etc/ssl/certs/ca-certificates.crt"`. Save the file (ctrl+x en accept) and return to your home folder `cd ~`.
-
-You are now good to go. When you call on the clienttools, make sure you first run `iinit` to sign in to Yoda first. 
-
+The following parameters are available:
+- `ca_file` : the name of the local Certificate Authority (CA) file, which is used to verify the Yoda server's identity. It uses the
+   CentOS / RHEL CA File location by default.
+- `default_yoda_version`: the Yoda client tools need to know the Yoda version running on the server. This version can be provided when running a tool
+   using the `--yoda-version` parameter. When this parameter is not provided, the tools use the default version specified in the configuration file, or
+   `1.8` if no default version is configured.
 
 ## Overview of tools
 
 ### ycleanup\_files
 
 ```
-usage: ycleanup_files [-h] -r ROOT [-y {1.7,1.8,1.9}]
+usage: ycleanup_files [-h] [-y {1.7,1.8,1.9}] -r ROOT
 
 Recursively finds data objects in a collection that will typically have to be
 cleaned up when a dataset is archived, and deletes them.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+                        Override Yoda version on the server
   -r ROOT, --root ROOT  Delete unwanted files in this collection, as well as
                         its subcollections
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+
 ```
 
 Overview of files to be removed:
@@ -81,7 +97,7 @@ Overview of files to be removed:
 ### yensuremembers
 
 ```
-usage: yensuremembers [-h] -i INTERNAL_DOMAINS [-y {1.7,1.8,1.9}]
+usage: yensuremembers [-h] [-y {1.7,1.8,1.9}] -i INTERNAL_DOMAINS
                       [--offline-check | --online-check] [--verbose]
                       [--dry-run]
                       userfile groupfile
@@ -95,10 +111,10 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+                        Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
   --offline-check, -c   Only checks user file format
   --online-check, -C    Check mode (online): Verifies that all users in the user file exist.
   --verbose, -v         Verbose mode: print additional debug information.
@@ -133,7 +149,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   -a, --all             Show all groups (not just research and vault groups)
 ```
 
@@ -152,7 +168,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
 ```
 
 ### yimportgroups
@@ -171,7 +187,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server
   --offline-check, -c   Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups
@@ -217,7 +233,7 @@ Shows a report of the size of all data objects in a (set of) collections
 
 optional arguments:
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   --help                show help information
   -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
                         instead of 1000000
@@ -246,6 +262,7 @@ optional arguments:
                         Show total size of data objects in each research and
                         vault collection in a Yoda community. Note: you will
                         only see the collections you have access to.
+
 ```
 
 ### yreport\_dataobjectspercollection
@@ -261,11 +278,12 @@ Shows a report of number of data objects and subcollections per collection
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   -r ROOT, --root ROOT  show only collections in this root collection
                         (default: show all collections
   -e, --by-extension    show number of data objects by extension for each
                         collection
+
 ```
 
 List of columns in regular mode:
@@ -299,7 +317,7 @@ Generates a report of the contents of an intake collection.
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
                         Study to process
@@ -309,6 +327,7 @@ optional arguments:
                         to speed up report generation. The script will also
                         store newly collected dataset information in the
                         cache.
+
 ```
 
 ### yreport\_linecount
@@ -324,12 +343,13 @@ Shows a report of the line counts of data objects.
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   -c COLLECTION, --collection COLLECTION
                         show line counts of all data objects in this
                         collection (recursive)
   -d DATA_OBJECT, --data-object DATA_OBJECT
                         show line count of only this data object
+
 ```
 
 ### yrmgroups
@@ -347,7 +367,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   --remove-data, -r     Remove any data from the group, if needed.
   --check, -c           Check mode: verifies groups exist, and checks if they are empty
   --verbose, -v         Verbose mode: print additional debug information.
@@ -372,7 +392,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
   --check, -c           Check mode: verifies user exist and trash/home directories are empty
   --verbose, -v         Verbose mode: print additional debug information.
   --dry-run, -d         Dry run mode: show what action would be taken.
@@ -395,5 +415,5 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
-                        Yoda version on the server (default: 1.7)
+                        Override Yoda version on the server
 ```

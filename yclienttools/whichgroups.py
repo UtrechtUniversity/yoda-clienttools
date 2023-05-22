@@ -3,7 +3,7 @@
 import argparse
 import sys
 from irods.models import User, UserGroup
-from yclienttools import common_queries
+from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 
 
@@ -11,9 +11,8 @@ def entry():
     '''Entry point'''
     try:
         args = _get_args()
-        session = s.setup_session(args,
-            require_ssl = False if args.yoda_version == "1.7" else True)
-
+        yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+        session = s.setup_session(yoda_version)
 
         if not common_queries.user_exists(session, args.username):
             print("Error: user {} does not exist.".format(args.username),
@@ -37,7 +36,6 @@ def entry():
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
-                        help="Yoda version on the server (default: 1.7)")
+    common_args.add_default_args(parser)
     parser.add_argument("username", help='The username')
     return parser.parse_args()

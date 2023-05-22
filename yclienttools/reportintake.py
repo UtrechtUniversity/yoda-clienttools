@@ -9,7 +9,7 @@ import sys
 from time import time
 from collections import OrderedDict, defaultdict
 from irods.models import Collection
-from yclienttools import common_queries
+from yclienttools import common_args, common_config, common_queries
 from yclienttools.options import GroupByOption
 from yclienttools.session import setup_session
 
@@ -67,8 +67,7 @@ class DatasetStatisticsCache:
 def _get_args():
     '''Parse command line arguments'''
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-y", "--yoda-version", default ="1.7", choices = ["1.7", "1.8","1.9"],
-                        help="Yoda version on the server (default: 1.7)")
+    common_args.add_default_args(parser)
     parser.add_argument('-p', '--progress', action='store_true',
                         help='Show progress updates.')
     parser.add_argument('-s', '--study', required=True,
@@ -96,8 +95,8 @@ def entry():
 
 def main():
     args = _get_args()
-    session = setup_session(args,
-        require_ssl = False if args.yoda_version == "1.7" else True)
+    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    session = setup_session(yoda_version)
 
     vault_collection = _get_vault_collection(session, args.study)
     if not common_queries.collection_exists(session, vault_collection):
