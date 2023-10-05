@@ -184,8 +184,9 @@ def validate_data(rule_interface, args, data):
         for user in managers + members + viewers:
             if not is_internal_user(user, args.internal_domains.split(",")):
                 # ensure that external users already have an iRODS account
-                # we do not want to be the actor that creates them
-                if not rule_interface.call_uuUserExists(user):
+                # we do not want to be the actor that creates them (unless
+                # we are creating them in the name of a creator user)
+                if not rule_interface.call_uuUserExists(user)and not args.creator_user:
                     errors.append(
                         'Group {} has nonexisting external user {}'.format(groupname, user))
 
@@ -222,7 +223,10 @@ def apply_data(rule_interface, args, data):
             currentrole = rule_interface.call_uuGroupGetMemberType(groupname, username)
 
             if currentrole == "none":
-                [status, msg] = rule_interface.call_uuGroupUserAdd(groupname, username)
+                if args.creator_user:
+                    [status, msg] = rule_interface.call_uuGroupUserAddByOtherCreator(groupname, username, args.creator_user, args.creator_zone)
+                else:
+                    [status, msg] = rule_interface.call_uuGroupUserAdd(groupname, username)
 
                 if status == '0':
                      currentrole = "member"
@@ -333,6 +337,9 @@ def entry():
     if args.delete and not args.allow_update:
         _exit_with_error("Using the --delete option without the --allow-update option is not supported.")
 
+    if (args.creator_user and not args.creator_zone) or (not args.creator_user and args.creator_zone):
+        _exit_with_error("Using the --creator-user option without the --creator-zone option is not supported.")
+
     if args.offline_check:
         sys.exit(0)
 
@@ -379,6 +386,10 @@ def _get_args():
                         help='Show information as extracted from CSV file')
     parser.add_argument('--no-validate-domains', '-n', action='store_true',
                         help='Do not validate email address domains')
+    parser.add_argument('--creator-user', type=str,
+                        help='User who creates user')
+    parser.add_argument('--creator-zone', type=str,
+                        help='Zone of the user who creates user')
     return parser.parse_args()
 
 
