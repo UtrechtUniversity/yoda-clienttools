@@ -177,6 +177,8 @@ optional arguments:
 usage: yimportgroups [-h] [-y {1.7,1.8,1.9}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
                      [--delete] [--verbose] [--no-validate-domains]
+                     [--creator-user CREATOR_USER]
+                     [--creator-zone CREATOR_ZONE]
                      csvfile
 
 Creates a list of groups based on a CSV file
@@ -197,6 +199,10 @@ optional arguments:
   --verbose, -v         Show information as extracted from CSV file
   --no-validate-domains, -n
                         Do not validate email address domains
+  --creator-user CREATOR_USER
+                        User who creates user (only available in Yoda 1.9 and higher)
+  --creator-zone CREATOR_ZONE
+                        Zone of the user who creates user (only available in Yoda 1.9 and higher)
 
         The CSV file is expected to include the following labels in its header (the first row):
         'category'    = category for the group

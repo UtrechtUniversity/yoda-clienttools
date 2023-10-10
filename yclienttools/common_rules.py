@@ -100,6 +100,22 @@ Whether to specify the rule engine on rule calls
            ( 'user', user) ])
        return self.call_rule('uuGroupGetMemberType', parms, 1)[0]
 
+    def call_uuGroupUserAddByOtherCreator(self, groupname, username, creator_user, creator_zone):
+       """Adds user to group on the behalf of a creator user.
+
+          :param: groupname
+          :param: username
+          :param: creator_user
+          :param: creator_zone
+          :returns: (status, message) ; status !=0 is error
+       """
+       parms = OrderedDict([
+           ('groupname', groupname),
+           ('username', username),
+           ('creatorUser', creator_user),
+           ('creatorZone', creator_zone)])
+       return self.call_rule('uuGroupUserAdd', parms, 2)
+
     def call_uuGroupUserAdd(self, groupname, username):
        """Adds user to group.
 
@@ -176,9 +192,11 @@ Whether to specify the rule engine on rule calls
                ('category', category),
                ('subcategory', subcategory),
                ('schema_id', 'default-2'),
-               ('expirationdate', ''),
+               ('expiration_date', ''),
                ('description', description),
-               ('classification', classification)])
+               ('dataClassification', classification),
+               ('co_identifier', '')
+               ])
 
        return self.call_rule('uuGroupAdd', parms, 2)
 
