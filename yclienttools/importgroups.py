@@ -340,6 +340,9 @@ def entry():
     if (args.creator_user and not args.creator_zone) or (not args.creator_user and args.creator_zone):
         _exit_with_error("Using the --creator-user option without the --creator-zone option is not supported.")
 
+    if (args.creator_user and (yoda_version in ('1.7','1.8'))):
+        _exit_with_error("The --creator-user and --creator-zone options are only supported with Yoda versions 1.9 and higher.")
+
     if args.offline_check:
         sys.exit(0)
 
@@ -387,9 +390,9 @@ def _get_args():
     parser.add_argument('--no-validate-domains', '-n', action='store_true',
                         help='Do not validate email address domains')
     parser.add_argument('--creator-user', type=str,
-                        help='User who creates user')
+                        help='User who creates user (only available in Yoda 1.9 and higher)')
     parser.add_argument('--creator-zone', type=str,
-                        help='Zone of the user who creates user')
+                        help='Zone of the user who creates user (only available in Yoda 1.9 and higher)')
     return parser.parse_args()
 
 

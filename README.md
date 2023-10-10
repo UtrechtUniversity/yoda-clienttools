@@ -200,9 +200,9 @@ optional arguments:
   --no-validate-domains, -n
                         Do not validate email address domains
   --creator-user CREATOR_USER
-                        User who creates user
+                        User who creates user (only available in Yoda 1.9 and higher)
   --creator-zone CREATOR_ZONE
-                        Zone of the user who creates user
+                        Zone of the user who creates user (only available in Yoda 1.9 and higher)
 
         The CSV file is expected to include the following labels in its header (the first row):
         'category'    = category for the group
