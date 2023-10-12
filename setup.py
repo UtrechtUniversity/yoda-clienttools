@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    author="Sietse Snel, Ton Smeele",
-    author_email="s.t.snel@uu.nl, a.p.m.smeele@uu.nl",
+    author="Utrecht University Yoda team",
+    author_email="yoda@uu.nl",
     description=('Client-side tools for Yoda / iRODS'),
     install_requires=[
         'python-irodsclient==1.1.1',
