@@ -167,7 +167,7 @@ Whether to specify the rule engine on rule calls
 
 
     def call_uuGroupAdd(self, groupname, category,
-                       subcategory, description, classification):
+                       subcategory, description, classification, schema_id='default-2', expiration_date=''):
        """Adds a group
 
           :param groupname: name of group
@@ -175,6 +175,8 @@ Whether to specify the rule engine on rule calls
           :param subcategory: subcategory
           :param description: description
           :param classification: security classification
+          :param schema_id: schema id
+          :param expiration_date: expiration date
 
           :returns: (status, message). Status not 0 means error,
                     -1089000 means group name already exists
@@ -191,14 +193,30 @@ Whether to specify the rule engine on rule calls
                ('groupname', groupname),
                ('category', category),
                ('subcategory', subcategory),
-               ('schema_id', 'default-2'),
-               ('expiration_date', ''),
+               ('schema_id', schema_id if schema_id not in ("", ".") else "default-2"),
+               ('expiration_date', expiration_date),
                ('description', description),
                ('dataClassification', classification),
                ('co_identifier', '')
                ])
 
        return self.call_rule('uuGroupAdd', parms, 2)
+
+
+    def call_uuGroupModify(self, groupname, property, value):
+       """Modifies one property of a group
+
+          :param groupname: name of group
+          :param property:  property to change
+          :param value:     value to change the property to
+
+          :returns: (status, message). Status not 0 means error.
+       """
+       parms = OrderedDict([('groupname', groupname),
+                            ('property', property),
+                            ('value', value)])
+       return self.call_rule('uuGroupModify', parms, 2)
+
 
     def call_uuGroupRemove(self, groupname):
        """Removes an empty group
