@@ -3,6 +3,7 @@ import argparse
 import csv
 import sys
 import re
+from datetime import datetime
 
 import dns.resolver as resolver
 
@@ -19,7 +20,7 @@ from yclienttools.exceptions import SizeNotSupportedException
 
 # Based on yoda-batch-add script by Ton Smeele
 
-def parse_csv_file(input_file, args):
+def parse_csv_file(input_file, args, yoda_version):
     extracted_data = []
 
     with open(input_file, mode="r", encoding="utf-8-sig") as csv_file:
@@ -34,39 +35,48 @@ def parse_csv_file(input_file, args):
             restkey='OTHERDATA')
         row_number = 1  # header row already read
 
-        for label in _get_csv_predefined_labels():
+        for label in _get_csv_required_labels():
             if label not in reader.fieldnames:
                 _exit_with_error(
                     'CSV header is missing compulsory field "{}"'.format(label))
 
-        duplicate_columns = _get_duplicate_columns(reader.fieldnames)
+        duplicate_columns = _get_duplicate_columns(reader.fieldnames, yoda_version)
         if ( len(duplicate_columns) > 0 ):
             _exit_with_error("File has duplicate column(s): " + str(duplicate_columns) )
 
         for line in reader:
             row_number += 1
-            rowdata, error = _process_csv_line(line, args)
+            rowdata, error = _process_csv_line(line, args, yoda_version)
 
             if error is None:
                 extracted_data.append(rowdata)
             else:
-                _exit_with_error("Data error in in row {}: {}".format(
+                _exit_with_error("Data error in row {}: {}".format(
                     str(row_number), error))
 
     return extracted_data
 
-
-def _get_csv_predefined_labels():
+def _get_csv_required_labels():
     return ['category', 'subcategory', 'groupname']
 
+def _get_csv_1_9_exclusive_labels():
+    """Returns labels that can only appear with yoda version 1.9 and higher."""
+    return ['expiration_date', 'schema_id']
 
-def _get_duplicate_columns(fields_list):
+def _get_csv_predefined_labels(yoda_version):
+    if yoda_version in ('1.7', '1.8'):
+        return ['category', 'subcategory', 'groupname']
+    else:
+        return ['category', 'subcategory', 'groupname', 'expiration_date', 'schema_id']
+
+
+def _get_duplicate_columns(fields_list, yoda_version):
     fields_seen = set()
     duplicate_fields = set()
 
     for field in fields_list:
-        if ( field in _get_csv_predefined_labels() or
-             field.startswith( ("manager:", "viewer:", "member:"))):
+        if (field in _get_csv_predefined_labels(yoda_version) or
+             field.startswith(("manager:", "viewer:", "member:"))):
             if field in fields_seen:
                 duplicate_fields.add(field)
             else:
@@ -75,10 +85,12 @@ def _get_duplicate_columns(fields_list):
     return duplicate_fields
 
 
-def _process_csv_line(line, args):
+def _process_csv_line(line, args, yoda_version):
     category = line['category'].strip().lower().replace('.', '')
     subcategory = line['subcategory'].strip()
     groupname = "research-" + line['groupname'].strip().lower()
+    schema_id = line['schema_id'] if 'schema_id' in line else ''
+    expiration_date = line['expiration_date'] if 'expiration_date' in line else ''
     managers = []
     members = []
     viewers = []
@@ -86,7 +98,9 @@ def _process_csv_line(line, args):
     for column_name in line.keys():
         if column_name == '':
             return None, 'Column cannot have an empty label'
-        elif column_name in _get_csv_predefined_labels():
+        elif yoda_version in ('1.7', '1.8') and column_name in _get_csv_1_9_exclusive_labels():
+            return None, 'Column "{}" is only supported in Yoda 1.9 and higher'.format(column_name)
+        elif column_name in _get_csv_predefined_labels(yoda_version):
             continue
 
         username = line.get(column_name)
@@ -129,7 +143,13 @@ def _process_csv_line(line, args):
     if not is_valid_groupname(groupname):
         return None, '"{}" is not a valid group name.'.format(groupname)
 
-    row_data = (category, subcategory, groupname, managers, members, viewers)
+    if not is_valid_schema_id(schema_id):
+        return None, '"{}" is not a valid schema id.'.format(schema_id)
+
+    if not is_valid_expiration_date(expiration_date):
+        return None, '"{}" is not a valid expiration date.'.format(expiration_date)
+
+    row_data = (category, subcategory, groupname, managers, members, viewers, schema_id, expiration_date)
     return row_data, None
 
 
@@ -174,10 +194,37 @@ def is_internal_user(username, internal_domains):
 
     return False
 
+def is_valid_expiration_date(expiration_date):
+    """Validation of expiration date.
+
+    :param expiration_date: String containing date that has to be validated
+
+    :returns: Indication whether expiration date is an accepted value
+    """
+    # Copied from rule_group_expiration_date_validate
+    if expiration_date in ["", "."]:
+        return True
+
+    try:
+        if expiration_date != datetime.strptime(expiration_date, "%Y-%m-%d").strftime('%Y-%m-%d'):
+            raise ValueError
+
+        # Expiration date should be in the future
+        if expiration_date <= datetime.now().strftime('%Y-%m-%d'):
+            raise ValueError
+        return True
+    except ValueError:
+        return False
+
+def is_valid_schema_id(schema_id):
+    """Is this schema at least a correctly formatted schema-id?"""
+    if schema_id == "":
+        return True
+    return re.search(r"^[a-zA-Z0-9\-]+\-[0-9]+$", schema_id) is not None
 
 def validate_data(rule_interface, args, data):
     errors = []
-    for (category, subcategory, groupname, managers, members, viewers) in data:
+    for (category, subcategory, groupname, managers, members, viewers, schema_id, expiration_date) in data:
         if rule_interface.call_uuGroupExists(groupname) and not args.allow_update:
             errors.append('Group "{}" already exists'.format(groupname))
 
@@ -194,7 +241,7 @@ def validate_data(rule_interface, args, data):
 
 
 def apply_data(rule_interface, args, data):
-    for (category, subcategory, groupname, managers, members, viewers) in data:
+    for (category, subcategory, groupname, managers, members, viewers, schema_id, expiration_date) in data:
         new_group = False
 
         if args.verbose:
@@ -203,14 +250,16 @@ def apply_data(rule_interface, args, data):
         # First create the group. Note that the rodsadmin actor will become a
         # groupmanager.
         [status, msg] = rule_interface.call_uuGroupAdd(
-            groupname, category, subcategory, '', 'unspecified')
+            groupname, category, subcategory, '', 'unspecified', schema_id, expiration_date)
 
         if ((status == '-1089000') | (status == '-809000')) and args.allow_update:
             print(
                 'WARNING: group "{}" not created, it already exists'.format(groupname))
+            if schema_id != '':
+                print('WARNING: group property "schema_id" not updated, as it can only be specified when the group is first created')
         elif status != '0':
             _exit_with_error(
-                "Error while attempting to create group {}. Status/message: {} / {}".format(
+                'Error while attempting to create group "{}". Status/message: {} / {}'.format(
                     groupname,
                     status,
                     msg))
@@ -279,6 +328,16 @@ def apply_data(rule_interface, args, data):
                  if status !=0:
                      print ("Warning: error while attempting to remove user rods from group {}".format(groupname))
                      print("Status: {} , Message: {}".format(status, msg))
+            
+        # Update expiration date if applicable
+        if not new_group and expiration_date not in ['','.'] and args.allow_update:
+            [status, msg] = rule_interface.call_uuGroupModify(groupname, "expiration_date", expiration_date)
+            if status == "0":
+                if args.verbose:
+                    print("Notice: updated expiration date to {} for group {}".format(expiration_date, groupname))
+            else:
+                print("Warning: error while attempting to update expiration date to {} for group {}".format(expiration_date, groupname))
+                print("Status: {} , Message: {}".format(status, msg))
 
         # Remove users not in sheet
         if args.delete:
@@ -315,21 +374,23 @@ def print_parsed_data(data):
         print('No data loaded')
     else:
         for (category, subcategory, groupname,
-             managers, members, viewers) in data:
+             managers, members, viewers, schema_id, expiration_date) in data:
             print("Category: {}".format(category))
             print("Subcategory: {}".format(subcategory))
             print("Group: {}".format(groupname))
             print("Managers: {}".format(','.join(managers)))
             print("Members: {}".format(','.join(members)))
             print("Readonly members: {}".format(','.join(viewers)))
+            print("Schema Id: {}".format(schema_id))
+            print("Expiration Date: {}".format(expiration_date))
             print()
 
 
 def entry():
     '''Entry point'''
     args = _get_args()
-    data = parse_csv_file(args.csvfile, args)
-    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    data = parse_csv_file(args.csvfile, args, yoda_version)
 
     if args.offline_check or args.verbose:
         print_parsed_data(data)
@@ -399,16 +460,20 @@ def _get_args():
 def _get_format_help_text():
     return '''
         The CSV file is expected to include the following labels in its header (the first row):
-        'category'    = category for the group
-        'subcategory' = subcategory for the group
-        'groupname'   = name of the group (without the "research-" prefix)
+        'category'        = category for the group
+        'subcategory'     = subcategory for the group
+        'groupname'       = name of the group (without the "research-" prefix)
+
+        For Yoda versions 1.9 and higher, these labels can optionally be included:
+        'expiration_date' = expiration date for the group. Can only be set when the group is first created.
+        'schema_id'       = schema id for the group. Can only be set when the group is first created.
 
         The remainder of the columns should have a label that starts with a prefix which
         indicates the role of each group member:
 
-        'manager:'    = user that will be given the role of manager
-        'member:'     = user that will be given the role of member with read/write
-        'viewer:'     = user that will be given the role of viewer with read
+        'manager:'        = user that will be given the role of manager
+        'member:'         = user that will be given the role of member with read/write
+        'viewer:'         = user that will be given the role of viewer with read
 
         Notes:
         - Columns may appear in any order
@@ -418,6 +483,11 @@ def _get_format_help_text():
         category,subcategory,groupname,manager:manager,member:member1,member:member2
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,n.member@example.com
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,
+
+        Example Yoda 1.9 and higher:
+        category,subcategory,groupname,manager:manager,member:member1,expiration_date,schema_id
+        departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2025-01-01,default-2
+        departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
     '''
 
 

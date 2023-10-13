@@ -205,16 +205,20 @@ optional arguments:
                         Zone of the user who creates user (only available in Yoda 1.9 and higher)
 
         The CSV file is expected to include the following labels in its header (the first row):
-        'category'    = category for the group
-        'subcategory' = subcategory for the group
-        'groupname'   = name of the group (without the "research-" prefix)
+        'category'        = category for the group
+        'subcategory'     = subcategory for the group
+        'groupname'       = name of the group (without the "research-" prefix)
+
+        For Yoda versions 1.9 and higher, these labels can optionally be included:
+        'expiration_date' = expiration date for the group.
+        'schema_id'       = schema id for the group. Can only be set when the group is first created.
 
         The remainder of the columns should have a label that starts with a prefix which
         indicates the role of each group member:
 
-        'manager:'    = user that will be given the role of manager
-        'member:'     = user that will be given the role of member with read/write
-        'viewer:'     = user that will be given the role of viewer with read
+        'manager:'        = user that will be given the role of manager
+        'member:'         = user that will be given the role of member with read/write
+        'viewer:'         = user that will be given the role of viewer with read
 
         Notes:
         - Columns may appear in any order
@@ -224,6 +228,11 @@ optional arguments:
         category,subcategory,groupname,manager:manager,member:member1,member:member2
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,n.member@example.com
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,
+
+        Example Yoda 1.9 and higher:
+        category,subcategory,groupname,manager:manager,member:member1,expiration_date,schema_id
+        departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2025-01-01,default-2
+        departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
 ```
 
 ### yreport\_collectionsize
