@@ -35,5 +35,6 @@ jobs:
     
     - name: Run unit tests
       run: |
+        python -m pip install --upgrade ./
         cd unit-tests
         python3 -m unittest unit_tests
