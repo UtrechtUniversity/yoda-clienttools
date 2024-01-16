@@ -2,9 +2,9 @@
 # https://github.com/actions/starter-workflows/blob/master/ci/python-package.yml
 # (C) Github, MIT License
 
-name: Python package
+name: "Python lint and unit tests"
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -32,3 +32,8 @@ jobs:
       run: |
         pip install flake8
         flake8 yclienttools --select=E999,F63,F7,F82,F831
+    
+    - name: Run unit tests
+      run: |
+        cd unit-tests
+        python3 -m unittest unit_tests

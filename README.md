@@ -67,6 +67,20 @@ The following parameters are available:
    using the `--yoda-version` parameter. When this parameter is not provided, the tools use the default version specified in the configuration file, or
    `1.8` if no default version is configured.
 
+## Running tests
+
+There are a few unit tests in `unit-tests` using the [unittest framework](https://docs.python.org/3/library/unittest.html), they are run directly against the files in the `yclienttools` directory. For example:
+
+```bash
+$ cd unit-tests
+$ python -m unittest unit_tests
+.
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK
+```
+
 ## Overview of tools
 
 ### ycleanup\_files
@@ -213,24 +227,23 @@ optional arguments:
         'expiration_date' = expiration date for the group.
         'schema_id'       = schema id for the group. Can only be set when the group is first created.
 
-        The remainder of the columns should have a label that starts with a prefix which
-        indicates the role of each group member:
-
-        'manager:'        = user that will be given the role of manager
-        'member:'         = user that will be given the role of member with read/write
-        'viewer:'         = user that will be given the role of viewer with read
+        The remainder of the columns should be labels that indicate the role of each group member:
+        'manager'         = user that will be given the role of manager
+        'member'          = user that will be given the role of member with read/write
+        'viewer'          = user that will be given the role of viewer with read
 
         Notes:
         - Columns may appear in any order
         - Empty data cells are ignored: groups can differ in number of members
+        - manager, member, and viewer columns can appear multiple times
 
         Example:
-        category,subcategory,groupname,manager:manager,member:member1,member:member2
+        category,subcategory,groupname,manager,member,member
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,n.member@example.com
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,
 
         Example Yoda 1.9 and higher:
-        category,subcategory,groupname,manager:manager,member:member1,expiration_date,schema_id
+        category,subcategory,groupname,manager,member,expiration_date,schema_id
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2025-01-01,default-2
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
 ```

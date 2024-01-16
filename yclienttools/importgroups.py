@@ -2,21 +2,13 @@
 import argparse
 import csv
 import sys
-import re
-from datetime import datetime
-
-import dns.resolver as resolver
 
 from yclienttools import common_args, common_config
-
-try:
-    from functools import lru_cache
-except ImportError:
-    from backports.functools_lru_cache import lru_cache
 
 from yclienttools import session as s
 from yclienttools.common_rules import RuleInterface
 from yclienttools.exceptions import SizeNotSupportedException
+from yclienttools import yoda_names
 
 # Based on yoda-batch-add script by Ton Smeele
 
@@ -26,30 +18,50 @@ def parse_csv_file(input_file, args, yoda_version):
 
     with open(input_file, mode="r", encoding="utf-8-sig") as csv_file:
 
-        dialect = csv.Sniffer().sniff(csv_file.read(), delimiters=';,')
+        try:
+            dialect = csv.Sniffer().sniff(csv_file.read(), delimiters=';,')
+        except Exception:
+            _exit_with_error('CSV is not correctly delimited with ";" or ","')
+
         csv_file.seek(0)
 
-        reader = csv.DictReader(
+        reader = csv.reader(
             csv_file,
             dialect=dialect,
-            restval='',
-            restkey='OTHERDATA')
+            )
+        header = next(reader)
         row_number = 1  # header row already read
 
         for label in _get_csv_required_labels():
-            if label not in reader.fieldnames:
+            if label not in header:
                 _exit_with_error(
                     'CSV header is missing compulsory field "{}"'.format(label))
 
-        duplicate_columns = _get_duplicate_columns(
-            reader.fieldnames, yoda_version)
+        # Check that all header names are valid
+        possible_labels = _get_csv_possible_labels(yoda_version)
+        for label in header:
+            if label not in possible_labels:
+                _exit_with_error(
+                    'CSV header contains unknown field "{}"'.format(label))
+
+        duplicate_columns = _get_duplicate_columns(header, yoda_version)
         if (len(duplicate_columns) > 0):
             _exit_with_error(
                 "File has duplicate column(s): " + str(duplicate_columns))
 
+        # Create a kind of MultiDict.
+        # keys are the column names, items are the list of items
         for line in reader:
             row_number += 1
-            rowdata, error = _process_csv_line(line, args, yoda_version)
+            d = {}
+            for j in range(len(line)):
+                if len(line[j]):
+                    if header[j] not in d:
+                        d[header[j]] = []
+
+                    d[header[j]].append(line[j])
+
+            rowdata, error = _process_csv_line(d, args, yoda_version)
 
             if error is None:
                 extracted_data.append(rowdata)
@@ -58,6 +70,13 @@ def parse_csv_file(input_file, args, yoda_version):
                     str(row_number), error))
 
     return extracted_data
+
+
+def _get_csv_possible_labels(yoda_version):
+    if yoda_version in ('1.7', '1.8'):
+        return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager']
+    else:
+        return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager', 'expiration_date', 'schema_id']
 
 
 def _get_csv_required_labels():
@@ -77,12 +96,12 @@ def _get_csv_predefined_labels(yoda_version):
 
 
 def _get_duplicate_columns(fields_list, yoda_version):
+    """ Only checks columns that cannot have duplicates """
     fields_seen = set()
     duplicate_fields = set()
 
     for field in fields_list:
-        if (field in _get_csv_predefined_labels(yoda_version) or
-                field.startswith(("manager:", "viewer:", "member:"))):
+        if (field in _get_csv_predefined_labels(yoda_version)):
             if field in fields_seen:
                 duplicate_fields.add(field)
             else:
@@ -92,16 +111,21 @@ def _get_duplicate_columns(fields_list, yoda_version):
 
 
 def _process_csv_line(line, args, yoda_version):
-    category = line['category'].strip().lower().replace('.', '')
-    subcategory = line['subcategory'].strip()
-    groupname = "research-" + line['groupname'].strip().lower()
-    schema_id = line['schema_id'] if 'schema_id' in line else ''
-    expiration_date = line['expiration_date'] if 'expiration_date' in line else ''
+    if ('category' not in line or not len(line['category'])
+            or 'subcategory' not in line or not len(line['subcategory'])
+            or 'groupname' not in line or not len(line['groupname'])):
+        return None, "Row has a missing group name, category or subcategory"
+
+    category = line['category'][0].strip().lower().replace('.', '')
+    subcategory = line['subcategory'][0].strip()
+    groupname = "research-" + line['groupname'][0].strip().lower()
+    schema_id = line['schema_id'][0] if 'schema_id' in line and len(line['schema_id']) else ''
+    expiration_date = line['expiration_date'][0] if 'expiration_date' in line and len(line['expiration_date']) else ''
     managers = []
     members = []
     viewers = []
 
-    for column_name in line.keys():
+    for column_name, item_list in line.items():
         if column_name == '':
             return None, 'Column cannot have an empty label'
         elif yoda_version in ('1.7', '1.8') and column_name in _get_csv_1_9_exclusive_labels():
@@ -109,50 +133,36 @@ def _process_csv_line(line, args, yoda_version):
         elif column_name in _get_csv_predefined_labels(yoda_version):
             continue
 
-        username = line.get(column_name)
+        for i in range(len(item_list)):
+            item_list[i] = item_list[i].strip().lower()
+            is_valid = yoda_names.is_valid_username(item_list[i], args)
+            if not is_valid:
+                return None, '"{}" is not a valid username.'.format(item_list[i])
 
-        if isinstance(username, list):
-            return None, "Data is present in an unlabelled column"
-
-        username = username.strip().lower()
-
-        if username == '':    # empty value
-            continue
-        elif not is_email(username):
-            return None, 'Username "{}" is not a valid email address.'.format(
-                username)
-        elif not (args.no_validate_domains or is_valid_domain(username.split('@')[1])):
-            return None, 'Username "{}" failed DNS domain validation - domain does not exist or has no MX records.'.format(username)
-
-        if column_name.lower().startswith('manager:'):
-            managers.append(username)
-        elif column_name.lower().startswith('member:'):
-            members.append(username)
-        elif column_name.lower().startswith('viewer:'):
-            viewers.append(username)
-        else:
-            return None, "Column label '{}' is neither predefined nor a valid role label.".format(column_name)
+        if column_name.lower() == 'manager':
+            managers = item_list
+        elif column_name.lower() == 'member':
+            members = item_list
+        elif column_name.lower() == 'viewer':
+            viewers = item_list
 
     # perform additional data validations
-    if (len(category) == 0) | (len(subcategory) == 0) | (len(groupname) == 0):
-        return None, "Row has no group name, category or subcategory"
-
     if len(managers) == 0:
         return None, "Group must have a group manager"
 
-    if not is_valid_category(category):
+    if not yoda_names.is_valid_category(category):
         return None, '"{}" is not a valid category name.'.format(category)
 
-    if not is_valid_category(subcategory):
+    if not yoda_names.is_valid_category(subcategory):
         return None, '"{}" is not a valid subcategory name.'.format(subcategory)
 
-    if not is_valid_groupname(groupname):
+    if not yoda_names.is_valid_groupname(groupname):
         return None, '"{}" is not a valid group name.'.format(groupname)
 
-    if not is_valid_schema_id(schema_id):
+    if not yoda_names.is_valid_schema_id(schema_id):
         return None, '"{}" is not a valid schema id.'.format(schema_id)
 
-    if not is_valid_expiration_date(expiration_date):
+    if not yoda_names.is_valid_expiration_date(expiration_date):
         return None, '"{}" is not a valid expiration date.'.format(expiration_date)
 
     row_data = (category, subcategory, groupname, managers,
@@ -176,67 +186,6 @@ def _are_roles_equivalent(a, b):
         return False
 
 
-def is_email(username):
-    return re.search(r'@.*[^\.]+\.[^\.]+$', username) is not None
-
-
-@lru_cache(maxsize=100)
-def is_valid_domain(domain):
-    try:
-        return bool(resolver.query(domain, 'MX'))
-    except (resolver.NXDOMAIN, resolver.NoAnswer):
-        return False
-
-
-def is_valid_category(name):
-    """Is this name a valid (sub)category name?"""
-    return re.search(r"^[a-zA-Z0-9\-_]+$", name) is not None
-
-
-def is_valid_groupname(name):
-    """Is this name a valid group name (prefix such as "research-" can be omitted"""
-    return re.search(r"^[a-zA-Z0-9\-]+$", name) is not None
-
-
-def is_internal_user(username, internal_domains):
-    for domain in internal_domains:
-        domain_pattern = '@{}$'.format(domain)
-        if re.search(domain_pattern, username) is not None:
-            return True
-
-    return False
-
-
-def is_valid_expiration_date(expiration_date):
-    """Validation of expiration date.
-
-    :param expiration_date: String containing date that has to be validated
-
-    :returns: Indication whether expiration date is an accepted value
-    """
-    # Copied from rule_group_expiration_date_validate
-    if expiration_date in ["", "."]:
-        return True
-
-    try:
-        if expiration_date != datetime.strptime(expiration_date, "%Y-%m-%d").strftime('%Y-%m-%d'):
-            raise ValueError
-
-        # Expiration date should be in the future
-        if expiration_date <= datetime.now().strftime('%Y-%m-%d'):
-            raise ValueError
-        return True
-    except ValueError:
-        return False
-
-
-def is_valid_schema_id(schema_id):
-    """Is this schema at least a correctly formatted schema-id?"""
-    if schema_id == "":
-        return True
-    return re.search(r"^[a-zA-Z0-9\-]+\-[0-9]+$", schema_id) is not None
-
-
 def validate_data(rule_interface, args, data):
     errors = []
     for (category, subcategory, groupname, managers, members, viewers, schema_id, expiration_date) in data:
@@ -244,7 +193,7 @@ def validate_data(rule_interface, args, data):
             errors.append('Group "{}" already exists'.format(groupname))
 
         for user in managers + members + viewers:
-            if not is_internal_user(user, args.internal_domains.split(",")):
+            if not yoda_names.is_internal_user(user, args.internal_domains.split(",")):
                 # ensure that external users already have an iRODS account
                 # we do not want to be the actor that creates them (unless
                 # we are creating them in the name of a creator user)
@@ -502,24 +451,23 @@ def _get_format_help_text():
         'expiration_date' = expiration date for the group. Can only be set when the group is first created.
         'schema_id'       = schema id for the group. Can only be set when the group is first created.
 
-        The remainder of the columns should have a label that starts with a prefix which
-        indicates the role of each group member:
-
-        'manager:'        = user that will be given the role of manager
-        'member:'         = user that will be given the role of member with read/write
-        'viewer:'         = user that will be given the role of viewer with read
+        The remainder of the columns should be labels that indicate the role of each group member:
+        'manager'         = user that will be given the role of manager
+        'member'          = user that will be given the role of member with read/write
+        'viewer'          = user that will be given the role of viewer with read
 
         Notes:
         - Columns may appear in any order
         - Empty data cells are ignored: groups can differ in number of members
+        - manager, member, and viewer columns can appear multiple times
 
         Example:
-        category,subcategory,groupname,manager:manager,member:member1,member:member2
+        category,subcategory,groupname,manager,member,member
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,n.member@example.com
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,
 
         Example Yoda 1.9 and higher:
-        category,subcategory,groupname,manager:manager,member:member1,expiration_date,schema_id
+        category,subcategory,groupname,manager,member,expiration_date,schema_id
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2025-01-01,default-2
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
     '''
