@@ -8,6 +8,8 @@ __license__   = 'GPLv3, see LICENSE'
 
 import sys
 from unittest import TestCase
+from unittest.mock import patch
+from io import StringIO
 
 sys.path.append("../yclienttools")
 
@@ -96,7 +98,7 @@ class ImportGroupsTest(TestCase):
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
-        # Missing subcategory
+        # Missing subcategory (should give error)
         d = {
             "category": ["test-automation"],
             "groupname": ["groupteama2"],
@@ -111,7 +113,8 @@ class ImportGroupsTest(TestCase):
 
     def test_error_fields_1_8(self):
         args = {"offline_check": True}
-        # Includes (valid) schema id and expiration, even though those are not in version 1.8
+        # Includes (valid) schema id and expiration,
+        # which are not in version 1.8 (should give error)
         d = {
             "category": ["test-automation"],
             "subcategory": ["initial"],
@@ -126,7 +129,8 @@ class ImportGroupsTest(TestCase):
         self.assertIsNone(result)
         self.assertIn("1.9", error_msg)
 
-    def test_parse_invalid_csv_file(self):
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_parse_invalid_csv_file(self, mock_stderr):
         # csv that has an unlabeled header
         args = {"offline_check": True}
         with self.assertRaises(SystemExit):
