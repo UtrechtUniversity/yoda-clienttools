@@ -3,6 +3,8 @@ import argparse
 import csv
 import sys
 
+from iteration_utilities import duplicates, unique_everseen
+
 from yclienttools import common_args, common_config
 
 from yclienttools import session as s
@@ -108,6 +110,11 @@ def _get_duplicate_columns(fields_list, yoda_version):
                 fields_seen.add(field)
 
     return duplicate_fields
+
+
+def _get_duplicate_groups(row_data):
+    group_names = list(map(lambda r: r[2], row_data))
+    return list(unique_everseen(duplicates(group_names)))
 
 
 def _process_csv_line(line, args, yoda_version):
@@ -386,6 +393,11 @@ def entry():
     if (args.creator_user and (yoda_version in ('1.7', '1.8'))):
         _exit_with_error(
             "The --creator-user and --creator-zone options are only supported with Yoda versions 1.9 and higher.")
+
+    duplicate_groups = _get_duplicate_groups(data)
+    if duplicate_groups:
+        _exit_with_error(
+            "The group list has multiple rows with the same group name(s): " + ",".join(duplicate_groups))
 
     if args.offline_check:
         sys.exit(0)
