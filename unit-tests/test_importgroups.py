@@ -13,7 +13,7 @@ from io import StringIO
 
 sys.path.append("../yclienttools")
 
-from importgroups import _get_duplicate_columns, _process_csv_line, parse_csv_file
+from importgroups import _get_duplicate_columns, _get_duplicate_groups, _process_csv_line, parse_csv_file
 
 
 class ImportGroupsTest(TestCase):
@@ -139,3 +139,12 @@ class ImportGroupsTest(TestCase):
         # csv that has too many items in the rows compared to the headers
         with self.assertRaises(SystemExit):
             parse_csv_file("files/more-entries-than-headers.csv", args, "1.9")
+
+    def test_parse_duplicate_groups(self):
+        args = {"offline_check": True}
+
+        data_no_duplicates = parse_csv_file("files/no-duplicates.csv", args, "1.9")
+        self.assertEqual(_get_duplicate_groups(data_no_duplicates), [])
+
+        data_with_duplicates = parse_csv_file("files/with-duplicates.csv", args, "1.9")
+        self.assertEqual(_get_duplicate_groups(data_with_duplicates), ["research-data-duplicate"])
