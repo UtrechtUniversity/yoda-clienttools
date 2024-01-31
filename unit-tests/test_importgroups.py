@@ -31,7 +31,7 @@ class ImportGroupsTest(TestCase):
             "manager": ["m.manager@yoda.dev"],
             "member": ["p.member@yoda.dev"],
             "viewer": ["m.viewer@yoda.dev"],
-            "expiration_date": ["2025-01-01"],
+            "expiration_date": ["2030-01-01"],
             "schema_id": ["default-3"],
         }
         expected = (
@@ -42,7 +42,34 @@ class ImportGroupsTest(TestCase):
             ["p.member@yoda.dev"],
             ["m.viewer@yoda.dev"],
             "default-3",
-            "2025-01-01",
+            "2030-01-01",
+        )
+        result, error_msg = _process_csv_line(d, args, "1.9")
+        self.assertTupleEqual(expected, result)
+        self.assertIsNone(error_msg)
+
+    def test_fully_filled_csv_line_1_9_with_suffixes(self):
+        # Confirm support the old csv header format still (with ":nicknameofuser")
+        args = {"offline_check": True}
+        d = {
+            "category": ["test-automation"],
+            "subcategory": ["initial"],
+            "groupname": ["groupteama"],
+            "manager:alice": ["m.manager@yoda.dev"],
+            "member:bob": ["p.member@yoda.dev"],
+            "viewer:eve": ["m.viewer@yoda.dev"],
+            "expiration_date": ["2030-01-01"],
+            "schema_id": ["default-3"],
+        }
+        expected = (
+            "test-automation",
+            "initial",
+            "research-groupteama",
+            ["m.manager@yoda.dev"],
+            ["p.member@yoda.dev"],
+            ["m.viewer@yoda.dev"],
+            "default-3",
+            "2030-01-01",
         )
         result, error_msg = _process_csv_line(d, args, "1.9")
         self.assertTupleEqual(expected, result)
@@ -128,6 +155,19 @@ class ImportGroupsTest(TestCase):
         result, error_msg = _process_csv_line(d, args, "1.8")
         self.assertIsNone(result)
         self.assertIn("1.9", error_msg)
+
+    def test_parse_csv(self):
+        args = {"offline_check": True}
+        parse_csv_file("files/csv-import-test.csv", args, "1.9")
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_parse_csv_with_header_suffixes(self, mock_stderr):
+        args = {"offline_check": True}
+        parse_csv_file("files/header-with-suffixes.csv", args, "1.8")
+
+        # This header format not supported in 1.9 and higher
+        with self.assertRaises(SystemExit):
+            parse_csv_file("files/header-with-suffixes.csv", args, "1.9")
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_parse_invalid_csv_file(self, mock_stderr):

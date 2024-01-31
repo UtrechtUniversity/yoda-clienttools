@@ -41,10 +41,21 @@ def parse_csv_file(input_file, args, yoda_version):
 
         # Check that all header names are valid
         possible_labels = _get_csv_possible_labels(yoda_version)
+        labels_with_optional_suffix = ['viewer', 'member', 'manager']
         for label in header:
             if label not in possible_labels:
-                _exit_with_error(
-                    'CSV header contains unknown field "{}"'.format(label))
+                found_match = False
+                for opt_label in labels_with_optional_suffix:
+                    if label.startswith('{}:'.format(opt_label)):
+                        found_match = True
+
+                if found_match and yoda_version not in ('1.7', '1.8'):
+                    _exit_with_error(
+                        'This script does not support headers with suffixes in '
+                        'Yoda version 1.9 and higher. Field with suffix: "{}"'.format(label))
+                elif not found_match:
+                    _exit_with_error(
+                        'CSV header contains unknown field "{}"'.format(label))
 
         duplicate_columns = _get_duplicate_columns(header, yoda_version)
         if (len(duplicate_columns) > 0):
@@ -146,11 +157,11 @@ def _process_csv_line(line, args, yoda_version):
             if not is_valid:
                 return None, '"{}" is not a valid username.'.format(item_list[i])
 
-        if column_name.lower() == 'manager':
+        if column_name.lower() == 'manager' or column_name.lower().startswith('manager:'):
             managers = item_list
-        elif column_name.lower() == 'member':
+        elif column_name.lower() == 'member' or column_name.lower().startswith('member:'):
             members = item_list
-        elif column_name.lower() == 'viewer':
+        elif column_name.lower() == 'viewer' or column_name.lower().startswith('viewer:'):
             viewers = item_list
 
     # perform additional data validations
