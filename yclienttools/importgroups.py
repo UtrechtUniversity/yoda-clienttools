@@ -68,11 +68,12 @@ def parse_csv_file(input_file, args, yoda_version):
             row_number += 1
             d = {}
             for j in range(len(line)):
-                if len(line[j]):
+                item = line[j].strip()
+                if len(item):
                     if header[j] not in d:
                         d[header[j]] = []
 
-                    d[header[j]].append(line[j])
+                    d[header[j]].append(item)
 
             rowdata, error = _process_csv_line(d, args, yoda_version)
 

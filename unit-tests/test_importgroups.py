@@ -160,6 +160,9 @@ class ImportGroupsTest(TestCase):
         args = {"offline_check": True}
         parse_csv_file("files/csv-import-test.csv", args, "1.9")
 
+        # With carriage returns
+        parse_csv_file("files/windows-csv.csv", args, "1.9")
+
     @patch('sys.stderr', new_callable=StringIO)
     def test_parse_csv_with_header_suffixes(self, mock_stderr):
         args = {"offline_check": True}
