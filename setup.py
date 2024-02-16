@@ -20,6 +20,7 @@ setup(
         'console_scripts': [
             'yreport_dataobjectspercollection= yclienttools.reportdoc:entry',
             'yreport_collectionsize= yclienttools.reportsize:entry',
+            'yreport_grouplifecycle= yclienttools.reportgrouplifecycle:entry',
             'yreport_intake= yclienttools.reportintake:entry',
             'yreport_linecount= yclienttools.reportlinecount:entry',
             'ycleanup_files= yclienttools.cleanupfiles:entry',

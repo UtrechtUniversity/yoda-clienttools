@@ -328,6 +328,23 @@ List of columns if --by-extension is enabled:
 4. Extension
 5. Name of collection
 
+### yreport\_grouplifecycle
+
+```
+usage: yreport_grouplifecycle [-h] [-q] [-y {1.7,1.8,1.9}]
+
+Generates a list of research groups, along with their creation date, expiration date (if available), lists of group managers,
+regular members, and readonly members. The report also shows whether each research compartment contains data, as well as whether
+its vault compartment contains data.
+
+options:
+  -h, --help            show this help message and exit
+  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser
+  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+                        Override Yoda version on the server
+
+```
+
 ### yreport\_intake
 
 Prints an intake collection report. This report is only relevant for environments
