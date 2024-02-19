@@ -253,7 +253,7 @@ optional arguments:
 Shows a report of the size of all data objects in a (set of) collections.
 
 ```
-usage: yreport_collectionsize [-y {1.7,1.8,1.9}] [--help] [-h] [-r] [-R]
+usage: yreport_collectionsize [-y {1.7,1.8,1.9}] [--help] [-q] [-h] [-r] [-R]
                               [-g GROUP_BY]
                               (-c COLLECTION | -H | -C COMMUNITY)
 
@@ -263,6 +263,8 @@ optional arguments:
   -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
                         Override Yoda version on the server
   --help                show help information
+  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse
+                        characters not supported by regular XML parser
   -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
                         instead of 1000000
   -r, --count-all-replicas
@@ -290,7 +292,6 @@ optional arguments:
                         Show total size of data objects in each research and
                         vault collection in a Yoda community. Note: you will
                         only see the collections you have access to.
-
 ```
 
 ### yreport\_dataobjectspercollection

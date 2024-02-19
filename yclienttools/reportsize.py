@@ -4,8 +4,9 @@ import argparse
 import humanize
 import csv
 import sys
+from irods.message import (XML_Parser_Type, ET)
 from irods.models import Collection, User, UserMeta
-from yclienttools import session, common_args, exceptions
+from yclienttools import session as s, common_args, common_config, exceptions
 from yclienttools.common_queries import collection_exists, get_collection_size
 from yclienttools.options import GroupByOption
 
@@ -14,9 +15,12 @@ def entry():
     '''Entry point'''
     try:
         args = _get_args()
-        s = session.setup_session(args.yoda_version)
-        report_size(args, s)
-        s.cleanup()
+        yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+        session = s.setup_session(yoda_version)
+        if args.quasi_xml:
+            ET(XML_Parser_Type.QUASI_XML, session.server_version)
+        report_size(args, session)
+        session.cleanup()
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
 
@@ -35,6 +39,8 @@ def _get_args():
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
     common_args.add_default_args(parser)
     parser.add_argument('--help', action='help', help='show help information')
+    parser.add_argument("-q", "--quasi-xml", default=False, action='store_true',
+                        help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
     parser.add_argument('-h', '--human-readable', action='store_true', default=False,
                         help="Show sizes in human readable format, e.g. 1.0MB instead of 1000000")
     parser.add_argument("-r", '--count-all-replicas', action='store_true', default=False,
