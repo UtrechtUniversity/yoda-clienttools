@@ -1,4 +1,4 @@
-python_irodsclient==1.1.1
+python_irodsclient==2.0.0
 enum34
 six
 humanize>=0.5
