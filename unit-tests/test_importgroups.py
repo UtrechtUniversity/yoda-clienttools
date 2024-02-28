@@ -48,6 +48,33 @@ class ImportGroupsTest(TestCase):
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
+    def test_fully_filled_csv_line_1_9_multi_role(self):
+        args = {"offline_check": True}
+        d = {
+            "category": ["test-automation"],
+            "subcategory": ["initial"],
+            "groupname": ["groupteama"],
+            "manager": ["m.manager@yoda.dev", "n.manager@yoda.dev"],
+            "member": ["p.member@yoda.dev", "q.member@yoda.dev"],
+            "viewer": ["m.viewer@yoda.dev", "n.viewer@yoda.dev"],
+            "expiration_date": ["2030-01-01"],
+            "schema_id": ["default-3"],
+        }
+        expected = (
+            "test-automation",
+            "initial",
+            "research-groupteama",
+            ["m.manager@yoda.dev", "n.manager@yoda.dev"],
+            ["p.member@yoda.dev", "q.member@yoda.dev"],
+            ["m.viewer@yoda.dev", "n.viewer@yoda.dev"],
+            "default-3",
+            "2030-01-01",
+        )
+        result, error_msg = _process_csv_line(d, args, "1.9")
+        self.assertTupleEqual(expected, result)
+        self.assertIsNone(error_msg)
+
+
     def test_fully_filled_csv_line_1_9_with_suffixes(self):
         # Confirm support the old csv header format still (with ":nicknameofuser")
         args = {"offline_check": True}
@@ -74,6 +101,37 @@ class ImportGroupsTest(TestCase):
         result, error_msg = _process_csv_line(d, args, "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
+
+    def test_fully_filled_csv_line_1_9_with_suffixes_multi_role(self):
+        # Confirm support the old csv header format still (with ":nicknameofuser")
+        args = {"offline_check": True}
+        d = {
+            "category": ["test-automation"],
+            "subcategory": ["initial"],
+            "groupname": ["groupteama"],
+            "manager:alice": ["m.manager@yoda.dev"],
+            "manager:andy": ["n.manager@yoda.dev"],
+            "member:bob": ["p.member@yoda.dev"],
+            "member:bella": ["q.member@yoda.dev"],
+            "viewer:eve": ["m.viewer@yoda.dev"],
+            "viewer:emma": ["n.viewer@yoda.dev"],
+            "expiration_date": ["2030-01-01"],
+            "schema_id": ["default-3"],
+        }
+        expected = (
+            "test-automation",
+            "initial",
+            "research-groupteama",
+            ["m.manager@yoda.dev", "n.manager@yoda.dev"],
+            ["p.member@yoda.dev", "q.member@yoda.dev"],
+            ["m.viewer@yoda.dev", "n.viewer@yoda.dev"],
+            "default-3",
+            "2030-01-01",
+        )
+        result, error_msg = _process_csv_line(d, args, "1.9")
+        self.assertTupleEqual(expected, result)
+        self.assertIsNone(error_msg)
+
 
     def test_missing_fields_1_9(self):
         args = {"offline_check": True}

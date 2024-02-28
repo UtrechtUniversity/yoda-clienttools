@@ -159,11 +159,11 @@ def _process_csv_line(line, args, yoda_version):
                 return None, '"{}" is not a valid username.'.format(item_list[i])
 
         if column_name.lower() == 'manager' or column_name.lower().startswith('manager:'):
-            managers = item_list
+            managers.extend(item_list)
         elif column_name.lower() == 'member' or column_name.lower().startswith('member:'):
-            members = item_list
+            members.extend(item_list)
         elif column_name.lower() == 'viewer' or column_name.lower().startswith('viewer:'):
-            viewers = item_list
+            viewers.extend(item_list)
 
     # perform additional data validations
     if len(managers) == 0:
