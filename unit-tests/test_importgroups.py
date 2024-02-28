@@ -226,10 +226,6 @@ class ImportGroupsTest(TestCase):
         args = {"offline_check": True}
         parse_csv_file("files/header-with-suffixes.csv", args, "1.8")
 
-        # This header format not supported in 1.9 and higher
-        with self.assertRaises(SystemExit):
-            parse_csv_file("files/header-with-suffixes.csv", args, "1.9")
-
     @patch('sys.stderr', new_callable=StringIO)
     def test_parse_invalid_csv_file(self, mock_stderr):
         # csv that has an unlabeled header

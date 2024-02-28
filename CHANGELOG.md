@@ -4,6 +4,7 @@
 
 - yimportgroups: bugfix for situation where legacy format CSV files with role suffixes where not processed
   correctly in case of multiple users with the same role (YDA-5612)
+- yimportgroups: retain support for legacy format CSV files with role suffixes in Yoda 1.9 and higher.
 
 ## 2024-02-19 v1.0.0
 

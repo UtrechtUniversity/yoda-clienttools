@@ -49,11 +49,7 @@ def parse_csv_file(input_file, args, yoda_version):
                     if label.startswith('{}:'.format(opt_label)):
                         found_match = True
 
-                if found_match and yoda_version not in ('1.7', '1.8'):
-                    _exit_with_error(
-                        'This script does not support headers with suffixes in '
-                        'Yoda version 1.9 and higher. Field with suffix: "{}"'.format(label))
-                elif not found_match:
+                if not found_match:
                     _exit_with_error(
                         'CSV header contains unknown field "{}"'.format(label))
 
