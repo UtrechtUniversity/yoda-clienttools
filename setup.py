@@ -33,5 +33,5 @@ setup(
             'yrmgroups=yclienttools.rmgroups:entry'
         ]
     },
-    version='1.0.0'
+    version='1.0.1'
 )

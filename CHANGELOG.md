@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased
+## 2024-02-28 v1.0.1
 
 - yimportgroups: bugfix for situation where legacy format CSV files with role suffixes where not processed
   correctly in case of multiple users with the same role (YDA-5612)
