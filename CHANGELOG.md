@@ -1,5 +1,9 @@
 # Change log
 
+## Unreleased
+
+- Prepare for release of Yoda v1.10
+
 ## 2024-02-28 v1.0.1
 
 - yimportgroups: bugfix for situation where legacy format CSV files with role suffixes where not processed

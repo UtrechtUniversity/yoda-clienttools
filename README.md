@@ -86,20 +86,19 @@ OK
 ### ycleanup\_files
 
 ```
-usage: ycleanup_files [-h] [-y {1.7,1.8,1.9}] -r ROOT
+usage: ycleanup_files [-h] [-y {1.7,1.8,1.9,1.10}] -r ROOT
 
 Recursively finds data objects in a collection that will typically have to be
 cleaned up when a dataset is archived, and deletes them.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -r ROOT, --root ROOT  Delete unwanted files in this collection, as well as
                         its subcollections
 
 ```
-
 Overview of files to be removed:
 
 | file      | meaning                        |   |   |   |
@@ -111,7 +110,7 @@ Overview of files to be removed:
 ### yensuremembers
 
 ```
-usage: yensuremembers [-h] [-y {1.7,1.8,1.9}] -i INTERNAL_DOMAINS
+usage: yensuremembers [-h] [-y {1.7,1.8,1.9,1.10}] -i INTERNAL_DOMAINS
                       [--offline-check | --online-check] [--verbose]
                       [--dry-run]
                       userfile groupfile
@@ -123,9 +122,9 @@ positional arguments:
   userfile              Name of the user file
   groupfile             Name of the group file ("-" for standard input)
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server
@@ -148,21 +147,22 @@ optional arguments:
         viewer:v.viewer@uu.nl
 
         The group file should have one group name on each line.
+
 ```
 
 ### ygrepgroups
 
 ```
-usage: ygrepgroups [-h] [-y {1.7,1.8,1.9}] [-a] searchstring
+usage: ygrepgroups [-h] [-y {1.7,1.8,1.9,1.10}] [-a] searchstring
 
 Searches for groups by a search string
 
 positional arguments:
   searchstring          The string to search for
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -a, --all             Show all groups (not just research and vault groups)
 ```
@@ -172,23 +172,23 @@ optional arguments:
 Prints the category and subcategory of a Yoda research group.
 
 ```
-usage: ygroupinfo [-h] [-y {1.7,1.8,1.9}] groupname
+usage: ygroupinfo [-h] [-y {1.7,1.8,1.9,1.10}] groupname
 
 Shows information about a Yoda research group
 
 positional arguments:
   groupname
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
 ```
 
 ### yimportgroups
 
 ```
-usage: yimportgroups [-h] [-y {1.7,1.8,1.9}] -i INTERNAL_DOMAINS
+usage: yimportgroups [-h] [-y {1.7,1.8,1.9,1.10}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
                      [--delete] [--verbose] [--no-validate-domains]
                      [--creator-user CREATOR_USER]
@@ -200,9 +200,9 @@ Creates a list of groups based on a CSV file
 positional arguments:
   csvfile               Name of the CSV file
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server
@@ -224,7 +224,7 @@ optional arguments:
         'groupname'       = name of the group (without the "research-" prefix)
 
         For Yoda versions 1.9 and higher, these labels can optionally be included:
-        'expiration_date' = expiration date for the group.
+        'expiration_date' = expiration date for the group. Can only be set when the group is first created.
         'schema_id'       = schema id for the group. Can only be set when the group is first created.
 
         The remainder of the columns should be labels that indicate the role of each group member:
@@ -246,6 +246,7 @@ optional arguments:
         category,subcategory,groupname,manager,member,expiration_date,schema_id
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2025-01-01,default-2
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
+
 ```
 
 ### yreport\_collectionsize
@@ -253,14 +254,14 @@ optional arguments:
 Shows a report of the size of all data objects in a (set of) collections.
 
 ```
-usage: yreport_collectionsize [-y {1.7,1.8,1.9}] [--help] [-q] [-h] [-r] [-R]
-                              [-g GROUP_BY]
+usage: yreport_collectionsize [-y {1.7,1.8,1.9,1.10}] [--help] [-q] [-h] [-r]
+                              [-R] [-g GROUP_BY]
                               (-c COLLECTION | -H | -C COMMUNITY)
 
 Shows a report of the size of all data objects in a (set of) collections
 
-optional arguments:
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+options:
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   --help                show help information
   -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse
@@ -276,14 +277,14 @@ optional arguments:
                         in the collection (if available).
   -g GROUP_BY, --group-by GROUP_BY
                         Group collection sizes by resource or by location.
-                        Argument should be 'none' (the default), 'resource' or
-                        'location'. Grouping by resource or location implies
-                        --count-all-replicas. If a collection has no
+                        Argument should be 'none' (the default), 'resource'
+                        or 'location'. Grouping by resource or location
+                        implies --count-all-replicas. If a collection has no
                         dataobjects and --group-by resource / location is
                         enabled, its size will be printed with group 'all'.
   -c COLLECTION, --collection COLLECTION
-                        Show total size of data objects in this collection and
-                        its subcollections
+                        Show total size of data objects in this collection
+                        and its subcollections
   -H, --all-collections-in-home
                         Show total size of data objects in each collection in
                         /zoneName/home, including its subcollections. Note:
@@ -300,19 +301,19 @@ Prints a report of the number of subcollections and data objects
 per collection. The output is in CSV format.
 
 ```
-usage: yreport_dataobjectspercollection [-h] [-y {1.7,1.8,1.9}] [-r ROOT] [-e]
+usage: yreport_dataobjectspercollection [-h] [-y {1.7,1.8,1.9,1.10}]
+                                        [-r ROOT] [-e]
 
 Shows a report of number of data objects and subcollections per collection
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -r ROOT, --root ROOT  show only collections in this root collection
                         (default: show all collections
   -e, --by-extension    show number of data objects by extension for each
                         collection
-
 ```
 
 List of columns in regular mode:
@@ -332,18 +333,19 @@ List of columns if --by-extension is enabled:
 ### yreport\_grouplifecycle
 
 ```
-usage: yreport_grouplifecycle [-h] [-q] [-y {1.7,1.8,1.9}]
+usage: yreport_grouplifecycle [-h] [-q] [-y {1.7,1.8,1.9,1.10}]
 
-Generates a list of research groups, along with their creation date, expiration date (if available), lists of group managers,
-regular members, and readonly members. The report also shows whether each research compartment contains data, as well as whether
-its vault compartment contains data.
+Generates a list of research groups, along with their creation date,
+expiration date (if available), lists of group managers, regular members, and
+readonly members. The report also shows whether each research compartment
+contains data, as well as whether its vault compartment contains data.
 
 options:
   -h, --help            show this help message and exit
-  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse
+                        characters not supported by regular XML parser
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
-
 ```
 
 ### yreport\_intake
@@ -356,24 +358,23 @@ On systems with a significant number of datasets, it is recommended to use the
 up report generation.
 
 ```
-usage: yreport_intake [-h] [-y {1.7,1.8,1.9}] [-p] -s STUDY [-c CACHE]
+usage: yreport_intake [-h] [-y {1.7,1.8,1.9,1.10}] [-p] -s STUDY [-c CACHE]
 
 Generates a report of the contents of an intake collection.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
                         Study to process
   -c CACHE, --cache CACHE
                         Local cache directory. Can be used to retrieve
-                        previously collected information on datasets, in order
-                        to speed up report generation. The script will also
-                        store newly collected dataset information in the
+                        previously collected information on datasets, in
+                        order to speed up report generation. The script will
+                        also store newly collected dataset information in the
                         cache.
-
 ```
 
 ### yreport\_linecount
@@ -381,28 +382,27 @@ optional arguments:
 Prints a report of the number of lines per data object.
 
 ```
-usage: yreport_linecount [-h] [-y {1.7,1.8,1.9}]
+usage: yreport_linecount [-h] [-y {1.7,1.8,1.9,1.10}]
                          (-c COLLECTION | -d DATA_OBJECT)
 
 Shows a report of the line counts of data objects.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -c COLLECTION, --collection COLLECTION
                         show line counts of all data objects in this
                         collection (recursive)
   -d DATA_OBJECT, --data-object DATA_OBJECT
                         show line count of only this data object
-
 ```
 
 ### yrmgroups
 
 ```
-usage: yrmgroups [-h] [-y {1.7,1.8,1.9}] [--remove-data] [--check] [--verbose]
-                 [--dry-run] [--continue-failure]
+usage: yrmgroups [-h] [-y {1.7,1.8,1.9,1.10}] [--remove-data] [--check]
+                 [--verbose] [--dry-run] [--continue-failure]
                  groupfile
 
 Removes a list of (research) groups
@@ -410,9 +410,9 @@ Removes a list of (research) groups
 positional arguments:
   groupfile             Name of the group file
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   --remove-data, -r     Remove any data from the group, if needed.
   --check, -c           Check mode: verifies groups exist, and checks if they are empty
@@ -427,7 +427,8 @@ The group file is a text file, with one group name (e.g.: research-foo) on each 
 ### yrmusers
 
 ```
-usage: yrmusers [-h] [-y {1.7,1.8,1.9}] [--check] [--verbose] [--dry-run]
+usage: yrmusers [-h] [-y {1.7,1.8,1.9,1.10}] [--check] [--verbose]
+                [--dry-run]
                 userfile
 
 Removes a list of user accounts. This script needs to run locally on the environment.
@@ -435,9 +436,9 @@ Removes a list of user accounts. This script needs to run locally on the environ
 positional arguments:
   userfile              Name of the user file
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   --check, -c           Check mode: verifies user exist and trash/home directories are empty
   --verbose, -v         Verbose mode: print additional debug information.
@@ -451,15 +452,15 @@ The user file is a text file, with one user name on each line.
 Prints a list of all groups a user is a member of.
 
 ```
-usage: ywhichgroups [-h] [-y {1.7,1.8,1.9}] username
+usage: ywhichgroups [-h] [-y {1.7,1.8,1.9,1.10}] username
 
 Returns a list of groups of which a user is a member
 
 positional arguments:
   username              The username
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9}, --yoda-version {1.7,1.8,1.9}
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
 ```
