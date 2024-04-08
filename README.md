@@ -330,6 +330,38 @@ List of columns if --by-extension is enabled:
 4. Extension
 5. Name of collection
 
+### yreport_datapackagestatus
+
+```
+usage: yreport_datapackagestatus [-h] [--email EMAIL]
+                                 [--email-subject EMAIL_SUBJECT]
+                                 [--email-sender EMAIL_SENDER] [--pending]
+                                 [--stale] [-y {1.7,1.8,1.9,1.10}]
+
+Produces a report of data packages and their vault status. The script can
+either report all data packages, or only the pending ones (i.e. ones with a
+status other than published, depublished or secured in the vault). The report
+can optionally be sent by email. An email is only sent if matching results
+have been found.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --email EMAIL         Comma-separated list of email addresses to send report
+                        to (default: print to stdout).
+  --email-subject EMAIL_SUBJECT
+                        Subject for email reports, can include e.g. the name
+                        of the environment.
+  --email-sender EMAIL_SENDER
+                        Sender of emails (default: noreply@uu.nl)
+  --pending             Only print pending data packages (i.e. not
+                        (de)published or secured)
+  --stale               Only print data packages which have last been modified
+                        over approximately four hours ago (or with unavailable
+                        modification time)
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+                        Override Yoda version on the server
+```
+
 ### yreport\_grouplifecycle
 
 ```
