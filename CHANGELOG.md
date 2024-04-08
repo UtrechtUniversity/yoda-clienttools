@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased
+## 2024-04-08 v1.1.0
 
 - Prepare for release of Yoda v1.10
 - Add data package status report
