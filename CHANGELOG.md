@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Prepare for release of Yoda v1.10
+- Add data package status report
 
 ## 2024-02-28 v1.0.1
 
