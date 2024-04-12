@@ -145,7 +145,7 @@ def remove_group_contents(session, rule_interface, group, verbose, dry_run, cont
                 print(f"Making rods user manager of group {group} in order to remove data ...")
             rule_interface.call_uuGroupUserChangeRole(group, "rods", "manager")
     if verbose:
-        print(f"Removing data from group {group_coll} (dry run mode: { str(dry_run) } ...")
+        print(f"Removing data from group {group_coll} (dry run mode: {str(dry_run)} ...")
     remove_collection_data(group_coll, verbose, dry_run, continue_failure, False)
 
 
