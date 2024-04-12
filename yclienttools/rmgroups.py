@@ -3,8 +3,6 @@
 import argparse
 import contextlib
 import os
-import re
-import subprocess
 import sys
 
 from yclienttools import session as s
@@ -27,13 +25,13 @@ def _get_args():
     parser.add_argument("--remove-data", "-r", action='store_true',
                         help="Remove any data from the group, if needed.")
     parser.add_argument('--check', '-c', action='store_true',
-                             help='Check mode: verifies groups exist, and checks if they are empty')
+                        help='Check mode: verifies groups exist, and checks if they are empty')
     parser.add_argument('--verbose', '-v', action='store_true', default=False,
-                             help='Verbose mode: print additional debug information.')
+                        help='Verbose mode: print additional debug information.')
     parser.add_argument('--dry-run', '-d', action='store_true', default=False,
-                             help="Dry run mode: show what action would be taken.")
+                        help="Dry run mode: show what action would be taken.")
     parser.add_argument('--continue-failure', '-C', action='store_true', default=False,
-                             help="Continue if operations to remove collections or data objects return an error code")
+                        help="Continue if operations to remove collections or data objects return an error code")
     return parser.parse_args()
 
 
@@ -44,7 +42,7 @@ def _get_format_help_text():
 def entry():
     '''Entry point'''
     args = _get_args()
-    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
     groupdata = parse_group_file(args.groupfile)
 
     session = s.setup_session(yoda_version)
@@ -64,6 +62,7 @@ def entry():
 
     finally:
         session.cleanup()
+
 
 def validate_data(session, rule_interface, args, groupdata):
     errors = []
@@ -87,9 +86,9 @@ def remove_groups(session, rule_interface, args, groups):
 
         # Safety checks
         if group == "":
-            _exit_with_error(f"Cannot process empty group name")
+            _exit_with_error("Cannot process empty group name")
         elif "/" in group or ".." in group:
-            _exit_with_error(f"Refusing to process group name containing slash or dot dot, for safety reasons.")
+            _exit_with_error("Refusing to process group name containing slash or dot dot, for safety reasons.")
 
         if args.verbose:
             print(f"Processing group {group} ...")
@@ -97,7 +96,7 @@ def remove_groups(session, rule_interface, args, groups):
 
         group_empty = group_is_empty(session, group)
         if args.verbose:
-            print(f"Group {group} is " + ( "empty" if group_empty else "not empty") )
+            print(f"Group {group} is " + ("empty" if group_empty else "not empty"))
 
         if not group_empty:
             group_coll = f"/{session.zone}/home/{group}"
@@ -121,11 +120,11 @@ def remove_groups(session, rule_interface, args, groups):
                 print(f"Removing group {group} ...")
             (status, err) = rule_interface.call_uuGroupRemove(group)
             if status != '0':
-               message = f"Could not remove group {group}. Error: {err} (code {status})"
-               if args.continue_failure:
-                   _print_error(message)
-               else:
-                   _exit_with_error(message)
+                message = f"Could not remove group {group}. Error: {err} (code {status})"
+                if args.continue_failure:
+                    _print_error(message)
+                else:
+                    _exit_with_error(message)
 
 
 def remove_group_contents(session, rule_interface, group, verbose, dry_run, continue_failure):
@@ -140,7 +139,7 @@ def remove_group_contents(session, rule_interface, group, verbose, dry_run, cont
             rule_interface.call_uuGroupUserAdd(group, "rods")
     if rods_role != "manager":
         if dry_run:
-            print (f"Would make rods user manager of group {group} in order to remove data")
+            print(f"Would make rods user manager of group {group} in order to remove data")
         else:
             if verbose:
                 print(f"Making rods user manager of group {group} in order to remove data ...")

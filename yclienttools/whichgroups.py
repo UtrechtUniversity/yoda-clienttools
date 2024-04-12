@@ -11,7 +11,7 @@ def entry():
     '''Entry point'''
     try:
         args = _get_args()
-        yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+        yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
         session = s.setup_session(yoda_version)
 
         if not common_queries.user_exists(session, args.username):

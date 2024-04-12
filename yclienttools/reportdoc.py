@@ -12,12 +12,12 @@ def entry():
     '''Entry point'''
     try:
         args = _get_args()
-        yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+        yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
         session = s.setup_session(yoda_version)
 
         if args.root and not common_queries.collection_exists(session, args.root):
-            print ("Error: collection {} does not exist (or you don't have access)".format(args.root),
-                    file=sys.stderr)
+            print("Error: collection {} does not exist (or you don't have access)".format(args.root),
+                  file=sys.stderr)
             sys.exit(1)
 
         report_collections(args, session)
@@ -63,7 +63,7 @@ def _get_extension(filename):
 def _filter_by_extension(filenames, extension):
     '''Filter list of filenames based on whether they have a particular extension (None: no extension).'''
     if extension is None:
-        return [n for n in filenames if not "." in n]
+        return [n for n in filenames if "." not in n]
     else:
         return [n for n in filenames if n.endswith("." + extension)]
 

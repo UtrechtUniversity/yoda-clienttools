@@ -3,7 +3,6 @@
 import argparse
 import contextlib
 import os
-import re
 import subprocess
 import sys
 
@@ -24,11 +23,11 @@ def _get_args():
     common_args.add_default_args(parser)
     parser.add_argument('userfile', help='Name of the user file')
     parser.add_argument('--check', '-c', action='store_true',
-                             help='Check mode: verifies user exist and trash/home directories are empty')
+                        help='Check mode: verifies user exist and trash/home directories are empty')
     parser.add_argument('--verbose', '-v', action='store_true', default=False,
-                             help='Verbose mode: print additional debug information.')
+                        help='Verbose mode: print additional debug information.')
     parser.add_argument('--dry-run', '-d', action='store_true', default=False,
-                             help="Dry run mode: show what action would be taken.")
+                        help="Dry run mode: show what action would be taken.")
     return parser.parse_args()
 
 
@@ -58,7 +57,7 @@ def remove_users(rule_interface, args, users, verbose, dry_run):
         if not dry_run:
             p = subprocess.Popen(["iadmin", "rmuser", user])
             p.communicate()
-            if ( p.returncode == 0 ):
+            if (p.returncode == 0):
                 if verbose:
                     print(f"User {user} has been successfully removed")
             else:
@@ -68,7 +67,7 @@ def remove_users(rule_interface, args, users, verbose, dry_run):
 def entry():
     '''Entry point'''
     args = _get_args()
-    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
     userdata = parse_user_file(args.userfile)
 
     session = s.setup_session(yoda_version)
@@ -105,6 +104,7 @@ def parse_user_file(userfile):
 
     return users
 
+
 @contextlib.contextmanager
 def _open_file_or_stdin(filename, mode):
     if filename == '-':
@@ -120,6 +120,7 @@ def _open_file_or_stdin(filename, mode):
         if filename != '-':
             f.close()
 
+
 def home_exists(session, user):
     home_collection = f"/{session.zone}/home/{user}"
     return len(list(get_collections_in_root(session, home_collection))) > 0
@@ -130,6 +131,7 @@ def home_is_empty(session, user):
     num_collections = len(list(get_collections_in_root(session, home_collection)))
     num_objects = get_collection_size(session, home_collection, False, GroupByOption.none, False)['all']
     return num_collections <= 1 and num_objects == 0
+
 
 def trash_exists(session, user):
     trash_collection = f"/{session.zone}/trash/home/{user}"

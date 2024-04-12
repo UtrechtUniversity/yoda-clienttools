@@ -115,6 +115,7 @@ def get_dataobject_count(session, collection_name):
     '''Returns the number of data objects in a collection (including its subcollections).'''
     return len(get_dataobjects_in_collection(session, collection_name))
 
+
 def get_dataobjects_in_collection(session, collection_name):
     result = []
 
@@ -123,7 +124,7 @@ def get_dataobjects_in_collection(session, collection_name):
                        .filter(Collection.name == collection[Collection.name])
                        .get_results())
         result.extend(map(
-            lambda d : "{}/{}".format(d[Collection.name], d[DataObject.name]),
+            lambda d: "{}/{}".format(d[Collection.name], d[DataObject.name]),
             dataobjects))
 
     return result
@@ -134,6 +135,7 @@ def collection_exists(session, collection):
     return len(list(session.query(Collection.name).filter(
         Collection.name == collection).get_results())) > 0
 
+
 def dataobject_exists(session, path):
     '''Returns a boolean value that indicates whether a data object with the provided name exists.'''
     collection_name, dataobject_name = os.path.split(path)
@@ -141,11 +143,13 @@ def dataobject_exists(session, path):
         DataObject.name == dataobject_name).filter(
         Collection.name == collection_name).get_results())) > 0
 
+
 def user_exists(session, username):
     '''Returns a boolean value that indicates whether a user with the provided name exists.'''
     return len(list(session.query(User.name).filter(User.name == username).get_results())) > 0
 
+
 def group_exists(session, groupname):
     '''Returns a boolean value that indicates whether a user group with the provided name exists.'''
     return (len(list(session.query(UserGroup.name).filter(
-        UserGroup.name == groupname).get_results())) > 0 )
+        UserGroup.name == groupname).get_results())) > 0)

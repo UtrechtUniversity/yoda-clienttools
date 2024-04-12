@@ -44,24 +44,24 @@ def _get_args():
     parser.add_argument('-h', '--human-readable', action='store_true', default=False,
                         help="Show sizes in human readable format, e.g. 1.0MB instead of 1000000")
     parser.add_argument("-r", '--count-all-replicas', action='store_true', default=False,
-                        help="Count the size of all replicas of a data object. By default, only " +
-                        "the size of one replica of each data object is counted.")
+                        help="Count the size of all replicas of a data object. By default, only "
+                        + "the size of one replica of each data object is counted.")
     parser.add_argument("-R", '--include-revisions', action='store_true', default=False,
                         help="Include the size of stored revisions of data objects in the collection (if available).")
     parser.add_argument("-g", "--group-by", type=GroupByOption, default='none',
-                        help="Group collection sizes by resource or by location. Argument should be 'none' (the default), " +
-                             "'resource' or 'location'. Grouping by resource or location implies --count-all-replicas. " +
-                             "If a collection has no dataobjects and --group-by resource / location is enabled, its size " +
-                             "will be printed with group 'all'.")
+                        help="Group collection sizes by resource or by location. Argument should be 'none' (the default), "
+                             + "'resource' or 'location'. Grouping by resource or location implies --count-all-replicas. "
+                             + "If a collection has no dataobjects and --group-by resource / location is enabled, its size "
+                             + "will be printed with group 'all'.")
     subject_group = parser.add_mutually_exclusive_group(required=True)
     subject_group.add_argument("-c", "--collection",
                                help='Show total size of data objects in this collection and its subcollections')
     subject_group.add_argument("-H", "--all-collections-in-home", action='store_true',
-                               help='Show total size of data objects in each collection in /zoneName/home, including its subcollections. ' +
-                               "Note: you will only see the collections you have access to.")
+                               help='Show total size of data objects in each collection in /zoneName/home, including its subcollections. '
+                               + "Note: you will only see the collections you have access to.")
     subject_group.add_argument("-C", "--community",
-                               help='Show total size of data objects in each research and vault collection in a Yoda community. ' +
-                               "Note: you will only see the collections you have access to.")
+                               help='Show total size of data objects in each research and vault collection in a Yoda community. '
+                               + "Note: you will only see the collections you have access to.")
 
     args = parser.parse_args()
 

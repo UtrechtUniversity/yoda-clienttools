@@ -95,7 +95,7 @@ def entry():
 
 def main():
     args = _get_args()
-    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
     session = setup_session(yoda_version)
 
     vault_collection = _get_vault_collection(session, args.study)

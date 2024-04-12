@@ -6,7 +6,6 @@ from collections import OrderedDict
 
 from irods.rule import Rule
 
-from yclienttools import common_queries
 from yclienttools.exceptions import SizeNotSupportedException
 
 

@@ -74,7 +74,6 @@ class ImportGroupsTest(TestCase):
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
-
     def test_fully_filled_csv_line_1_9_with_suffixes(self):
         # Confirm support the old csv header format still (with ":nicknameofuser")
         args = {"offline_check": True}
@@ -131,7 +130,6 @@ class ImportGroupsTest(TestCase):
         result, error_msg = _process_csv_line(d, args, "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
-
 
     def test_missing_fields_1_9(self):
         args = {"offline_check": True}

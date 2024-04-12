@@ -30,9 +30,9 @@ def _get_args():
     actiongroup.add_argument('--online-check', '-C', action='store_true',
                              help='Check mode (online): Verifies that all users in the user file exist.')
     parser.add_argument('--verbose', '-v', action='store_true', default=False,
-                             help='Verbose mode: print additional debug information.')
+                        help='Verbose mode: print additional debug information.')
     parser.add_argument('--dry-run', '-d', action='store_true', default=False,
-                             help="Dry run mode: show what action would be taken.")
+                        help="Dry run mode: show what action would be taken.")
     return parser.parse_args()
 
 
@@ -102,9 +102,9 @@ def apply_data_to_group(rule_interface, args, userdata, group, verbose, dry_run)
                 print("Adding user {} to group {} ...".format(user, group))
 
             if dry_run:
-                print("Would add user {} to group {} ...".format(user,group))
+                print("Would add user {} to group {} ...".format(user, group))
             else:
-                [status, msg ] = rule_interface.call_uuGroupUserAdd(group, user)
+                [status, msg] = rule_interface.call_uuGroupUserAdd(group, user)
 
                 if status == "0":
                     current_role = "member"
@@ -128,9 +128,9 @@ def apply_data_to_group(rule_interface, args, userdata, group, verbose, dry_run)
 
 
 def _to_yoda_role_name(role):
-    mapping = {  "viewer" : "reader",
-                 "member" : "normal",
-                 "manager" : "manager" }
+    mapping = {"viewer": "reader",
+               "member": "normal",
+               "manager": "manager"}
 
     if role in mapping:
         return mapping[role]
@@ -138,11 +138,11 @@ def _to_yoda_role_name(role):
         _exit_with_error("Cannot map role {} to Yoda role.".format(role))
 
 
-def _are_roles_equivalent(a,b):
+def _are_roles_equivalent(a, b):
     """Checks whether two roles are equivalent. Needed because Yoda and Yoda-clienttools
        use slightly different names for the roles."""
-    r_role_names = [ "viewer", "reader" ]
-    m_role_names = [ "member", "normal" ]
+    r_role_names = ["viewer", "reader"]
+    m_role_names = ["member", "normal"]
 
     if a == b:
         return True
@@ -166,7 +166,7 @@ def print_parsed_data(userdata, groupdata):
 def entry():
     '''Entry point'''
     args = _get_args()
-    yoda_version =  args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
+    yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
     userdata = parse_user_file(args.userfile)
     groupdata = parse_group_file(args.groupfile)
 
@@ -208,11 +208,11 @@ def parse_user_file(userfile):
             username = fields[1].strip().lower()
             users[username] = fields[0]
 
-
     if len(users) == 0:
         _exit_with_error("User file has no users.")
 
     return users
+
 
 @contextlib.contextmanager
 def _open_file_or_stdin(filename, mode):

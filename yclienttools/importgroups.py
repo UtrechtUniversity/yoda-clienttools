@@ -30,7 +30,7 @@ def parse_csv_file(input_file, args, yoda_version):
         reader = csv.reader(
             csv_file,
             dialect=dialect,
-            )
+        )
         header = next(reader)
         row_number = 1  # header row already read
 
@@ -305,8 +305,8 @@ def apply_data(rule_interface, args, data):
 
         # Always remove the rods user for new groups, unless it is in the
         # CSV file.
-        if (new_group and "rods" not in allusers and
-                rule_interface.call_uuGroupGetMemberType(groupname, "rods") != "none"):
+        if (new_group and "rods" not in allusers
+                and rule_interface.call_uuGroupGetMemberType(groupname, "rods") != "none"):
             (status, msg) = rule_interface.call_uuGroupUserRemove(groupname, "rods")
             if status == "0":
                 if args.verbose:
