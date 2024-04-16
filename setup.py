@@ -7,7 +7,6 @@ setup(
     install_requires=[
         'python-irodsclient==2.0.0',
         'enum34',
-        'six',
         'humanize>=0.5',
         'iteration_utilities==0.11.0',
         'dnspython>=2.2.0',
@@ -15,7 +14,7 @@ setup(
         'PyYaml'
     ],
     name='yclienttools',
-    packages=['yclienttools', 'irodsutils'],
+    packages=['yclienttools'],
     entry_points={
         'console_scripts': [
             'yreport_dataobjectspercollection= yclienttools.reportdoc:entry',

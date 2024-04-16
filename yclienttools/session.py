@@ -2,9 +2,12 @@ import json
 import os
 import ssl
 import sys
+
 from getpass import getpass
+
+from irods import password_obfuscation
 from irods.session import iRODSSession
-from irodsutils import password_obfuscation
+
 from yclienttools import common_config
 
 
