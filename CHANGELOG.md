@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased
+## 2024-04-18 v1.1.1
 
 - Fix regression that broke the ensuremembers tool
 - Ensuremembers: add message in verbose mode that confirms validation checks passed
