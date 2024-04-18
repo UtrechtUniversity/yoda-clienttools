@@ -231,7 +231,7 @@ def apply_data(rule_interface, args, data):
         [status, msg] = rule_interface.call_uuGroupAdd(
             groupname, category, subcategory, '', 'unspecified', schema_id, expiration_date)
 
-        if ((status == '-1089000') | (status == '-809000')) and args.allow_update:
+        if ((status in '-1089000', '-809000', '-806000')) and args.allow_update:
             print(
                 'WARNING: group "{}" not created, it already exists'.format(groupname))
             if schema_id != '':
