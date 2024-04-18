@@ -1,5 +1,9 @@
 # Change log
 
+## Unreleased
+
+- Fix regression that broke the ensuremembers tool
+
 ## 2024-04-08 v1.1.0
 
 - Prepare for release of Yoda v1.10

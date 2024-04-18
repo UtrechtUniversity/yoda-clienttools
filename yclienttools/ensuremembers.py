@@ -174,7 +174,7 @@ def entry():
         print_parsed_data(userdata, groupdata)
         sys.exit(0)
 
-    session = s.setup_session(yoda_version),
+    session = s.setup_session(yoda_version)
     rule_interface = RuleInterface(session, yoda_version)
 
     try:
