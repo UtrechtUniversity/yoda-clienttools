@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix regression that broke the ensuremembers tool
+- Ensuremembers: add message in verbose mode that confirms validation checks passed
 
 ## 2024-04-08 v1.1.0
 

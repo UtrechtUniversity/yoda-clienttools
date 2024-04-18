@@ -182,6 +182,8 @@ def entry():
 
         if len(validation_errors) > 0:
             _exit_with_validation_errors(validation_errors)
+        elif args.verbose:
+            print("No validation errors encountered.")
 
         if not args.online_check:
             apply_data(rule_interface, args, userdata, groupdata, args.verbose, args.dry_run)
