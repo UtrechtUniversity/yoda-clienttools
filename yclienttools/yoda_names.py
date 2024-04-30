@@ -14,7 +14,7 @@ from datetime import datetime
 try:
     from functools import lru_cache
 except ImportError:
-    from backports.functools_lru_cache import lru_cache
+    from backports.functools_lru_cache import lru_cache  # type: ignore[no-redef]
 
 
 def is_valid_username(username, no_validate_domains):
