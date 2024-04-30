@@ -2,6 +2,7 @@
 import argparse
 import csv
 import sys
+from typing import List, Set, Tuple
 
 from iteration_utilities import duplicates, unique_everseen
 
@@ -15,7 +16,7 @@ from yclienttools import yoda_names
 # Based on yoda-batch-add script by Ton Smeele
 
 
-def parse_csv_file(input_file, args, yoda_version):
+def parse_csv_file(input_file: str, args: argparse.Namespace, yoda_version: str) -> list:
     extracted_data = []
 
     with open(input_file, mode="r", encoding="utf-8-sig") as csv_file:
@@ -62,7 +63,7 @@ def parse_csv_file(input_file, args, yoda_version):
         # keys are the column names, items are the list of items
         for line in reader:
             row_number += 1
-            d = {}
+            d: dict = {}
             for j in range(len(line)):
                 item = line[j].strip()
                 if len(item):
@@ -82,30 +83,30 @@ def parse_csv_file(input_file, args, yoda_version):
     return extracted_data
 
 
-def _get_csv_possible_labels(yoda_version):
+def _get_csv_possible_labels(yoda_version: str) -> List[str]:
     if yoda_version in ('1.7', '1.8'):
         return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager']
     else:
         return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager', 'expiration_date', 'schema_id']
 
 
-def _get_csv_required_labels():
+def _get_csv_required_labels() -> List[str]:
     return ['category', 'subcategory', 'groupname']
 
 
-def _get_csv_1_9_exclusive_labels():
+def _get_csv_1_9_exclusive_labels() -> List[str]:
     """Returns labels that can only appear with yoda version 1.9 and higher."""
     return ['expiration_date', 'schema_id']
 
 
-def _get_csv_predefined_labels(yoda_version):
+def _get_csv_predefined_labels(yoda_version: str) -> List[str]:
     if yoda_version in ('1.7', '1.8'):
         return ['category', 'subcategory', 'groupname']
     else:
         return ['category', 'subcategory', 'groupname', 'expiration_date', 'schema_id']
 
 
-def _get_duplicate_columns(fields_list, yoda_version):
+def _get_duplicate_columns(fields_list: List[str], yoda_version: str) -> Set[str]:
     """ Only checks columns that cannot have duplicates """
     fields_seen = set()
     duplicate_fields = set()
@@ -120,12 +121,12 @@ def _get_duplicate_columns(fields_list, yoda_version):
     return duplicate_fields
 
 
-def _get_duplicate_groups(row_data):
+def _get_duplicate_groups(row_data: list) -> List[str]:
     group_names = list(map(lambda r: r[2], row_data))
     return list(unique_everseen(duplicates(group_names)))
 
 
-def _process_csv_line(line, args, yoda_version):
+def _process_csv_line(line: dict, args: argparse.Namespace, yoda_version: str) -> Tuple:
     if ('category' not in line or not len(line['category'])
             or 'subcategory' not in line or not len(line['subcategory'])
             or 'groupname' not in line or not len(line['groupname'])):
@@ -185,7 +186,7 @@ def _process_csv_line(line, args, yoda_version):
     return row_data, None
 
 
-def _are_roles_equivalent(a, b):
+def _are_roles_equivalent(a: str, b: str) -> bool:
     """Checks whether two roles are equivalent. Needed because Yoda and Yoda-clienttools
        use slightly different names for the roles."""
     r_role_names = ["viewer", "reader"]
@@ -201,7 +202,7 @@ def _are_roles_equivalent(a, b):
         return False
 
 
-def validate_data(rule_interface, args, data):
+def validate_data(rule_interface: RuleInterface, args: argparse.Namespace, data: list) -> List[str]:
     errors = []
     for (category, subcategory, groupname, managers, members, viewers, schema_id, expiration_date) in data:
         if rule_interface.call_uuGroupExists(groupname) and not args.allow_update:
@@ -219,7 +220,7 @@ def validate_data(rule_interface, args, data):
     return errors
 
 
-def apply_data(rule_interface, args, data):
+def apply_data(rule_interface: RuleInterface, args: argparse.Namespace, data: list) -> None:
     for (category, subcategory, groupname, managers, members, viewers, schema_id, expiration_date) in data:
         new_group = False
 
@@ -361,7 +362,7 @@ def apply_data(rule_interface, args, data):
                         print("Status: {} , Message: {}".format(status, msg))
 
 
-def print_parsed_data(data):
+def print_parsed_data(data: list) -> None:
     print('Parsed data:')
     print()
 
@@ -381,7 +382,7 @@ def print_parsed_data(data):
             print()
 
 
-def entry():
+def entry() -> None:
     '''Entry point'''
     args = _get_args()
     yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
@@ -429,7 +430,7 @@ def entry():
         session.cleanup()
 
 
-def _get_args():
+def _get_args() -> argparse.Namespace:
     '''Parse command line arguments'''
 
     parser = argparse.ArgumentParser(
@@ -460,7 +461,7 @@ def _get_args():
     return parser.parse_args()
 
 
-def _get_format_help_text():
+def _get_format_help_text() -> str:
     return '''
         The CSV file is expected to include the following labels in its header (the first row):
         'category'        = category for the group
@@ -493,12 +494,12 @@ def _get_format_help_text():
     '''
 
 
-def _exit_with_error(message):
+def _exit_with_error(message: str) -> None:
     print("Error: {}".format(message), file=sys.stderr)
     sys.exit(1)
 
 
-def _exit_with_validation_errors(errors):
+def _exit_with_validation_errors(errors: List[str]) -> None:
     for error in errors:
         print("Validation error: {}".format(error), file=sys.stderr)
     sys.exit(1)

@@ -1,8 +1,8 @@
 '''This class is used as an interface for calling Yoda rules using python-irodsclient
 '''
 from io import StringIO
-
 from collections import OrderedDict
+from typing import List
 
 from irods.rule import Rule
 
@@ -27,7 +27,7 @@ Whether to specify the rule engine on rule calls
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
 
     def call_rule(self, rulename, params, number_outputs,
-                  rule_engine=None):
+                  rule_engine=None) -> List[str]:
         """Run a rule
 
            :param rulename: name of the rule
@@ -69,14 +69,14 @@ Whether to specify the rule engine on rule calls
 
         return buf[:number_outputs]
 
-    def _string_list_to_list(self, s):
+    def _string_list_to_list(self, s: str) -> List[str]:
         if s.startswith("[") and s.endswith("]"):
             return s[1:-1].split(",")
         else:
             raise ValueError(
                 "Unable to convert string representation of list to list")
 
-    def call_uuGroupGetMembers(self, groupname):
+    def call_uuGroupGetMembers(self, groupname: str) -> List[str]:
         """Returns list of group members"""
         parms = OrderedDict([
             ('groupname', groupname)])
@@ -86,14 +86,14 @@ Whether to specify the rule engine on rule calls
                 "Group member list exceeds 1023 bytes")
         return self._string_list_to_list(out)
 
-    def call_uuGroupUserRemove(self, groupname, user):
+    def call_uuGroupUserRemove(self, groupname: str, user: str) -> List[str]:
         """Removes a user from a group"""
         parms = OrderedDict([
             ('groupname', groupname),
             ('user', user)])
         return self.call_rule('uuGroupUserRemove', parms, 2)
 
-    def call_uuGroupGetMemberType(self, groupname, user):
+    def call_uuGroupGetMemberType(self, groupname: str, user: str) -> str:
         """:returns: member type of a group member"""
         parms = OrderedDict([
             ('groupname', groupname),
@@ -101,7 +101,7 @@ Whether to specify the rule engine on rule calls
         return self.call_rule('uuGroupGetMemberType', parms, 1)[0]
 
     def call_uuGroupUserAddByOtherCreator(
-            self, groupname, username, creator_user, creator_zone):
+            self, groupname: str, username: str, creator_user: str, creator_zone: str) -> List[str]:
         """Adds user to group on the behalf of a creator user.
 
            :param: groupname
@@ -117,7 +117,7 @@ Whether to specify the rule engine on rule calls
             ('creatorZone', creator_zone)])
         return self.call_rule('uuGroupUserAdd', parms, 2)
 
-    def call_uuGroupUserAdd(self, groupname, username):
+    def call_uuGroupUserAdd(self, groupname: str, username: str) -> List[str]:
         """Adds user to group.
 
            :param: groupname
@@ -129,7 +129,7 @@ Whether to specify the rule engine on rule calls
             ('username', username)])
         return self.call_rule('uuGroupUserAdd', parms, 2)
 
-    def call_uuGroupUserChangeRole(self, groupname, username, newrole):
+    def call_uuGroupUserChangeRole(self, groupname: str, username: str, newrole: str) -> List[str]:
         """Change role of user in group
 
            :param groupname: name of group
@@ -143,7 +143,7 @@ Whether to specify the rule engine on rule calls
             ('newrole', newrole)])
         return self.call_rule('uuGroupUserChangeRole', parms, 2)
 
-    def call_uuGroupExists(self, groupname):
+    def call_uuGroupExists(self, groupname: str) -> bool:
         """Check whether group name exists on Yoda
 
            :param groupname: name of group
@@ -153,7 +153,7 @@ Whether to specify the rule engine on rule calls
         [out] = self.call_rule('uuGroupExists', parms, 1)
         return out == 'true'
 
-    def call_uuUserExists(self, username):
+    def call_uuUserExists(self, username: str) -> bool:
         """Check whether user name exists on Yoda
 
            :param username: name of user
@@ -163,8 +163,8 @@ Whether to specify the rule engine on rule calls
         [out] = self.call_rule('uuUserExists', parms, 1)
         return out == 'true'
 
-    def call_uuGroupAdd(self, groupname, category,
-                        subcategory, description, classification, schema_id='default-2', expiration_date=''):
+    def call_uuGroupAdd(self, groupname: str, category: str,
+                        subcategory: str, description: str, classification, schema_id: str = 'default-2', expiration_date: str = '') -> List[str]:
         """Adds a group
 
            :param groupname: name of group
@@ -199,7 +199,7 @@ Whether to specify the rule engine on rule calls
 
         return self.call_rule('uuGroupAdd', parms, 2)
 
-    def call_uuGroupModify(self, groupname, property, value):
+    def call_uuGroupModify(self, groupname: str, property: str, value: str) -> List[str]:
         """Modifies one property of a group
 
            :param groupname: name of group
@@ -213,7 +213,7 @@ Whether to specify the rule engine on rule calls
                              ('value', value)])
         return self.call_rule('uuGroupModify', parms, 2)
 
-    def call_uuGroupRemove(self, groupname):
+    def call_uuGroupRemove(self, groupname: str) -> List[str]:
         """Removes an empty group
 
            :param groupname: name of group

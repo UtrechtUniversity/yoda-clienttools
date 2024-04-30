@@ -8,6 +8,7 @@ __license__   = 'GPLv3, see LICENSE'
 
 import dns.resolver as resolver
 import re
+from typing import List, Optional, Tuple
 
 from datetime import datetime
 
@@ -17,7 +18,7 @@ except ImportError:
     from backports.functools_lru_cache import lru_cache  # type: ignore[no-redef]
 
 
-def is_valid_username(username, no_validate_domains):
+def is_valid_username(username: str, no_validate_domains: bool) -> Tuple[bool, Optional[str]]:
     """Is this name a valid username
     Returns whether valid and error
     """
@@ -33,32 +34,32 @@ def is_valid_username(username, no_validate_domains):
             ),
         )
     else:
-        return True
+        return True, None
 
 
-def is_email(username):
+def is_email(username: str) -> bool:
     return re.search(r"@.*[^\.]+\.[^\.]+$", username) is not None
 
 
 @lru_cache(maxsize=100)
-def is_valid_domain(domain):
+def is_valid_domain(domain: str) -> bool:
     try:
         return bool(resolver.query(domain, "MX"))
     except (resolver.NXDOMAIN, resolver.NoAnswer):
         return False
 
 
-def is_valid_category(name):
+def is_valid_category(name: str) -> bool:
     """Is this name a valid (sub)category name?"""
     return re.search(r"^[a-zA-Z0-9\-_]+$", name) is not None
 
 
-def is_valid_groupname(name):
+def is_valid_groupname(name: str) -> bool:
     """Is this name a valid group name (prefix such as "research-" can be omitted)"""
     return re.search(r"^[a-zA-Z0-9\-]+$", name) is not None
 
 
-def is_internal_user(username, internal_domains):
+def is_internal_user(username: str, internal_domains: List[str]) -> bool:
     for domain in internal_domains:
         domain_pattern = "@{}$".format(domain)
         if re.search(domain_pattern, username) is not None:
@@ -67,7 +68,7 @@ def is_internal_user(username, internal_domains):
     return False
 
 
-def is_valid_expiration_date(expiration_date):
+def is_valid_expiration_date(expiration_date: str) -> bool:
     """Validation of expiration date.
 
     :param expiration_date: String containing date that has to be validated
@@ -92,7 +93,7 @@ def is_valid_expiration_date(expiration_date):
         return False
 
 
-def is_valid_schema_id(schema_id):
+def is_valid_schema_id(schema_id: str) -> bool:
     """Is this schema at least a correctly formatted schema-id?"""
     if schema_id == "":
         return True
