@@ -3,6 +3,7 @@
 ## UNRELEASED
 
 - Importgroups: fix issue where domain validation was not performed even if it had not been disabled
+- Importgroups: fix issue where username validation results were not processed correctly.
 
 ## 2024-04-18 v1.1.1
 

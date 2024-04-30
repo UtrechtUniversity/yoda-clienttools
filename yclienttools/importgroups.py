@@ -151,9 +151,9 @@ def _process_csv_line(line: dict, args: argparse.Namespace, yoda_version: str) -
 
         for i in range(len(item_list)):
             item_list[i] = item_list[i].strip().lower()
-            is_valid = yoda_names.is_valid_username(item_list[i], args.no_validate_domains)
+            is_valid, validation_message = yoda_names.is_valid_username(item_list[i], args.no_validate_domains)
             if not is_valid:
-                return None, '"{}" is not a valid username.'.format(item_list[i])
+                return None, validation_message
 
         if column_name.lower() == 'manager' or column_name.lower().startswith('manager:'):
             managers.extend(item_list)
