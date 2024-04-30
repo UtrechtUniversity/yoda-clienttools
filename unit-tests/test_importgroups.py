@@ -13,7 +13,7 @@ from io import StringIO
 
 sys.path.append("../yclienttools")
 
-from importgroups import _get_duplicate_columns, _get_duplicate_groups, _process_csv_line, parse_csv_file
+from importgroups import _get_duplicate_columns, _get_duplicate_groups, _process_csv_line, parse_csv_file  # type: ignore[import-not-found]
 
 
 class ImportGroupsTest(TestCase):
