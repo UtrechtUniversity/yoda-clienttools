@@ -6,10 +6,11 @@
 __copyright__ = 'Copyright (c) 2019-2024, Utrecht University'
 __license__   = 'GPLv3, see LICENSE'
 
+import argparse
+from io import StringIO
 import sys
 from unittest import TestCase
 from unittest.mock import patch
-from io import StringIO
 
 sys.path.append("../yclienttools")
 
@@ -23,7 +24,7 @@ class ImportGroupsTest(TestCase):
         self.assertSetEqual(result, set({"category"}))
 
     def test_fully_filled_csv_line_1_9(self):
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         d = {
             "category": ["test-automation"],
             "subcategory": ["initial"],
@@ -44,12 +45,12 @@ class ImportGroupsTest(TestCase):
             "default-3",
             "2030-01-01",
         )
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
     def test_fully_filled_csv_line_1_9_multi_role(self):
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         d = {
             "category": ["test-automation"],
             "subcategory": ["initial"],
@@ -70,13 +71,13 @@ class ImportGroupsTest(TestCase):
             "default-3",
             "2030-01-01",
         )
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
     def test_fully_filled_csv_line_1_9_with_suffixes(self):
         # Confirm support the old csv header format still (with ":nicknameofuser")
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         d = {
             "category": ["test-automation"],
             "subcategory": ["initial"],
@@ -97,13 +98,13 @@ class ImportGroupsTest(TestCase):
             "default-3",
             "2030-01-01",
         )
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
     def test_fully_filled_csv_line_1_9_with_suffixes_multi_role(self):
         # Confirm support the old csv header format still (with ":nicknameofuser")
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         d = {
             "category": ["test-automation"],
             "subcategory": ["initial"],
@@ -127,12 +128,12 @@ class ImportGroupsTest(TestCase):
             "default-3",
             "2030-01-01",
         )
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
     def test_missing_fields_1_9(self):
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         # No schema id or expiration date
         d = {
             "category": ["test-automation"],
@@ -152,7 +153,7 @@ class ImportGroupsTest(TestCase):
             "",
             "",
         )
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
@@ -177,7 +178,7 @@ class ImportGroupsTest(TestCase):
             "",
             "",
         )
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertTupleEqual(expected, result)
         self.assertIsNone(error_msg)
 
@@ -190,12 +191,12 @@ class ImportGroupsTest(TestCase):
             "expiration_date": ["2030-01-01"],
             "schema_id": ["default-3"],
         }
-        result, error_msg = _process_csv_line(d, args, "1.9")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.9")
         self.assertIsNone(result)
         self.assertIn("missing", error_msg)
 
     def test_error_fields_1_8(self):
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         # Includes (valid) schema id and expiration,
         # which are not in version 1.8 (should give error)
         d = {
@@ -208,38 +209,38 @@ class ImportGroupsTest(TestCase):
             "schema_id": ["default-3"],
             "expiration_date": ["2030-01-01"],
         }
-        result, error_msg = _process_csv_line(d, args, "1.8")
+        result, error_msg = _process_csv_line(d, argparse.Namespace(**args), "1.8")
         self.assertIsNone(result)
         self.assertIn("1.9", error_msg)
 
     def test_parse_csv(self):
-        args = {"offline_check": True}
-        parse_csv_file("files/csv-import-test.csv", args, "1.9")
+        args = {"offline_check": True, "no_validate_domains": True}
+        parse_csv_file("files/csv-import-test.csv", argparse.Namespace(**args), "1.9")
 
         # With carriage returns
-        parse_csv_file("files/windows-csv.csv", args, "1.9")
+        parse_csv_file("files/windows-csv.csv", argparse.Namespace(**args), "1.9")
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_parse_csv_with_header_suffixes(self, mock_stderr):
-        args = {"offline_check": True}
-        parse_csv_file("files/header-with-suffixes.csv", args, "1.8")
+        args = {"offline_check": True, "no_validate_domains": True}
+        parse_csv_file("files/header-with-suffixes.csv", argparse.Namespace(**args), "1.8")
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_parse_invalid_csv_file(self, mock_stderr):
         # csv that has an unlabeled header
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
         with self.assertRaises(SystemExit):
-            parse_csv_file("files/unlabeled-column.csv", args, "1.9")
+            parse_csv_file("files/unlabeled-column.csv", argparse.Namespace(**args), "1.9")
 
         # csv that has too many items in the rows compared to the headers
         with self.assertRaises(SystemExit):
-            parse_csv_file("files/more-entries-than-headers.csv", args, "1.9")
+            parse_csv_file("files/more-entries-than-headers.csv", argparse.Namespace(**args), "1.9")
 
     def test_parse_duplicate_groups(self):
-        args = {"offline_check": True}
+        args = {"offline_check": True, "no_validate_domains": True}
 
-        data_no_duplicates = parse_csv_file("files/no-duplicates.csv", args, "1.9")
+        data_no_duplicates = parse_csv_file("files/no-duplicates.csv", argparse.Namespace(**args), "1.9")
         self.assertEqual(_get_duplicate_groups(data_no_duplicates), [])
 
-        data_with_duplicates = parse_csv_file("files/with-duplicates.csv", args, "1.9")
+        data_with_duplicates = parse_csv_file("files/with-duplicates.csv", argparse.Namespace(**args), "1.9")
         self.assertEqual(_get_duplicate_groups(data_with_duplicates), ["research-data-duplicate"])
