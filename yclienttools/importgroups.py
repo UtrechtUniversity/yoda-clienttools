@@ -150,7 +150,7 @@ def _process_csv_line(line, args, yoda_version):
 
         for i in range(len(item_list)):
             item_list[i] = item_list[i].strip().lower()
-            is_valid = yoda_names.is_valid_username(item_list[i], args)
+            is_valid = yoda_names.is_valid_username(item_list[i], args.no_validate_domains)
             if not is_valid:
                 return None, '"{}" is not a valid username.'.format(item_list[i])
 

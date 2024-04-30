@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Importgroups: fix issue where domain validation was not performed even if it had not been disabled
+
 ## 2024-04-18 v1.1.1
 
 - Fix regression that broke the ensuremembers tool
