@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2024-05-01 v1.1.2
 
 - Importgroups: fix issue where domain validation was not performed even if it had not been disabled
 - Importgroups: fix issue where username validation results were not processed correctly.
