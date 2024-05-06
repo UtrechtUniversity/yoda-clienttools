@@ -1,5 +1,9 @@
 # Change log
 
+## Unreleased
+
+- Fix prompt for password if no .irodsA file is available
+
 ## 2024-05-01 v1.1.2
 
 - Importgroups: fix issue where domain validation was not performed even if it had not been disabled

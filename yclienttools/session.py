@@ -32,7 +32,7 @@ def setup_session(yoda_version_override):
             password = password_obfuscation.decode(scrambled_password)
     except OSError:
         print(
-            "Could not open {} .".format(scrambled_password),
+            "Could not open {} .".format(irodsA),
             file=sys.stderr
         )
         password = getpass(prompt="Please provide your irods password:")
