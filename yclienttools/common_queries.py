@@ -1,10 +1,12 @@
 from itertools import chain
 import os
+from typing import Dict
 
 from irods.column import Like
 from irods.models import Collection, DataObject, Resource, User, UserGroup
-from yclienttools.options import GroupByOption
+from irods.session import iRODSSession
 from yclienttools import exceptions
+from yclienttools.options import GroupByOption
 
 
 def get_collections_in_root(session, root):
@@ -26,8 +28,11 @@ def get_collections_in_root(session, root):
     return chain(generator_collection, generator_subcollections)
 
 
-def get_collection_size(session, collection_name,
-                        count_all_replicas, group_by, include_revisions):
+def get_collection_size(session: iRODSSession,
+                        collection_name: str,
+                        count_all_replicas: bool,
+                        group_by: GroupByOption,
+                        include_revisions: bool) -> Dict[str, int]:
     '''Get total size of all data objects in collection (including its subcollections).
        Options:
        - count_all_replicas (boolean): specifies whether to count the size of each data
@@ -39,7 +44,7 @@ def get_collection_size(session, collection_name,
          collection in the collection size.
     '''
 
-    result = {}
+    result: Dict[str, int] = {}
 
     collections = get_collections_in_root(
         session, collection_name)
