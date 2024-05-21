@@ -9,12 +9,14 @@ import itertools
 import sys
 from typing import Dict, List, Union
 
+import humanize
 from irods.column import Like
 from irods.message import (ET, XML_Parser_Type)
 from irods.models import Collection, DataObject, User
 from irods.session import iRODSSession
-from yclienttools import common_args, common_config
-from yclienttools import session as s
+from yclienttools import common_args, common_config, session as s
+from yclienttools.common_queries import collection_exists, get_collection_size
+from yclienttools.options import GroupByOption
 
 
 def entry():
@@ -37,6 +39,8 @@ def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-q", "--quasi-xml", default=False, action='store_true',
                         help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
+    parser.add_argument("-s", "--size", default=False, action='store_true',
+                        help='Include size of research collection and vault collection in output')
     common_args.add_default_args(parser)
     return parser.parse_args()
 
@@ -82,8 +86,7 @@ def _group_research_has_data(session: iRODSSession, group_name: str) -> int:
 
        :returns: number of data objects in research group
     """
-    research_collection = f"/{session.zone}/home/{group_name}"
-    return _collection_has_data(session, research_collection)
+    return _collection_has_data(session, _get_research_group_collection(session, group_name))
 
 
 def _group_vault_has_data(session: iRODSSession, group_name: str) -> int:
@@ -97,9 +100,36 @@ def _group_vault_has_data(session: iRODSSession, group_name: str) -> int:
        :returns: number of data objects in vault group
 
     """
-    vault_collection = f"/{session.zone}/home/{group_name}".replace(
+    return _collection_has_data(session, _get_vault_group_collection(session, group_name))
+
+
+def _get_vault_group_collection(session: iRODSSession, group_name: str) -> str:
+    return f"/{session.zone}/home/{group_name}".replace(
         "research-", "vault-", 1)
-    return _collection_has_data(session, vault_collection)
+
+
+def _get_research_group_collection(session: iRODSSession, group_name: str) -> str:
+    return f"/{session.zone}/home/{group_name}"
+
+
+def _get_research_size(session: iRODSSession, group_name: str) -> Union[int, None]:
+    collection = _get_research_group_collection(session, group_name)
+    if collection_exists(session, collection):
+        return _get_collection_size_for_glr(session, collection)
+    else:
+        return None
+
+
+def _get_vault_size(session: iRODSSession, group_name: str) -> Union[int, None]:
+    collection = _get_vault_group_collection(session, group_name)
+    if collection_exists(session, collection):
+        return _get_collection_size_for_glr(session, collection)
+    else:
+        return None
+
+
+def _get_collection_size_for_glr(session: iRODSSession, collection_name: str) -> int:
+    return get_collection_size(session, collection_name, True, GroupByOption.none, True)['all']
 
 
 def _collection_has_data(session: iRODSSession, coll_name: str) -> int:
@@ -142,6 +172,21 @@ def _get_group_managers(session: iRODSSession, group_name: str, attributes: Dict
     return [manager.split("#")[0] for manager in attributes["manager"]]
 
 
+def _get_columns(args: argparse.Namespace) -> List[str]:
+    base_cols = ["Group name", "Category", "Subcategory",
+                 "Group managers", "Regular members", "Read-only members",
+                 "Creation date", "Expiration date", "Has research data", "Has vault data"]
+
+    if args.size:
+        extra_cols = ["Research collection size", "Vault collection size"]
+    else:
+        extra_cols = []
+
+    result = base_cols
+    result.extend(extra_cols)
+    return result
+
+
 def _list_or_str_to_str(value: Union[str, List[str]]) -> str:
     if type(value) is str:
         return value
@@ -149,11 +194,16 @@ def _list_or_str_to_str(value: Union[str, List[str]]) -> str:
         return ";".join(value)
 
 
+def _size_to_str(value: Union[int, None]) -> str:
+    if value is None:
+        return "N/A"
+    else:
+        return humanize.naturalsize(value, binary=True)
+
+
 def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
     output = csv.writer(sys.stdout, delimiter=',')
-    output.writerow(["Group name", "Category", "Subcategory",
-                     "Group managers", "Regular members", "Read-only members",
-                     "Creation date", "Expiration date", "Has research data", "Has vault data"])
+    output.writerow(_get_columns(args))
 
     def _has_data_to_string(value):
         if value is None:
@@ -176,6 +226,12 @@ def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
             _group_research_has_data(session, group))
         vault_has_data = _has_data_to_string(
             _group_vault_has_data(session, group))
-        output.writerow([group, category, subcategory,
-                         group_managers, regular_members, readonly_members,
-                         creation_date_str, expiration_date, research_has_data, vault_has_data])
+        rowdata = [group, category, subcategory,
+                   group_managers, regular_members, readonly_members,
+                   creation_date_str, expiration_date, research_has_data, vault_has_data]
+
+        if args.size:
+            rowdata.append(_size_to_str(_get_research_size(session, group)))
+            rowdata.append(_size_to_str(_get_vault_size(session, group)))
+
+        output.writerow(rowdata)
