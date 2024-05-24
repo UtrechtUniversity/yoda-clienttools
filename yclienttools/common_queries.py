@@ -1,6 +1,7 @@
+import datetime
 from itertools import chain
 import os
-from typing import Dict
+from typing import Dict, Union
 
 from irods.column import Like
 from irods.models import Collection, DataObject, Resource, User, UserGroup
@@ -95,6 +96,45 @@ def get_collection_size(session: iRODSSession,
         result['all'] = 0
 
     return result
+
+
+def get_collection_contents_last_modified(session: iRODSSession, collection_name: str) -> Union[None, datetime.datetime]:
+    """Returns datetime of last modification of collection or its contents
+
+       :param session:         iRODS session
+       :param collection_name: collection name
+
+       :returns: datetime of last modification of the collection or its contents
+                 (data objects or subcollections, recursively), or None if no last
+                 modified datetime could be determined
+    """
+    last_timestamp = None
+
+    dataobjects_root = (session.query(DataObject.modify_time)
+                        .filter(Collection.name == collection_name)
+                        .get_results())
+    dataobjects_sub  = (session.query(DataObject.modify_time)
+                        .filter(Like(Collection.name, collection_name + "/%"))
+                        .get_results())
+    collection_root  = (session.query(Collection.modify_time)
+                        .filter(Collection.name == collection_name)
+                        .get_results())
+    collections_sub  = (session.query(Collection.modify_time)
+                        .filter(Like(Collection.name, collection_name + "/%"))
+                        .get_results())
+
+    all_collection_data = chain(collection_root, collections_sub)
+    all_dataobject_data = chain(dataobjects_root, dataobjects_sub)
+
+    for collection in all_collection_data:
+        if last_timestamp is None or collection[Collection.modify_time] > last_timestamp:
+            last_timestamp = collection[Collection.modify_time]
+
+    for dataobject in all_dataobject_data:
+        if last_timestamp is None or dataobject[DataObject.modify_time] > last_timestamp:
+            last_timestamp = dataobject[DataObject.modify_time]
+
+    return last_timestamp
 
 
 def get_revision_collection_name(session, collection_name):

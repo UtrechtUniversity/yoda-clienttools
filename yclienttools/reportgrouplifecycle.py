@@ -1,6 +1,10 @@
 '''Generates a list of research groups, along with their creation date, expiration date (if available),
    lists of group managers, regular members, and readonly members. The report also shows whether each
-   research compartment contains data, as well as whether its vault compartment contains data.'''
+   research compartment contains data, as well as whether its vault compartment contains data.
+
+   The report can optionally include size and last modified date of both the research and
+   vault collection.
+'''
 
 import argparse
 import csv
@@ -15,7 +19,7 @@ from irods.message import (ET, XML_Parser_Type)
 from irods.models import Collection, DataObject, User
 from irods.session import iRODSSession
 from yclienttools import common_args, common_config, session as s
-from yclienttools.common_queries import collection_exists, get_collection_size
+from yclienttools.common_queries import collection_exists, get_collection_contents_last_modified, get_collection_size
 from yclienttools.options import GroupByOption
 
 
@@ -41,6 +45,8 @@ def _get_args() -> argparse.Namespace:
                         help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
     parser.add_argument("-s", "--size", default=False, action='store_true',
                         help='Include size of research collection and vault collection in output')
+    parser.add_argument("-m", "--modified", default=False, action='store_true',
+                        help='Include last modified date research collection and vault collection in output')
     common_args.add_default_args(parser)
     return parser.parse_args()
 
@@ -182,6 +188,10 @@ def _get_columns(args: argparse.Namespace) -> List[str]:
     else:
         extra_cols = []
 
+    if args.modified:
+        extra_cols.append("Research last modified")
+        extra_cols.append("Vault last modified")
+
     result = base_cols
     result.extend(extra_cols)
     return result
@@ -199,6 +209,10 @@ def _size_to_str(value: Union[int, None]) -> str:
         return "N/A"
     else:
         return humanize.naturalsize(value, binary=True)
+
+
+def _timestamp_to_date_str(value: Union[datetime.datetime, None]) -> str:
+    return "N/A" if value is None else value.strftime("%Y-%m-%d")
 
 
 def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
@@ -233,5 +247,11 @@ def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
         if args.size:
             rowdata.append(_size_to_str(_get_research_size(session, group)))
             rowdata.append(_size_to_str(_get_vault_size(session, group)))
+
+        if args.modified:
+            rowdata.append(_timestamp_to_date_str(
+                get_collection_contents_last_modified(session, _get_research_group_collection(session, group))))
+            rowdata.append(_timestamp_to_date_str(
+                get_collection_contents_last_modified(session, _get_vault_group_collection(session, group))))
 
         output.writerow(rowdata)
