@@ -365,12 +365,14 @@ optional arguments:
 ### yreport\_grouplifecycle
 
 ```
-usage: yreport_grouplifecycle [-h] [-q] [-s] [-y {1.7,1.8,1.9,1.10}]
+usage: yreport_grouplifecycle [-h] [-q] [-s] [-m] [-y {1.7,1.8,1.9,1.10}]
 
 Generates a list of research groups, along with their creation date,
 expiration date (if available), lists of group managers, regular members, and
 readonly members. The report also shows whether each research compartment
-contains data, as well as whether its vault compartment contains data.
+contains data, as well as whether its vault compartment contains data. The
+report can optionally include size and last modified date of both the research
+and vault collection.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -378,6 +380,8 @@ optional arguments:
                         characters not supported by regular XML parser
   -s, --size            Include size of research collection and vault
                         collection in output
+  -m, --modified        Include last modified date research collection and
+                        vault collection in output
   -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
 ```

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Group lifecycle report: add options to show size and last modified date of research
+  and vault groups
 - Fix prompt for password if no .irodsA file is available
 
 ## 2024-05-01 v1.1.2
