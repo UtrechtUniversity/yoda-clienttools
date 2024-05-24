@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased
+## 2024-05-24 v1.2.0
 
 - Group lifecycle report: add options to show size and last modified date of research
   and vault groups
