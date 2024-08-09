@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2024-08-09 v1.3.0
 
 - Add --human-readable option to group lifecycle report, and change default behaviour to not
   report sizes in human readable units.
