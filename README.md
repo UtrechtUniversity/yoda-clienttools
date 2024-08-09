@@ -365,7 +365,7 @@ optional arguments:
 ### yreport\_grouplifecycle
 
 ```
-usage: yreport_grouplifecycle [-h] [-q] [-s] [-m] [-y {1.7,1.8,1.9,1.10}]
+usage: yreport_grouplifecycle [-h] [-q] [-s] [-H] [-m] [-y {1.7,1.8,1.9,1.10}]
 
 Generates a list of research groups, along with their creation date,
 expiration date (if available), lists of group managers, regular members, and
@@ -380,6 +380,8 @@ optional arguments:
                         characters not supported by regular XML parser
   -s, --size            Include size of research collection and vault
                         collection in output
+  -H, --human-readable  Report sizes in human-readable figures (only relevant
+                        in combination with --size parameter)
   -m, --modified        Include last modified date research collection and
                         vault collection in output
   -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}

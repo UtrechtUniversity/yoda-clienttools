@@ -45,6 +45,8 @@ def _get_args() -> argparse.Namespace:
                         help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
     parser.add_argument("-s", "--size", default=False, action='store_true',
                         help='Include size of research collection and vault collection in output')
+    parser.add_argument("-H", "--human-readable", default=False, action='store_true',
+                        help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
     parser.add_argument("-m", "--modified", default=False, action='store_true',
                         help='Include last modified date research collection and vault collection in output')
     common_args.add_default_args(parser)
@@ -204,11 +206,13 @@ def _list_or_str_to_str(value: Union[str, List[str]]) -> str:
         return ";".join(value)
 
 
-def _size_to_str(value: Union[int, None]) -> str:
+def _size_to_str(value: Union[int, None], human_readable: bool) -> str:
     if value is None:
         return "N/A"
-    else:
+    elif human_readable:
         return humanize.naturalsize(value, binary=True)
+    else:
+        return str(value)
 
 
 def _timestamp_to_date_str(value: Union[datetime.datetime, None]) -> str:
@@ -245,8 +249,8 @@ def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
                    creation_date_str, expiration_date, research_has_data, vault_has_data]
 
         if args.size:
-            rowdata.append(_size_to_str(_get_research_size(session, group)))
-            rowdata.append(_size_to_str(_get_vault_size(session, group)))
+            rowdata.append(_size_to_str(_get_research_size(session, group), args.human_readable))
+            rowdata.append(_size_to_str(_get_vault_size(session, group), args.human_readable))
 
         if args.modified:
             rowdata.append(_timestamp_to_date_str(
