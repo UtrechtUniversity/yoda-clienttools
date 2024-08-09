@@ -1,5 +1,10 @@
 # Change log
 
+## UNRELEASED
+
+- Add --human-readable option to group lifecycle report, and change default behaviour to not
+  report sizes in human readable units.
+
 ## 2024-05-24 v1.2.0
 
 - Group lifecycle report: add options to show size and last modified date of research
