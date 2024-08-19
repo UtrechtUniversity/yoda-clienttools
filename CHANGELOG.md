@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Update Python-irodsclient to v2.1.0
+
 ## 2024-08-09 v1.3.0
 
 - Add --human-readable option to group lifecycle report, and change default behaviour to not
