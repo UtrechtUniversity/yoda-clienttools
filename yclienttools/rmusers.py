@@ -39,7 +39,7 @@ def validate_data(session, rule_interface, args, userdata):
     errors = []
 
     for user in userdata:
-        if not rule_interface.call_uuUserExists(user):
+        if not rule_interface.call_rule_user_exists(user):
             errors.append(f"User {user} does not exist.")
         if home_exists(session, user) and not home_is_empty(session, user):
             errors.append(f"Home directory of user {user} is not empty")

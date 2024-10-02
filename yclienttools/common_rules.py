@@ -153,14 +153,28 @@ Whether to specify the rule engine on rule calls
         [out] = self.call_rule('uuGroupExists', parms, 1)
         return out == 'true'
 
-    def call_uuUserExists(self, username: str) -> bool:
+    def call_rule_user_exists(self, username: str) -> bool:
         """Check whether user name exists on Yoda
 
            :param username: name of user
            :returns: false/true
         """
+
+        # Attempt to retrieve client hints rules
+        try:
+            client_hints_rules = self.session.client_hints.get("rules", {})
+        except Exception as e:
+            print("Error: {}. Hint: python-irodsclient needs to be version 2.1 or later to support client_hints.".format(e))
+
+        # Select python rule if avaliable, otherwise select legacy rule
+        rule_to_call = 'rule_user_exists' if 'rule_user_exists' in client_hints_rules else 'uuUserExists'
         parms = OrderedDict([('username', username)])
-        [out] = self.call_rule('uuUserExists', parms, 1)
+        if rule_to_call == 'rule_user_exists':
+            parms['outparam1'] = ""
+
+        # Call the rule
+        [out] = self.call_rule(rule_to_call, parms, 1)
+
         return out == 'true'
 
     def call_uuGroupAdd(self, groupname: str, category: str,
