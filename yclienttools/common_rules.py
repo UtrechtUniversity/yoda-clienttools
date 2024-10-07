@@ -26,6 +26,11 @@ Whether to specify the rule engine on rule calls
             "1.7", "1.8"] else "1.9"
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
 
+        try:
+            self.client_hints_rules = self.session.client_hints.get("rules", {})
+        except Exception as e:
+            print("Error: {}. Hint: python-irodsclient needs to be version 2.1 or later to support client_hints.".format(e))
+
     def call_rule(self, rulename, params, number_outputs,
                   rule_engine=None) -> List[str]:
         """Run a rule
@@ -159,15 +164,14 @@ Whether to specify the rule engine on rule calls
            :param username: name of user
            :returns: false/true
         """
+        # Ensure client_hints_rules initialized
+        if not hasattr(self, 'client_hints_rules') or not isinstance(self.client_hints_rules, list):
+            self.client_hints_rules = self.session.client_hints.get("rules", {})
 
-        # Attempt to retrieve client hints rules
-        try:
-            client_hints_rules = self.session.client_hints.get("rules", {})
-        except Exception as e:
-            print("Error: {}. Hint: python-irodsclient needs to be version 2.1 or later to support client_hints.".format(e))
+        # Determinie which rule to call
+        rule_to_call = 'rule_user_exists' if 'rule_user_exists' in self.client_hints_rules else 'uuUserExists'
 
-        # Select python rule if avaliable, otherwise select legacy rule
-        rule_to_call = 'rule_user_exists' if 'rule_user_exists' in client_hints_rules else 'uuUserExists'
+        # Prepare rule parameters
         parms = OrderedDict([('username', username)])
         if rule_to_call == 'rule_user_exists':
             parms['outparam1'] = ""
