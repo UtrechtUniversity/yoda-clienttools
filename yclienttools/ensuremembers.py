@@ -60,7 +60,7 @@ def validate_data(rule_interface, args, userdata, groupdata):
 
     for user in userdata:
         if not is_internal_user(user, args.internal_domains.split(",")):
-            if not rule_interface.call_uuUserExists(user):
+            if not rule_interface.call_rule_user_exists(user):
                 errors.append("External user {} does not exist.".format(user))
 
     for group in groupdata:

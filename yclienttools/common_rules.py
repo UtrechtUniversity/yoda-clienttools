@@ -17,7 +17,7 @@ class RuleInterface:
            :param session: IrodsSession object to call
            :param yoda_version: which Yoda version to assume (e.g. 1.7, 1.8, 1.9)
 
-Whether to specify the rule engine on rule calls
+            Whether to specify the rule engine on rule calls
                           (enable for Yoda 1.8 and higher, disable for Yoda 1.7)
         """
         self.session = session
@@ -25,6 +25,11 @@ Whether to specify the rule engine on rule calls
         self.uuGroupAdd_version = "1.7" if yoda_version in [
             "1.7", "1.8"] else "1.9"
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
+
+        try:
+            self.client_hints_rules = self.session.client_hints.get("rules", {})
+        except Exception as e:
+            print("Error: {}. Hint: python-irodsclient needs to be version 2.1 or later to support client_hints.".format(e))
 
     def call_rule(self, rulename, params, number_outputs,
                   rule_engine=None) -> List[str]:
@@ -153,14 +158,23 @@ Whether to specify the rule engine on rule calls
         [out] = self.call_rule('uuGroupExists', parms, 1)
         return out == 'true'
 
-    def call_uuUserExists(self, username: str) -> bool:
+    def call_rule_user_exists(self, username: str) -> bool:
         """Check whether user name exists on Yoda
 
            :param username: name of user
            :returns: false/true
         """
+        # Determine which rule to call
+        rule_to_call = 'rule_user_exists' if 'rule_user_exists' in self.client_hints_rules else 'uuUserExists'
+
+        # Prepare rule parameters
         parms = OrderedDict([('username', username)])
-        [out] = self.call_rule('uuUserExists', parms, 1)
+        if rule_to_call == 'rule_user_exists':
+            parms['outparam1'] = ""
+
+        # Call the rule
+        [out] = self.call_rule(rule_to_call, parms, 1)
+
         return out == 'true'
 
     def call_uuGroupAdd(self, groupname: str, category: str,
