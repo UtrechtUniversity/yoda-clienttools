@@ -17,7 +17,7 @@ class RuleInterface:
            :param session: IrodsSession object to call
            :param yoda_version: which Yoda version to assume (e.g. 1.7, 1.8, 1.9)
 
-Whether to specify the rule engine on rule calls
+            Whether to specify the rule engine on rule calls
                           (enable for Yoda 1.8 and higher, disable for Yoda 1.7)
         """
         self.session = session
@@ -164,11 +164,7 @@ Whether to specify the rule engine on rule calls
            :param username: name of user
            :returns: false/true
         """
-        # Ensure client_hints_rules initialized
-        if not hasattr(self, 'client_hints_rules') or not isinstance(self.client_hints_rules, list):
-            self.client_hints_rules = self.session.client_hints.get("rules", {})
-
-        # Determinie which rule to call
+        # Determine which rule to call
         rule_to_call = 'rule_user_exists' if 'rule_user_exists' in self.client_hints_rules else 'uuUserExists'
 
         # Prepare rule parameters
