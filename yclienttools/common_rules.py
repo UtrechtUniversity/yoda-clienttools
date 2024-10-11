@@ -16,6 +16,7 @@ class RuleInterface:
 
            :param session: IrodsSession object to call
            :param yoda_version: which Yoda version to assume (e.g. 1.7, 1.8, 1.9)
+
 Whether to specify the rule engine on rule calls
                           (enable for Yoda 1.8 and higher, disable for Yoda 1.7)
         """
