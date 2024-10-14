@@ -1,7 +1,8 @@
 # Change log
 
-## UNRELEASED
+## 2024-10-14 v1.4.0
 
+- Add support for new Python version of user exists rule (YDA-5393)
 - Update Python-irodsclient to v2.1.0
 
 ## 2024-08-09 v1.3.0
