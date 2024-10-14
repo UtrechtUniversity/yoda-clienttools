@@ -213,7 +213,7 @@ def validate_data(rule_interface: RuleInterface, args: argparse.Namespace, data:
                 # ensure that external users already have an iRODS account
                 # we do not want to be the actor that creates them (unless
                 # we are creating them in the name of a creator user)
-                if not rule_interface.call_uuUserExists(user) and not args.creator_user:
+                if not rule_interface.call_rule_user_exists(user) and not args.creator_user:
                     errors.append(
                         'Group {} has nonexisting external user {}'.format(groupname, user))
 
