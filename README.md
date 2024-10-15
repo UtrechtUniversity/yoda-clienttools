@@ -22,7 +22,7 @@ See also the `Configuration` section below.
 
 ### Windows
 
-For Windows users, please activate Windows Subsystem for Linux and install Ubuntu as described on the Microsoft page https://learn.microsoft.com/en-us/windows/wsl/install. You will also need to install iCommands within your Ubuntu distro as described at https://www.uu.nl/en/research/yoda/guide-to-yoda/i-am-using-yoda/using-icommands-for-large-datasets. You will additionally need to create a .irods folder in your Ubuntu home directory (`mkdir .irods`) and create an irods_environment.json file (`sudo nano irods_environment.json`). The contents of that json file can be found after logging in to the Yoda webportal and clicking on the Yoda version at the bottom of each page in the webportal (e.g., clicking on Yoda `v1.8.6` or `Yoda v1.9`).
+For Windows users, please activate Windows Subsystem for Linux and install Ubuntu as described on the Microsoft page https://learn.microsoft.com/en-us/windows/wsl/install. You will also need to install iCommands within your Ubuntu distro as described at https://www.uu.nl/en/research/yoda/guide-to-yoda/i-am-using-yoda/using-icommands-for-large-datasets. You will additionally need to create a .irods folder in your Ubuntu home directory (`mkdir .irods`) and create an irods_environment.json file (`nano irods_environment.json`). The contents of this JSON file can be found by logging in to the Yoda portal and clicking on the Yoda version at the bottom of the page (e.g., clicking on `Yoda v1.9.4`). In Yoda 1.10 and later, this configuration can be found on the data transfer page, which is accessible via the user menu in the portal.
 
 Once you have completed the previous steps and have Ubuntu up and running, run the following commands:
 
