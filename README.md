@@ -51,7 +51,9 @@ You are now good to go. When you run the client tools, make sure you first run `
 
 ## Configuration
 
-The Yoda client tools look for an optional configuration file in YAML format named `.yodaclienttools.yml` in the user's home directory
+The Yoda client tools look for a configuration file in YAML format named `.yodaclienttools.yml` in the user's home directory. You may
+need to add a configuration file if the client tools can't find your CA file in a standard location. Otherwise, the configuration
+file is optional.
 
 Example:
 
