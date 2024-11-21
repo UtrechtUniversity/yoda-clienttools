@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Add some default values for the CA file location that also work in non-Yoda-server environments.
+
 ## 2024-10-14 v1.4.0
 
 - Add support for new Python version of user exists rule (YDA-5393)

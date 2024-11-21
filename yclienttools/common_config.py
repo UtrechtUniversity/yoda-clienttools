@@ -9,8 +9,19 @@ import yaml
 
 
 def get_ca_file() -> str:
-    return _get_parameter_with_default(
-        "ca_file", "/etc/irods/localhost_and_chain.crt")
+    configured_ca_file = _get_parameter_from_config("ca_file")
+    if configured_ca_file is None:
+        for standard_location in ["/etc/ssl/certs/ca-certificates.crt",
+                                  "/etc/pki/tls/certs/ca-bundle.crt",
+                                  "/etc/irods/localhost_and_chain.crt"]:
+            if os.path.isfile(standard_location):
+                return standard_location
+
+        print("Error: could not find CA bundle in a standard location. You will need to configure it (see the README file for details)")
+        sys.exit(1)
+
+    else:
+        return configured_ca_file
 
 
 def get_default_yoda_version() -> str:
