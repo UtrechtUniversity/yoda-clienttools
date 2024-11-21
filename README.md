@@ -63,8 +63,8 @@ default_yoda_version: 1.8
 ```
 
 The following parameters are available:
-- `ca_file` : the name of the local Certificate Authority (CA) file, which is used to verify the Yoda server's identity. It uses the
-   CentOS / RHEL CA File location by default.
+- `ca_file` : the name of the local Certificate Authority (CA) file, which is used to verify the Yoda server's identity. If no CA file is configured,
+   the tools try to find the CA file in the default locations of Ubuntu/Debian, RedHat/AlmaLinux and Yoda.
 - `default_yoda_version`: the Yoda client tools need to know the Yoda version running on the server. This version can be provided when running a tool
    using the `--yoda-version` parameter. When this parameter is not provided, the tools use the default version specified in the configuration file, or
    `1.8` if no default version is configured.
