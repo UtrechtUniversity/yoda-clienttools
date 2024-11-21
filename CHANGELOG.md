@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2024-11-21 v1.5.0
 
 - Add some default values for the CA file location that also work in non-Yoda-server environments.
 
