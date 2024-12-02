@@ -1,5 +1,10 @@
 # Change log
 
+## UNRELEASED
+
+- Add revision statistics to the group lifecycle report. Size of research group in this report
+  no longer includes revisions.
+
 ## 2024-11-21 v1.5.0
 
 - Add some default values for the CA file location that also work in non-Yoda-server environments.
