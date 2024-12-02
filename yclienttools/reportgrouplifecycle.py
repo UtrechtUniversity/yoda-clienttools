@@ -3,7 +3,7 @@
    research compartment contains data, as well as whether its vault compartment contains data.
 
    The report can optionally include size and last modified date of both the research and
-   vault collection.
+   vault collection, as well as revisions.
 '''
 
 import argparse
@@ -44,11 +44,11 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument("-q", "--quasi-xml", default=False, action='store_true',
                         help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
     parser.add_argument("-s", "--size", default=False, action='store_true',
-                        help='Include size of research collection and vault collection in output')
+                        help='Include size of research collection, vault collection and revisions in output')
     parser.add_argument("-H", "--human-readable", default=False, action='store_true',
                         help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
     parser.add_argument("-m", "--modified", default=False, action='store_true',
-                        help='Include last modified date research collection and vault collection in output')
+                        help='Include last modified date research collection, revisions and vault collection in output')
     common_args.add_default_args(parser)
     return parser.parse_args()
 
@@ -120,6 +120,10 @@ def _get_research_group_collection(session: iRODSSession, group_name: str) -> st
     return f"/{session.zone}/home/{group_name}"
 
 
+def _get_revision_group_collection(session: iRODSSession, group_name: str) -> str:
+    return f"/{session.zone}/yoda/revisions/{group_name}"
+
+
 def _get_research_size(session: iRODSSession, group_name: str) -> Union[int, None]:
     collection = _get_research_group_collection(session, group_name)
     if collection_exists(session, collection):
@@ -136,8 +140,16 @@ def _get_vault_size(session: iRODSSession, group_name: str) -> Union[int, None]:
         return None
 
 
+def _get_revisions_size(session: iRODSSession, group_name: str) -> Union[int, None]:
+    collection = _get_revision_group_collection(session, group_name)
+    if collection_exists(session, collection):
+        return _get_collection_size_for_glr(session, collection)
+    else:
+        return None
+
+
 def _get_collection_size_for_glr(session: iRODSSession, collection_name: str) -> int:
-    return get_collection_size(session, collection_name, True, GroupByOption.none, True)['all']
+    return get_collection_size(session, collection_name, True, GroupByOption.none, False)['all']
 
 
 def _collection_has_data(session: iRODSSession, coll_name: str) -> int:
@@ -186,13 +198,14 @@ def _get_columns(args: argparse.Namespace) -> List[str]:
                  "Creation date", "Expiration date", "Has research data", "Has vault data"]
 
     if args.size:
-        extra_cols = ["Research collection size", "Vault collection size"]
+        extra_cols = ["Research collection size", "Vault collection size", "Revisions size"]
     else:
         extra_cols = []
 
     if args.modified:
         extra_cols.append("Research last modified")
         extra_cols.append("Vault last modified")
+        extra_cols.append("Revisions last modified")
 
     result = base_cols
     result.extend(extra_cols)
@@ -251,11 +264,14 @@ def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
         if args.size:
             rowdata.append(_size_to_str(_get_research_size(session, group), args.human_readable))
             rowdata.append(_size_to_str(_get_vault_size(session, group), args.human_readable))
+            rowdata.append(_size_to_str(_get_revisions_size(session, group), args.human_readable))
 
         if args.modified:
             rowdata.append(_timestamp_to_date_str(
                 get_collection_contents_last_modified(session, _get_research_group_collection(session, group))))
             rowdata.append(_timestamp_to_date_str(
                 get_collection_contents_last_modified(session, _get_vault_group_collection(session, group))))
+            rowdata.append(_timestamp_to_date_str(
+                get_collection_contents_last_modified(session, _get_revision_group_collection(session, group))))
 
         output.writerow(rowdata)
