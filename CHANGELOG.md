@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2024-12-03 v1.6.0
 
 - Add revision statistics to the group lifecycle report. Size of research group in this report
   no longer includes revisions.
