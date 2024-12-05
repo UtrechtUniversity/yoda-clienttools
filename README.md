@@ -369,25 +369,26 @@ optional arguments:
 ```
 usage: yreport_grouplifecycle [-h] [-q] [-s] [-H] [-m] [-y {1.7,1.8,1.9,1.10}]
 
-Generates a list of research groups, along with their creation date,
-expiration date (if available), lists of group managers, regular members, and
-readonly members. The report also shows whether each research compartment
-contains data, as well as whether its vault compartment contains data. The
-report can optionally include size and last modified date of both the research
-and vault collection, as well as revisions.
+Generates a list of research and deposit groups, along with their creation date,
+expiration date (if available), lists of group managers, regular members, and readonly
+members. The report also shows whether each research compartment contains data, as well
+as whether its vault compartment contains data. The report can optionally include size
+and last modified date of both the research/deposit and vault collection, as well as
+revisions.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse
-                        characters not supported by regular XML parser
-  -s, --size            Include size of research collection, vault collection
+  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters
+                        not supported by regular XML parser
+  -s, --size            Include size of research/deposit collection, vault collection
                         and revisions in output
-  -H, --human-readable  Report sizes in human-readable figures (only relevant
-                        in combination with --size parameter)
-  -m, --modified        Include last modified date research collection,
+  -H, --human-readable  Report sizes in human-readable figures (only relevant in
+                        combination with --size parameter)
+  -m, --modified        Include last modified date research/deposit collection,
                         revisions and vault collection in output
   -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
+
 ```
 
 ### yreport\_intake

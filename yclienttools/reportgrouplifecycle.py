@@ -112,8 +112,14 @@ def _group_vault_has_data(session: iRODSSession, group_name: str) -> int:
 
 
 def _get_vault_group_collection(session: iRODSSession, group_name: str) -> str:
-    return f"/{session.zone}/home/{group_name}".replace(
-        "research-", "vault-", 1)
+    if group_name.startswith("research-"):
+        return f"/{session.zone}/home/{group_name}".replace(
+            "research-", "vault-", 1)
+    elif group_name.startswith("deposit-"):
+        return f"/{session.zone}/home/{group_name}".replace(
+            "deposit-", "vault-", 1)
+    else:
+        raise Exception("Unable to get vault group for group " + group_name)
 
 
 def _get_research_group_collection(session: iRODSSession, group_name: str) -> str:
@@ -171,10 +177,10 @@ def _get_group_creation_date(session: iRODSSession, group_name: str) -> Union[da
     return create_times[0][User.create_time] if len(create_times) else None
 
 
-def _get_research_groups_list(session: iRODSSession) -> List[str]:
+def _get_relevant_groups_list(session: iRODSSession) -> List[str]:
     groups = session.query(User).filter(User.type == 'rodsgroup').get_results()
     return [x[User.name]
-            for x in groups if x[User.name].startswith("research-")]
+            for x in groups if x[User.name].startswith(("research-", "deposit-"))]
 
 
 def _get_regular_members(session: iRODSSession, group_name: str, attributes: Dict[str, Union[str, List[str]]]) -> List[str]:
@@ -242,7 +248,7 @@ def report_groups_lifecycle(args: argparse.Namespace, session: iRODSSession):
         else:
             return "yes" if value else "no"
 
-    for group in sorted(_get_research_groups_list(session)):
+    for group in sorted(_get_relevant_groups_list(session)):
         attributes = _get_group_attributes(session, group)
         category = attributes.get("category", "no category")
         subcategory = attributes.get("subcategory", "no subcategory")
