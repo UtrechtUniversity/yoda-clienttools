@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2024-12-06 v1.7.0
 
 - Add support for deposit groups to group lifecycle report.
 
