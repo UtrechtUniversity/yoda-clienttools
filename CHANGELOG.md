@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Upgrade Python-irodsclient to v3.0.0
+
 ## 2024-12-06 v1.7.0
 
 - Add support for deposit groups to group lifecycle report.
