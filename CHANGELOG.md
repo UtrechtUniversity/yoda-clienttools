@@ -3,6 +3,7 @@
 ## UNRELEASED
 
 - Upgrade Python-irodsclient to v3.0.0
+- Add pending deposit report
 
 ## 2024-12-06 v1.7.0
 
