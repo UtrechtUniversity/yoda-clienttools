@@ -1,8 +1,9 @@
-'''Generates a list of research groups, along with their creation date, expiration date (if available),
-   lists of group managers, regular members, and readonly members. The report also shows whether each
-   research compartment contains data, as well as whether its vault compartment contains data.
+'''Generates a list of research and deposit groups, along with their creation date, expiration date
+   (if available), lists of group managers, regular members, and readonly members. The report also
+   shows whether each research compartment contains data, as well as whether its vault compartment
+   contains data.
 
-   The report can optionally include size and last modified date of both the research and
+   The report can optionally include size and last modified date of both the research/deposit and
    vault collection, as well as revisions.
 '''
 
@@ -44,11 +45,11 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument("-q", "--quasi-xml", default=False, action='store_true',
                         help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
     parser.add_argument("-s", "--size", default=False, action='store_true',
-                        help='Include size of research collection, vault collection and revisions in output')
+                        help='Include size of research/deposit collection, vault collection and revisions in output')
     parser.add_argument("-H", "--human-readable", default=False, action='store_true',
                         help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
     parser.add_argument("-m", "--modified", default=False, action='store_true',
-                        help='Include last modified date research collection, revisions and vault collection in output')
+                        help='Include last modified date research/deposit collection, revisions and vault collection in output')
     common_args.add_default_args(parser)
     return parser.parse_args()
 
