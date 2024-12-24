@@ -364,6 +364,27 @@ optional arguments:
                         Override Yoda version on the server
 ```
 
+### yreport\_depositpending
+
+```
+usage: yreport_depositpending [-h] [-q] [-H] [-y {1.7,1.8,1.9,1.10}] group
+
+Generates a list of direct subcollections of a deposit group collection, along with their size,
+owner, creation date and last modified date. The report can be used by data managers to tell which
+pending deposits might need to be cleaned up.
+
+positional arguments:
+  group                 deposit group to process (default: deposit-pilot)
+
+options:
+  -h, --help            show this help message and exit
+  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters not
+                        supported by regular XML parser
+  -H, --human-readable  Report sizes in human-readable figures
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+                        Override Yoda version on the server
+```
+
 ### yreport\_grouplifecycle
 
 ```
