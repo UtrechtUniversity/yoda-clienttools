@@ -5,9 +5,10 @@ import humanize
 from urllib.parse import urlparse
 from irods.column import Like
 from irods.models import Collection, CollectionMeta
-from yclienttools import common_args, common_config, common_queries, common_file_ops
+from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 from yclienttools.options import GroupByOption
+
 
 def entry():
     '''Entry point'''
@@ -42,18 +43,19 @@ def data_package_report(args, session):
 def _get_package_info(csv_output, session, collection, human_readable):
     raw_size = common_queries.get_collection_size(session, collection, True, GroupByOption.none, False)['all']
     vault_status = _get_vault_status(session, collection)
-    publication_date = _get_publication_date(session, collection)  
-    has_readme = _has_readme_file(session, collection) 
+    publication_date = _get_publication_date(session, collection)
+    has_readme = _has_readme_file(session, collection)
     license = _get_license(session, collection)
-    data_access = _get_data_access(session, collection)    
-    metadata_schema = _get_metadata_schema(session, collection)    
-    
+    data_access = _get_data_access(session, collection)
+    metadata_schema = _get_metadata_schema(session, collection)
+
     if human_readable:
         display_size = str(humanize.naturalsize(raw_size))
     else:
         display_size = str(raw_size)
 
     csv_output.writerow([collection, display_size, vault_status, publication_date, has_readme, license, data_access, metadata_schema])
+
 
 def _get_data_packages(session):
     """Returns a list of collections of all data packages."""
@@ -62,7 +64,7 @@ def _get_data_packages(session):
 
     return [result[Collection.name]
             for result in query_results if not result[Collection.name].endswith("/original")]
-    
+
 
 def _get_vault_status(session, collection):
     """Returns vault status of data package (or None if not found)."""
@@ -72,8 +74,8 @@ def _get_vault_status(session, collection):
 
     if len(query_results) == 1:
         return query_results[0][CollectionMeta.value]
-    else:
-        return None
+
+    return None
 
 
 def _get_publication_date(session, collection):
@@ -84,8 +86,8 @@ def _get_publication_date(session, collection):
 
     if len(query_results) == 1:
         return query_results[0][CollectionMeta.value]
-    else:
-        return None
+
+    return None
 
 
 def _has_readme_file(session, collection):
@@ -94,7 +96,7 @@ def _has_readme_file(session, collection):
         if "readme" in data_obj.lower():
             return True
 
-    return False        
+    return False
 
 
 def _get_license(session, collection):
@@ -105,8 +107,8 @@ def _get_license(session, collection):
 
     if len(query_results) == 1:
         return query_results[0][CollectionMeta.value]
-    else:
-        return None
+
+    return None
 
 
 def _get_data_access(session, collection):
@@ -117,8 +119,8 @@ def _get_data_access(session, collection):
 
     if len(query_results) == 1:
         return query_results[0][CollectionMeta.value]
-    else:
-        return None
+
+    return None
 
 
 def _get_metadata_schema(session, collection):
@@ -131,5 +133,5 @@ def _get_metadata_schema(session, collection):
         href = query_results[0][CollectionMeta.value]
         href_parts = urlparse(href).path.split('/')
         return href_parts[-2]
-    else:
-        return None
+
+    return None
