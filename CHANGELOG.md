@@ -1,5 +1,10 @@
 # Change log
 
+## UNRELEASED
+
+- Data package status report: fix for matching vault collections other than data
+  package collections in some cases.
+
 ## 2024-12-24 v1.8.0
 
 - Upgrade Python-irodsclient to v3.0.0
