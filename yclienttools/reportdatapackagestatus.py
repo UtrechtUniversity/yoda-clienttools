@@ -131,12 +131,18 @@ def report_data_package_status(args, session):
 
 def get_data_packages(session):
     """Returns a list of collections of all data packages."""
-    query_results = session.query(Collection.name).filter(
-        Like(Collection.parent_name, '/%/home/vault-%')).filter(
-        CollectionMeta.name == 'org_vault_status').get_results()
+    vault_collections = session.query(Collection.name).filter(
+        Collection.parent_name == f'/{session.zone}/home').filter(
+        Like(Collection.name, f'/{session.zone}/home/vault-%')).get_results()
 
-    return [result[Collection.name]
-            for result in query_results if not result[Collection.name].endswith("/original")]
+    datapackage_collections = []
+    for vault_collection in [coll[Collection.name] for coll in vault_collections]:
+        these_datapackage_collections = session.query(Collection.name).filter(
+            Collection.parent_name == vault_collection).filter(
+            Like(Collection.name, f"/{session.zone}/home/vault-%/%[%]")).get_results()
+        datapackage_collections.extend([coll[Collection.name] for coll in these_datapackage_collections])
+
+    return datapackage_collections
 
 
 def get_current_timestamp():
