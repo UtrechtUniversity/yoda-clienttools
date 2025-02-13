@@ -115,7 +115,7 @@ def report_data_package_status(args, session):
         if args.stale and days_ago == 0 and hours_ago <= 4:
             continue
 
-        line = data_package + " : " + human_readable_ago + " : " + status
+        line = data_package + " : " + human_readable_ago + " : " + str(status)
         if args.email is None:
             print(line)
         else:
