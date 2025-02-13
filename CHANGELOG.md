@@ -4,6 +4,8 @@
 
 - Data package status report: fix for matching vault collections other than data
   package collections in some cases.
+- Data package status report: report data package collections with no valid status
+  correctly.
 
 ## 2024-12-24 v1.8.0
 
