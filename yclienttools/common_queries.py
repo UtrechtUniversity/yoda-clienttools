@@ -198,3 +198,19 @@ def group_exists(session, groupname):
     '''Returns a boolean value that indicates whether a user group with the provided name exists.'''
     return (len(list(session.query(UserGroup.name).filter(
         UserGroup.name == groupname).get_results())) > 0)
+
+
+def get_vault_data_packages(session):
+    """Returns a list of collections of all data packages in the vault space."""
+    vault_collections = session.query(Collection.name).filter(
+        Collection.parent_name == f'/{session.zone}/home').filter(
+        Like(Collection.name, f'/{session.zone}/home/vault-%')).get_results()
+
+    datapackage_collections = []
+    for vault_collection in [coll[Collection.name] for coll in vault_collections]:
+        these_datapackage_collections = session.query(Collection.name).filter(
+            Collection.parent_name == vault_collection).filter(
+            Like(Collection.name, f"/{session.zone}/home/vault-%/%[%]")).get_results()
+        datapackage_collections.extend([coll[Collection.name] for coll in these_datapackage_collections])
+
+    return datapackage_collections

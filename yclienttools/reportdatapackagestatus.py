@@ -10,9 +10,8 @@ import smtplib
 import sys
 import time
 
-from irods.column import Like
 from irods.models import Collection, CollectionMeta
-from yclienttools import common_args, common_config
+from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 
 from email.mime.multipart import MIMEMultipart
@@ -96,7 +95,8 @@ def time_ago_to_readable(days, hours):
 
 def report_data_package_status(args, session):
     report = ""
-    for data_package in get_data_packages(session):
+    data_packages = common_queries.get_vault_data_packages(session)
+    for data_package in data_packages:
 
         status = get_vault_status(session, data_package)
         if args.pending and status in [
@@ -127,22 +127,6 @@ def report_data_package_status(args, session):
             args.email_sender,
             args.email_subject,
             report)
-
-
-def get_data_packages(session):
-    """Returns a list of collections of all data packages."""
-    vault_collections = session.query(Collection.name).filter(
-        Collection.parent_name == f'/{session.zone}/home').filter(
-        Like(Collection.name, f'/{session.zone}/home/vault-%')).get_results()
-
-    datapackage_collections = []
-    for vault_collection in [coll[Collection.name] for coll in vault_collections]:
-        these_datapackage_collections = session.query(Collection.name).filter(
-            Collection.parent_name == vault_collection).filter(
-            Like(Collection.name, f"/{session.zone}/home/vault-%/%[%]")).get_results()
-        datapackage_collections.extend([coll[Collection.name] for coll in these_datapackage_collections])
-
-    return datapackage_collections
 
 
 def get_current_timestamp():
