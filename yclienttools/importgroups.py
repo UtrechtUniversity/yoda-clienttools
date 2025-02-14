@@ -440,7 +440,7 @@ def _get_args() -> argparse.Namespace:
     common_args.add_default_args(parser)
     parser.add_argument('csvfile', help='Name of the CSV file')
     parser.add_argument('-i', '--internal-domains', required=True,
-                        help='Comma-separated list of internal email domains to the Yoda server')
+                        help='Comma-separated list of internal email domains to the Yoda server, or "all" if all domains should be considered internal')
     actiongroup = parser.add_mutually_exclusive_group()
     actiongroup.add_argument('--offline-check', '-c', action='store_true',
                              help='Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups')

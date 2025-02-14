@@ -23,7 +23,7 @@ def _get_args():
     parser.add_argument('userfile', help='Name of the user file')
     parser.add_argument('groupfile', help='Name of the group file ("-" for standard input)')
     parser.add_argument('-i', '--internal-domains', required=True,
-                        help='Comma-separated list of internal email domains to the Yoda server')
+                        help='Comma-separated list of internal email domains to the Yoda server, or "all" if all domains should be considered internal')
     actiongroup = parser.add_mutually_exclusive_group()
     actiongroup.add_argument('--offline-check', '-c', action='store_true',
                              help='Only checks user file format')

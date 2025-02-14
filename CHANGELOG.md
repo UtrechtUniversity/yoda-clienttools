@@ -6,6 +6,7 @@
   package collections in some cases.
 - Data package status report: report data package collections with no valid status
   correctly.
+- Add "all" option for --internal-domains in ensuremembers and importgroups tool
 
 ## 2024-12-24 v1.8.0
 
