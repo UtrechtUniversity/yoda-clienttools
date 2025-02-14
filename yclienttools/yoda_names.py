@@ -62,7 +62,7 @@ def is_valid_groupname(name: str) -> bool:
 def is_internal_user(username: str, internal_domains: List[str]) -> bool:
     for domain in internal_domains:
         domain_pattern = "@{}$".format(domain)
-        if re.search(domain_pattern, username) is not None:
+        if domain == "all" or re.search(domain_pattern, username) is not None:
             return True
 
     return False

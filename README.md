@@ -129,7 +129,9 @@ options:
   -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
-                        Comma-separated list of internal email domains to the Yoda server
+                        Comma-separated list of internal email domains to the Yoda server, or "all"
+                        if all domains should be considered internal
+
   --offline-check, -c   Only checks user file format
   --online-check, -C    Check mode (online): Verifies that all users in the user file exist.
   --verbose, -v         Verbose mode: print additional debug information.
@@ -207,7 +209,8 @@ options:
   -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
-                        Comma-separated list of internal email domains to the Yoda server
+                        Comma-separated list of internal email domains to the Yoda server, or "all"
+                        if all domains should be considered internal
   --offline-check, -c   Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups
   --online-check, -C    Check mode (online): verify CSV format and that groups do not exist. Does not create groups.
   --allow-update, -u    Allows existing groups to be updated
