@@ -36,7 +36,9 @@ def _get_args():
 
 def data_package_report(args, session):
     output = csv.writer(sys.stdout, delimiter=',')
-    for data_package in _get_data_packages(session):
+    output.writerow(["Path", "Size", "Publication status", "Publication date", "Has README file", "License type", "Data access type", "Metadata schema"])
+
+    for data_package in common_queries.get_vault_data_packages(session):
         _get_package_info(output, session, data_package, args.human_readable)
 
 
@@ -45,7 +47,7 @@ def _get_package_info(csv_output, session, collection, human_readable):
     vault_status = _get_vault_status(session, collection)
     publication_date = _get_publication_date(session, collection)
     has_readme = _has_readme_file(session, collection)
-    license = _get_license(session, collection)
+    license_type = _get_license(session, collection)
     data_access = _get_data_access(session, collection)
     metadata_schema = _get_metadata_schema(session, collection)
 
@@ -54,16 +56,7 @@ def _get_package_info(csv_output, session, collection, human_readable):
     else:
         display_size = str(raw_size)
 
-    csv_output.writerow([collection, display_size, vault_status, publication_date, has_readme, license, data_access, metadata_schema])
-
-
-def _get_data_packages(session):
-    """Returns a list of collections of all data packages."""
-    query_results = session.query(Collection.name).filter(
-        Like(Collection.parent_name, '/%/home/vault-%')).get_results()
-
-    return [result[Collection.name]
-            for result in query_results if not result[Collection.name].endswith("/original")]
+    csv_output.writerow([collection, display_size, vault_status, publication_date, has_readme, license_type, data_access, metadata_schema])
 
 
 def _get_vault_status(session, collection):
