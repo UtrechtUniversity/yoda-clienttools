@@ -3,7 +3,6 @@ import sys
 import csv
 import humanize
 from urllib.parse import urlparse
-from irods.column import Like
 from irods.models import Collection, CollectionMeta
 from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
