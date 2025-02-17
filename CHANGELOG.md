@@ -7,6 +7,8 @@
 - Data package status report: report data package collections with no valid status
   correctly.
 - Add "all" option for --internal-domains in ensuremembers and importgroups tool
+- Data packages report: report information for all data packages regarding path, size,
+  publication state and date, README file, license, access type, metadata schema.
 
 ## 2024-12-24 v1.8.0
 

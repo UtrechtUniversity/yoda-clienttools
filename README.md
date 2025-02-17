@@ -85,6 +85,27 @@ OK
 
 ## Overview of tools
 
+### yreport\_datapackageinfo
+
+Shows an extended data package report for each data package in the vault that includes
+path, size, publication status and date, README file, license, data access type, and
+metadata schema. The output is in CSV format.
+
+```
+usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10}] [--help] [-h]
+
+Shows an extended data package report for each data package in the vault that includes
+path, size, publication status and date, README file, license, data access type, and
+metadata schema. The output is in CSV format.
+
+options:
+  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+                        Override Yoda version on the server
+  --help                show help information
+  -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
+                        instead of 1000000
+```
+
 ### ycleanup\_files
 
 ```

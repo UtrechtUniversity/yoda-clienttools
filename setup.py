@@ -17,6 +17,7 @@ setup(
     packages=['yclienttools'],
     entry_points={
         'console_scripts': [
+            'yreport_datapackageinfo= yclienttools.reportdatapackageinfo:entry',
             'yreport_dataobjectspercollection= yclienttools.reportdoc:entry',
             'yreport_datapackagestatus= yclienttools.reportdatapackagestatus:entry',
             'yreport_collectionsize= yclienttools.reportsize:entry',
