@@ -1,3 +1,8 @@
+'''Shows an extended data package report for each data package in the vault that includes
+   path, size, publication status and date, README file, license, data access type, and
+   metadata schema. The output is in CSV format.
+'''
+
 import argparse
 import sys
 import csv
