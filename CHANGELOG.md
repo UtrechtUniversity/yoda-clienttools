@@ -1,14 +1,15 @@
 # Change log
 
-## UNRELEASED
+## 2025-02-17 v1.9.0
 
 - Data package status report: fix for matching vault collections other than data
   package collections in some cases.
 - Data package status report: report data package collections with no valid status
   correctly.
 - Add "all" option for --internal-domains in ensuremembers and importgroups tool
-- Data packages report: report information for all data packages regarding path, size,
-  publication state and date, README file, license, access type, metadata schema.
+- Add extended data package report: report information for all data packages regarding
+  path, size, publication state and date, README file, license, access type,
+  and metadata schema.
 
 ## 2024-12-24 v1.8.0
 
