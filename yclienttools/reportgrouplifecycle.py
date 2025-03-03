@@ -29,7 +29,9 @@ def entry():
     try:
         args = _get_args()
         yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
-        session = s.setup_session(yoda_version)
+        # Use session with increased session timeout because querying modification times
+        # can be time consuming on large environments.
+        session = s.setup_session(yoda_version, session_timeout=600)
         if args.quasi_xml:
             ET(XML_Parser_Type.QUASI_XML, session.server_version)
         report_groups_lifecycle(args, session)

@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Use increased session timeout for group lifecycle report to reduce risks of timeouts.
+
 ## 2025-02-17 v1.9.0
 
 - Data package status report: fix for matching vault collections other than data
