@@ -11,7 +11,7 @@ from irods.session import iRODSSession
 from yclienttools import common_config
 
 
-def setup_session(yoda_version_override):
+def setup_session(yoda_version_override, session_timeout=120):
     """Use irods environment files to configure a iRODSSession"""
 
     yoda_version = yoda_version_override if yoda_version_override is not None else common_config.get_default_yoda_version()
@@ -63,4 +63,5 @@ def setup_session(yoda_version_override):
             zone=irods_env["irods_zone_name"],
         )
 
+    session.connection_timeout = session_timeout
     return session
