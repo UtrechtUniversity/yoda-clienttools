@@ -99,7 +99,7 @@ path, size, publication status and date, README file, license, data access type,
 metadata schema. The output is in CSV format.
 
 options:
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --help                show help information
   -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
@@ -116,7 +116,7 @@ cleaned up when a dataset is archived, and deletes them.
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -r ROOT, --root ROOT  Delete unwanted files in this collection, as well as
                         its subcollections
@@ -147,7 +147,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server, or "all"
@@ -187,7 +187,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -a, --all             Show all groups (not just research and vault groups)
 ```
@@ -206,7 +206,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
@@ -227,7 +227,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server, or "all"
@@ -287,7 +287,7 @@ usage: yreport_collectionsize [-y {1.7,1.8,1.9,1.10}] [--help] [-q] [-h] [-r]
 Shows a report of the size of all data objects in a (set of) collections
 
 options:
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --help                show help information
   -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse
@@ -334,7 +334,7 @@ Shows a report of number of data objects and subcollections per collection
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -r ROOT, --root ROOT  show only collections in this root collection
                         (default: show all collections
@@ -384,7 +384,7 @@ optional arguments:
   --stale               Only print data packages which have last been modified
                         over approximately four hours ago (or with unavailable
                         modification time)
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
@@ -405,7 +405,7 @@ options:
   -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters not
                         supported by regular XML parser
   -H, --human-readable  Report sizes in human-readable figures
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
@@ -431,7 +431,7 @@ options:
                         combination with --size parameter)
   -m, --modified        Include last modified date research/deposit collection,
                         revisions and vault collection in output
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 
 ```
@@ -452,7 +452,7 @@ Generates a report of the contents of an intake collection.
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
@@ -477,7 +477,7 @@ Shows a report of the line counts of data objects.
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -c COLLECTION, --collection COLLECTION
                         show line counts of all data objects in this
@@ -500,7 +500,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --remove-data, -r     Remove any data from the group, if needed.
   --check, -c           Check mode: verifies groups exist, and checks if they are empty
@@ -526,7 +526,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --check, -c           Check mode: verifies user exist and trash/home directories are empty
   --verbose, -v         Verbose mode: print additional debug information.
@@ -549,6 +549,6 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10}, --yoda-version {1.7,1.8,1.9,1.10}
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
