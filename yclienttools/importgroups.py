@@ -489,7 +489,7 @@ def _get_format_help_text() -> str:
 
         Example Yoda 1.9 and higher:
         category,subcategory,groupname,manager,member,expiration_date,schema_id
-        departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2025-01-01,default-2
+        departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2055-01-01,default-3
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
     '''
 

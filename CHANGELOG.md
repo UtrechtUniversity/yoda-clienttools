@@ -5,6 +5,8 @@
 - Use increased session timeout for group lifecycle report to reduce risks of timeouts.
 - Add "2.0" to Yoda version parameter, to prepare for release of first alpha version of
   Yoda 2.0.
+- Docs: update example expiration date for importgroups - it needs to be in the future.
+  Also update metadata schema in example to latest version.
 
 ## 2025-02-17 v1.9.0
 
