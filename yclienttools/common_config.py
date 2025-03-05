@@ -11,9 +11,9 @@ import yaml
 def get_ca_file() -> str:
     configured_ca_file = _get_parameter_from_config("ca_file")
     if configured_ca_file is None:
-        for standard_location in ["/etc/ssl/certs/ca-certificates.crt",
-                                  "/etc/pki/tls/certs/ca-bundle.crt",
-                                  "/etc/irods/localhost_and_chain.crt"]:
+        for standard_location in ["/etc/irods/localhost_and_chain.crt",
+                                  "/etc/ssl/certs/ca-certificates.crt",
+                                  "/etc/pki/tls/certs/ca-bundle.crt"]:
             if os.path.isfile(standard_location):
                 return standard_location
 
