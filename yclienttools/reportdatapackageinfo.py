@@ -56,7 +56,7 @@ def _get_package_info(csv_output, session, collection, human_readable):
     license_type = _get_license(session, collection)
     data_access = _get_data_access(session, collection)
     metadata_schema = _get_metadata_schema(session, collection)
-    group = _get_research_group(session, collection)
+    group = _get_group(session, collection)
     attributes = _get_group_attributes(session, group)
     category = attributes.get("category")
     subcategory = attributes.get("subcategory")
@@ -140,17 +140,21 @@ def _get_metadata_schema(session, collection):
     return None
 
 
-def _get_research_group(session, collection):
-    """Returns research group of data package (or None if not found)."""
+def _get_group(session, collection):
+    """Returns group (research- or deposit-) of data package (or None if not found)."""
     vault_pattern = r"^/[^/]+/home/vault-([^/]+)/.+$"
 
     # Match vault pattern in collection path.
     match = re.search(vault_pattern, collection)
     if match:
-        groupname = f"research-{match.group(1)}"
+        name = match.group(1)
+        research_group = f"research-{name}"
+        if common_queries.group_exists(session, research_group):
+            return research_group
 
-        if common_queries.group_exists(session, groupname):
-            return groupname
+        deposit_group = f"deposit-{name}"
+        if common_queries.group_exists(session, deposit_group):
+            return deposit_group
 
     return None
 
