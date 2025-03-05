@@ -1,21 +1,23 @@
-'''Shows an extended data package report for each data package in the vault that includes
+"""Shows an extended data package report for each data package in the vault that includes
    path, size, publication status and date, README file, license, data access type, and
    metadata schema. The output is in CSV format.
-'''
+"""
 
 import argparse
-import sys
 import csv
-import humanize
+import re
+import sys
 from urllib.parse import urlparse
-from irods.models import Collection, CollectionMeta
+
+import humanize
+from irods.models import Collection, CollectionMeta, User
 from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 from yclienttools.options import GroupByOption
 
 
 def entry():
-    '''Entry point'''
+    """Entry point"""
     try:
         args = _get_args()
         yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
@@ -29,7 +31,7 @@ def entry():
 
 
 def _get_args():
-    '''Parse command line arguments'''
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
     common_args.add_default_args(parser)
     parser.add_argument('--help', action='help', help='show help information')
@@ -40,7 +42,7 @@ def _get_args():
 
 def data_package_report(args, session):
     output = csv.writer(sys.stdout, delimiter=',')
-    output.writerow(["Path", "Size", "Publication status", "Publication date", "Has README file", "License type", "Data access type", "Metadata schema"])
+    output.writerow(["Path", "Category", "Subcategory", "Research group", "Size", "Publication status", "Publication date", "Has README file", "License type", "Data access type", "Metadata schema"])
 
     for data_package in common_queries.get_vault_data_packages(session):
         _get_package_info(output, session, data_package, args.human_readable)
@@ -54,13 +56,17 @@ def _get_package_info(csv_output, session, collection, human_readable):
     license_type = _get_license(session, collection)
     data_access = _get_data_access(session, collection)
     metadata_schema = _get_metadata_schema(session, collection)
+    group = _get_research_group(session, collection)
+    attributes = _get_group_attributes(session, group)
+    category = attributes.get("category")
+    subcategory = attributes.get("subcategory")
 
     if human_readable:
         display_size = str(humanize.naturalsize(raw_size))
     else:
         display_size = str(raw_size)
 
-    csv_output.writerow([collection, display_size, vault_status, publication_date, has_readme, license_type, data_access, metadata_schema])
+    csv_output.writerow([collection, category, subcategory, group, display_size, vault_status, publication_date, has_readme, license_type, data_access, metadata_schema])
 
 
 def _get_vault_status(session, collection):
@@ -132,3 +138,37 @@ def _get_metadata_schema(session, collection):
         return href_parts[-2]
 
     return None
+
+
+def _get_research_group(session, collection):
+    """Returns research group of data package (or None if not found)."""
+    vault_pattern = r"^/[^/]+/home/vault-([^/]+)/.+$"
+
+    # Match vault pattern in collection path.
+    match = re.search(vault_pattern, collection)
+    if match:
+        groupname = f"research-{match.group(1)}"
+
+        if common_queries.group_exists(session, groupname):
+            return groupname
+
+    return None
+
+
+def _get_group_attributes(session, group):
+    """Retrieves a dictionary of attribute-values of group metadata. """
+    group_attributes = {"category", "subcategory"}
+    result = dict()
+    group_objects = list(session.query(User).filter(
+        User.name == group).filter(
+        User.type == "rodsgroup").get_results())
+
+    if len(group_objects) > 0:
+        for group_object in group_objects:
+            obj = session.users.get(group_object[User.name])
+            avus = obj.metadata.items()
+            for avu in avus:
+                if avu.name in group_attributes:
+                    result[avu.name] = avu.value
+
+    return result
