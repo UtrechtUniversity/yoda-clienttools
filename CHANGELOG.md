@@ -11,6 +11,8 @@
   the distribution CA certificates, if available, so that running the client tools on a
   (development) server with a self-signed certificate works as expected with default
   settings.
+- Add research or deposit group name, category name and subcategory name to extended
+  data package report.
 
 ## 2025-02-17 v1.9.0
 
