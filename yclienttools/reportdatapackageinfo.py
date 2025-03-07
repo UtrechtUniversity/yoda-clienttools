@@ -1,5 +1,5 @@
 """Shows an extended data package report for each data package in the vault that includes
-   path, size, publication status and date, README file, license, data access type, and
+   path, size, publication status and date, archiving date, README file, license, data access type, and
    metadata schema. The output is in CSV format.
 """
 
@@ -122,7 +122,7 @@ def _get_archiving_date(session, collection):
     # Convert the timestamp to datetime
     if timestamp_unix:
         dt = datetime.datetime.utcfromtimestamp(float(timestamp_unix))
-        date_str = dt.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        date_str = dt.strftime("%Y-%m-%dT%H:%M:%S")
         return date_str
 
     return None
