@@ -13,6 +13,7 @@
   settings.
 - Add research or deposit group name, category name and subcategory name to extended
   data package report.
+- Add archiving date/time to data package info report.
 
 ## 2025-02-17 v1.9.0
 

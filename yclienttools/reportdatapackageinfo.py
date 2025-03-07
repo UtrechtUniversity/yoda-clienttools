@@ -1,10 +1,12 @@
 """Shows an extended data package report for each data package in the vault that includes
-   path, size, publication status and date, README file, license, data access type, and
+   path, size, publication status and date, archiving date, README file, license, data access type, and
    metadata schema. The output is in CSV format.
 """
 
 import argparse
 import csv
+import datetime
+import json
 import re
 import sys
 from urllib.parse import urlparse
@@ -42,7 +44,7 @@ def _get_args():
 
 def data_package_report(args, session):
     output = csv.writer(sys.stdout, delimiter=',')
-    output.writerow(["Path", "Category", "Subcategory", "Research group", "Size", "Publication status", "Publication date", "Has README file", "License type", "Data access type", "Metadata schema"])
+    output.writerow(["Path", "Category", "Subcategory", "Research group", "Size", "Publication status", "Publication date", "Archiving Date", "Has README file", "License type", "Data access type", "Metadata schema"])
 
     for data_package in common_queries.get_vault_data_packages(session):
         _get_package_info(output, session, data_package, args.human_readable)
@@ -52,6 +54,7 @@ def _get_package_info(csv_output, session, collection, human_readable):
     raw_size = common_queries.get_collection_size(session, collection, True, GroupByOption.none, False)['all']
     vault_status = _get_vault_status(session, collection)
     publication_date = _get_publication_date(session, collection)
+    archiving_date = _get_archiving_date(session, collection)
     has_readme = _has_readme_file(session, collection)
     license_type = _get_license(session, collection)
     data_access = _get_data_access(session, collection)
@@ -65,8 +68,7 @@ def _get_package_info(csv_output, session, collection, human_readable):
         display_size = str(humanize.naturalsize(raw_size))
     else:
         display_size = str(raw_size)
-
-    csv_output.writerow([collection, category, subcategory, group, display_size, vault_status, publication_date, has_readme, license_type, data_access, metadata_schema])
+    csv_output.writerow([collection, category, subcategory, group, display_size, vault_status, publication_date, archiving_date, has_readme, license_type, data_access, metadata_schema])
 
 
 def _get_vault_status(session, collection):
@@ -89,6 +91,39 @@ def _get_publication_date(session, collection):
 
     if len(query_results) == 1:
         return query_results[0][CollectionMeta.value]
+
+    return None
+
+
+def _get_archiving_date(session, collection):
+    """Return archiving date of data package or None if not found."""
+    timestamp_unix = None
+
+    # Query iRODS metadata for action logs
+    query_results = list(
+        session.query(CollectionMeta.value).filter(
+            Collection.name == collection,
+            CollectionMeta.name == 'org_action_log'
+        ).get_results()
+    )
+    if not query_results:
+        return None
+
+    # Find the "secured in vault" entry
+    for log_item in query_results:
+        try:
+            log_entry = json.loads(log_item[CollectionMeta.value])
+            if log_entry[1].lower() == "secured in vault":
+                timestamp_unix = log_entry[0]
+                break
+        except (json.JSONDecodeError, IndexError, KeyError, AttributeError):
+            continue
+
+    # Convert the timestamp to datetime
+    if timestamp_unix:
+        dt = datetime.datetime.utcfromtimestamp(float(timestamp_unix))
+        date_str = dt.strftime("%Y-%m-%dT%H:%M:%S")
+        return date_str
 
     return None
 

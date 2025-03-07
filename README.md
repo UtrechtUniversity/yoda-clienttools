@@ -88,14 +88,14 @@ OK
 ### yreport\_datapackageinfo
 
 Shows an extended data package report for each data package in the vault that includes
-path, size, publication status and date, README file, license, data access type, and
+path, size, publication status and date, archiving date, README file, license, data access type, and
 metadata schema. The output is in CSV format.
 
 ```
 usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10}] [--help] [-h]
 
 Shows an extended data package report for each data package in the vault that includes
-path, size, publication status and date, README file, license, data access type, and
+path, size, publication status and date, archiving date, README file, license, data access type, and
 metadata schema. The output is in CSV format.
 
 options:
