@@ -92,7 +92,7 @@ path, size, publication status and date, README file, license, data access type,
 metadata schema. The output is in CSV format.
 
 ```
-usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10}] [--help] [-h]
+usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10,2.0}] [--help] [-h]
 
 Shows an extended data package report for each data package in the vault that includes
 path, size, publication status and date, README file, license, data access type, and
@@ -109,7 +109,7 @@ options:
 ### ycleanup\_files
 
 ```
-usage: ycleanup_files [-h] [-y {1.7,1.8,1.9,1.10}] -r ROOT
+usage: ycleanup_files [-h] [-y {1.7,1.8,1.9,1.10,2.0}] -r ROOT
 
 Recursively finds data objects in a collection that will typically have to be
 cleaned up when a dataset is archived, and deletes them.
@@ -133,7 +133,7 @@ Overview of files to be removed:
 ### yensuremembers
 
 ```
-usage: yensuremembers [-h] [-y {1.7,1.8,1.9,1.10}] -i INTERNAL_DOMAINS
+usage: yensuremembers [-h] [-y {1.7,1.8,1.9,1.10,2.0}] -i INTERNAL_DOMAINS
                       [--offline-check | --online-check] [--verbose]
                       [--dry-run]
                       userfile groupfile
@@ -178,7 +178,7 @@ options:
 ### ygrepgroups
 
 ```
-usage: ygrepgroups [-h] [-y {1.7,1.8,1.9,1.10}] [-a] searchstring
+usage: ygrepgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-a] searchstring
 
 Searches for groups by a search string
 
@@ -197,7 +197,7 @@ options:
 Prints the category and subcategory of a Yoda research group.
 
 ```
-usage: ygroupinfo [-h] [-y {1.7,1.8,1.9,1.10}] groupname
+usage: ygroupinfo [-h] [-y {1.7,1.8,1.9,1.10,2.0}] groupname
 
 Shows information about a Yoda research group
 
@@ -213,7 +213,7 @@ options:
 ### yimportgroups
 
 ```
-usage: yimportgroups [-h] [-y {1.7,1.8,1.9,1.10}] -i INTERNAL_DOMAINS
+usage: yimportgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
                      [--delete] [--verbose] [--no-validate-domains]
                      [--creator-user CREATOR_USER]
@@ -280,7 +280,7 @@ options:
 Shows a report of the size of all data objects in a (set of) collections.
 
 ```
-usage: yreport_collectionsize [-y {1.7,1.8,1.9,1.10}] [--help] [-q] [-h] [-r]
+usage: yreport_collectionsize [-y {1.7,1.8,1.9,1.10,2.0}] [--help] [-q] [-h] [-r]
                               [-R] [-g GROUP_BY]
                               (-c COLLECTION | -H | -C COMMUNITY)
 
@@ -327,7 +327,7 @@ Prints a report of the number of subcollections and data objects
 per collection. The output is in CSV format.
 
 ```
-usage: yreport_dataobjectspercollection [-h] [-y {1.7,1.8,1.9,1.10}]
+usage: yreport_dataobjectspercollection [-h] [-y {1.7,1.8,1.9,1.10,2.0}]
                                         [-r ROOT] [-e]
 
 Shows a report of number of data objects and subcollections per collection
@@ -362,7 +362,7 @@ List of columns if --by-extension is enabled:
 usage: yreport_datapackagestatus [-h] [--email EMAIL]
                                  [--email-subject EMAIL_SUBJECT]
                                  [--email-sender EMAIL_SENDER] [--pending]
-                                 [--stale] [-y {1.7,1.8,1.9,1.10}]
+                                 [--stale] [-y {1.7,1.8,1.9,1.10,2.0}]
 
 Produces a report of data packages and their vault status. The script can
 either report all data packages, or only the pending ones (i.e. ones with a
@@ -391,7 +391,7 @@ optional arguments:
 ### yreport\_depositpending
 
 ```
-usage: yreport_depositpending [-h] [-q] [-H] [-y {1.7,1.8,1.9,1.10}] group
+usage: yreport_depositpending [-h] [-q] [-H] [-y {1.7,1.8,1.9,1.10,2.0}] group
 
 Generates a list of direct subcollections of a deposit group collection, along with their size,
 owner, creation date and last modified date. The report can be used by data managers to tell which
@@ -412,7 +412,7 @@ options:
 ### yreport\_grouplifecycle
 
 ```
-usage: yreport_grouplifecycle [-h] [-q] [-s] [-H] [-m] [-y {1.7,1.8,1.9,1.10}]
+usage: yreport_grouplifecycle [-h] [-q] [-s] [-H] [-m] [-y {1.7,1.8,1.9,1.10,2.0}]
 
 Generates a list of research and deposit groups, along with their creation date,
 expiration date (if available), lists of group managers, regular members, and readonly
@@ -446,7 +446,7 @@ On systems with a significant number of datasets, it is recommended to use the
 up report generation.
 
 ```
-usage: yreport_intake [-h] [-y {1.7,1.8,1.9,1.10}] [-p] -s STUDY [-c CACHE]
+usage: yreport_intake [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-p] -s STUDY [-c CACHE]
 
 Generates a report of the contents of an intake collection.
 
@@ -470,7 +470,7 @@ options:
 Prints a report of the number of lines per data object.
 
 ```
-usage: yreport_linecount [-h] [-y {1.7,1.8,1.9,1.10}]
+usage: yreport_linecount [-h] [-y {1.7,1.8,1.9,1.10,2.0}]
                          (-c COLLECTION | -d DATA_OBJECT)
 
 Shows a report of the line counts of data objects.
@@ -489,7 +489,7 @@ options:
 ### yrmgroups
 
 ```
-usage: yrmgroups [-h] [-y {1.7,1.8,1.9,1.10}] [--remove-data] [--check]
+usage: yrmgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [--remove-data] [--check]
                  [--verbose] [--dry-run] [--continue-failure]
                  groupfile
 
@@ -515,7 +515,7 @@ The group file is a text file, with one group name (e.g.: research-foo) on each 
 ### yrmusers
 
 ```
-usage: yrmusers [-h] [-y {1.7,1.8,1.9,1.10}] [--check] [--verbose]
+usage: yrmusers [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [--check] [--verbose]
                 [--dry-run]
                 userfile
 
@@ -540,7 +540,7 @@ The user file is a text file, with one user name on each line.
 Prints a list of all groups a user is a member of.
 
 ```
-usage: ywhichgroups [-h] [-y {1.7,1.8,1.9,1.10}] username
+usage: ywhichgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] username
 
 Returns a list of groups of which a user is a member
 
