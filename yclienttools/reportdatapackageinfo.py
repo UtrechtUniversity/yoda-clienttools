@@ -5,8 +5,8 @@
 
 import argparse
 import csv
-import datetime 
-import json 
+import datetime
+import json
 import re
 import sys
 from urllib.parse import urlparse
@@ -98,7 +98,7 @@ def _get_publication_date(session, collection):
 def _get_archiving_date(session, collection):
     """Return archiving date of data package or None if not found."""
     timestamp_unix = None
-    
+
     # Query iRODS metadata for action logs
     query_results = list(
         session.query(CollectionMeta.value).filter(
@@ -117,10 +117,10 @@ def _get_archiving_date(session, collection):
                 timestamp_unix = log_entry[0]
                 break
         except (json.JSONDecodeError, IndexError, KeyError, AttributeError):
-            continue  
+            continue
 
     # Convert the timestamp to datetime
-    if timestamp_unix: 
+    if timestamp_unix:
         dt = datetime.datetime.utcfromtimestamp(float(timestamp_unix))
         date_str = dt.strftime("%Y-%m-%dT%H:%M:%S.%f")
         return date_str
