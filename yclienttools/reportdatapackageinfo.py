@@ -83,20 +83,17 @@ def _get_vault_status(session, collection):
     return None
 
 
-def _get_publication_date(session, collection):
-    """Returns publication date of data package (or None if not found)."""
-    query_results = list(session.query(CollectionMeta.value).filter(
-        Collection.name == collection).filter(
-        CollectionMeta.name == 'org_publication_publicationDate').get_results())
-
-    if len(query_results) == 1:
-        return query_results[0][CollectionMeta.value]
-
-    return None
-
-
 def _get_archiving_date(session, collection):
-    """Return archiving date of data package or None if not found."""
+    return _get_operation_date(session, collection, "secured in vault")
+
+
+def _get_publication_date(session, collection):
+    return _get_operation_date(session, collection, "published")
+
+
+def _get_operation_date(session, collection, operation):
+    """Return operation date/timestamp of data package in provenance log,
+       or None if not found."""
     timestamp_unix = None
 
     # Query iRODS metadata for action logs
@@ -113,7 +110,7 @@ def _get_archiving_date(session, collection):
     for log_item in query_results:
         try:
             log_entry = json.loads(log_item[CollectionMeta.value])
-            if log_entry[1].lower() == "secured in vault":
+            if log_entry[1].lower() == operation:
                 timestamp_unix = log_entry[0]
                 break
         except (json.JSONDecodeError, IndexError, KeyError, AttributeError):
