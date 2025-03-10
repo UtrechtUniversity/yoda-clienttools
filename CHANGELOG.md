@@ -11,9 +11,11 @@
   the distribution CA certificates, if available, so that running the client tools on a
   (development) server with a self-signed certificate works as expected with default
   settings.
-- Add research or deposit group name, category name and subcategory name to extended
-  data package report.
-- Add archiving date/time to data package info report.
+- Extended data package report: add research or deposit group name, category name
+  and subcategory
+- Extended data package report: add archiving date and time
+- Extended data package report: ensure archiving date/time and publication date/time
+  use the same timezone (UTC)
 
 ## 2025-02-17 v1.9.0
 
