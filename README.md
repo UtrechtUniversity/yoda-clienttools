@@ -85,26 +85,23 @@ OK
 
 ## Overview of tools
 
-### yreport\_datapackageinfo
-
-Shows an extended data package report for each data package in the vault that includes
-path, size, publication status and date, archiving date, README file, license, data access type, and
-metadata schema. The output is in CSV format.
-
-```
-usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10,2.0}] [--help] [-h]
-
-Shows an extended data package report for each data package in the vault that includes
-path, size, publication status and date, archiving date, README file, license, data access type, and
-metadata schema. The output is in CSV format.
-
-options:
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
-                        Override Yoda version on the server
-  --help                show help information
-  -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
-                        instead of 1000000
-```
+Summary of tools:
+* [ycleanup_files](https://github.com/utrechtuniversity/yoda-clienttools#ycleanup_files) - clean up temporary data objects
+* [yensuremembers](https://github.com/utrechtuniversity/yoda-clienttools#yensuremembers) - ensure list of groups has a common set of members
+* [ygrepgroups](https://github.com/utrechtuniversity/yoda-clienttools#ygrepgroups) - search for groups
+* [ygroupinfo](https://github.com/utrechtuniversity/yoda-clienttools#ygroupinfo) - print group (sub)category information
+* [yimportgroups](https://github.com/utrechtuniversity/yoda-clienttools#yimportgroups) - import group data from CSV file
+* [yreport_collectionsize](https://github.com/utrechtuniversity/yoda-clienttools#yreport_collectionsize) - report of collection sizes
+* [yreport_dataobjectspercollection](https://github.com/utrechtuniversity/yoda-clienttools#yreport_dataobjectspercollection) - report of number of data objects per collection
+* [yreport_datapackagestatus](https://github.com/utrechtuniversity/yoda-clienttools#yreport_datapackagestatus) - print or email report on status of data packages
+* [yreport_datapackageinfo](https://github.com/utrechtuniversity/yoda-clienttools#yreport_datapackageinfo) - print extended report with data package information
+* [yreport_depositpending](https://github.com/utrechtuniversity/yoda-clienttools#yreport_depositpending) - print report on pending data package in deposit module
+* [yreport_grouplifecycle](https://github.com/utrechtuniversity/yoda-clienttools#yreport_grouplifecycle) - print extended report on Yoda groups
+* [yreport_intake](https://github.com/utrechtuniversity/yoda-clienttools#yreport_intake) - print report on intake module data
+* [yreport_linecount](https://github.com/utrechtuniversity/yoda-clienttools#yreport_linecount) - print report on line count per data object
+* [yrmgroups](https://github.com/utrechtuniversity/yoda-clienttools#yrmgroups) - remove a list of groups
+* [yrmusers](https://github.com/utrechtuniversity/yoda-clienttools#yrmusers) - remove a list of users
+* [ywhichgroups](https://github.com/utrechtuniversity/yoda-clienttools#ywhichgroups) - show list of groups that a user is a member of
 
 ### ycleanup\_files
 
@@ -355,6 +352,27 @@ List of columns if --by-extension is enabled:
    in collection (nonrecursive)
 4. Extension
 5. Name of collection
+
+### yreport\_datapackageinfo
+
+Shows an extended data package report for each data package in the vault that includes
+path, size, publication status and date, archiving date, README file, license, data access type, and
+metadata schema. The output is in CSV format.
+
+```
+usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10,2.0}] [--help] [-h]
+
+Shows an extended data package report for each data package in the vault that includes
+path, size, publication status and date, archiving date, README file, license, data access type, and
+metadata schema. The output is in CSV format.
+
+options:
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+                        Override Yoda version on the server
+  --help                show help information
+  -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
+                        instead of 1000000
+```
 
 ### yreport_datapackagestatus
 

@@ -7,6 +7,7 @@
   Yoda 2.0.
 - Docs: update example expiration date for importgroups - it needs to be in the future.
   Also update metadata schema in example to latest version.
+- Docs: add summary list of tools
 - Fix autodetection of CA certificates by choosing the iRODS server certificate over
   the distribution CA certificates, if available, so that running the client tools on a
   (development) server with a self-signed certificate works as expected with default
