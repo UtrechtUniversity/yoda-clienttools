@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2025-03-10 v1.10.0
 
 - Use increased session timeout for group lifecycle report to reduce risks of timeouts.
 - Add "2.0" to Yoda version parameter, to prepare for release of first alpha version of
