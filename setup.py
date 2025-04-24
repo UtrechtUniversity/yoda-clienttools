@@ -25,6 +25,7 @@ setup(
             'yreport_grouplifecycle= yclienttools.reportgrouplifecycle:entry',
             'yreport_intake= yclienttools.reportintake:entry',
             'yreport_linecount= yclienttools.reportlinecount:entry',
+            'yreport_oldvsnewdata= yclienttools.reportoldvsnewdata:entry',
             'ycleanup_files= yclienttools.cleanupfiles:entry',
             'ywhichgroups=yclienttools.whichgroups:entry',
             'ygrepgroups=yclienttools.grepgroups:entry',

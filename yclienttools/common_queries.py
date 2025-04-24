@@ -1,6 +1,7 @@
 import datetime
-from itertools import chain
+import itertools
 import os
+from itertools import chain
 from typing import Dict, Union
 
 from irods.column import Like
@@ -10,7 +11,7 @@ from yclienttools import exceptions
 from yclienttools.options import GroupByOption
 
 
-def get_collections_in_root(session, root):
+def get_collections_in_root(session: iRODSSession, root: str) -> itertools.chain:
     '''Get a generator of collections within a root collection, including the root collection itself.'''
 
     if root.endswith("/"):

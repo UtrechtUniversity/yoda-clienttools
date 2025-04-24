@@ -1,5 +1,10 @@
 # Change log
 
+## NOT YET RELEASED
+
+- add "old vs new data" report - prints report on total replica size of data objects,
+  grouped by old (not recently modified) vs new (recently modified) data objects
+
 ## 2025-03-10 v1.10.0
 
 - Use increased session timeout for group lifecycle report to reduce risks of timeouts.
