@@ -98,6 +98,7 @@ Summary of tools:
 * [yreport_depositpending](https://github.com/utrechtuniversity/yoda-clienttools#yreport_depositpending) - print report on pending data package in deposit module
 * [yreport_grouplifecycle](https://github.com/utrechtuniversity/yoda-clienttools#yreport_grouplifecycle) - print extended report on Yoda groups
 * [yreport_intake](https://github.com/utrechtuniversity/yoda-clienttools#yreport_intake) - print report on intake module data
+* [yreport_oldvsnewdata](https://github.com/utrechtuniversity/yoda-clienttools#yreport_oldvsnewdata) - print report on total replica size of data objects, grouped by old (not recently modified) vs new (recently modified) data objects
 * [yreport_linecount](https://github.com/utrechtuniversity/yoda-clienttools#yreport_linecount) - print report on line count per data object
 * [yrmgroups](https://github.com/utrechtuniversity/yoda-clienttools#yrmgroups) - remove a list of groups
 * [yrmusers](https://github.com/utrechtuniversity/yoda-clienttools#yrmusers) - remove a list of users
@@ -502,6 +503,37 @@ options:
                         collection (recursive)
   -d DATA_OBJECT, --data-object DATA_OBJECT
                         show line count of only this data object
+```
+
+### yreport_oldvsnewdata
+
+```
+usage: yreport_oldvsnewdata [-h] [-c] [-q] [-d DAYS_AGO] [-e ENVIRONMENT] [-H] [-p]
+                            [-y {1.7,1.8,1.9,1.10,2.0}]
+
+Generates a list of research and deposit groups. The report lists the amount of replica data
+in each research group collection, along with its vault group collection and revisions
+collection, split across old and new data. Data objects that have a replica that was
+modified after the user-provided cutoff date are considered 'new'. Data objects that do not
+have any replica that was modified after the user-provided cutoff date are considered 'old'.
+
+options:
+  -h, --help            show this help message and exit
+  -c, --aggregate-by-category
+                        Aggregate size data by category rather than by group
+  -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters not
+                        supported by regular XML parser
+  -d DAYS_AGO, --days-ago DAYS_AGO
+                        Cutoff date for dividing data in old vs. new data, in terms of
+                        number of days ago.
+  -e ENVIRONMENT, --environment ENVIRONMENT
+                        Contents of environment column to add to output, so that output of
+                        multiple Yoda environments can be concatenated.
+  -H, --human-readable  Report sizes in human-readable figures (only relevant in combination
+                        with --size parameter)
+  -p, --progress        Print progress updates
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+                        Override Yoda version on the server
 ```
 
 ### yrmgroups
