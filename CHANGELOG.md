@@ -1,5 +1,11 @@
 # Change log
 
+
+## NOT YET RELEASED
+
+- add "data duplication" report - prints report that shows which directory trees appear
+  both in a research and vault collection.
+
 ## 2025-03-10 v1.10.0
 
 - Use increased session timeout for group lifecycle report to reduce risks of timeouts.
