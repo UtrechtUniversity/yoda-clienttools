@@ -1,6 +1,6 @@
 # Change log
 
-## NOT YET RELEASED
+## 2025-05-07 v1.11.0
 
 - add "old vs new data" report - prints report on total replica size of data objects,
   grouped by old (not recently modified) vs new (recently modified) data objects
