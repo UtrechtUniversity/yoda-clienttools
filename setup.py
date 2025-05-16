@@ -20,6 +20,7 @@ setup(
             'yreport_datapackageinfo= yclienttools.reportdatapackageinfo:entry',
             'yreport_dataobjectspercollection= yclienttools.reportdoc:entry',
             'yreport_datapackagestatus= yclienttools.reportdatapackagestatus:entry',
+            'yreport_dataduplication= yclienttools.reportdataduplication:entry',
             'yreport_collectionsize= yclienttools.reportsize:entry',
             'yreport_depositpending= yclienttools.reportdepositpending:entry',
             'yreport_grouplifecycle= yclienttools.reportgrouplifecycle:entry',
