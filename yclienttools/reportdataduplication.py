@@ -1,7 +1,7 @@
 import argparse
 import csv
 import sys
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any, Set
 
 from irods.session import iRODSSession
 from irods.models import Collection, DataObject
@@ -42,7 +42,7 @@ def _get_output_columns(args: argparse.Namespace) -> List[str]:
 
 def _get_research_group_name(vault_group: str) -> str:
     """Converts a vault group name to its corresponding research group name."""
-    return vault_group.replace("vault", "research")
+    return vault_group.replace("vault", "research", 1)
 
 
 def _get_research_group_path(zone: str, research_group: str) -> str:
@@ -63,7 +63,7 @@ def _get_research_matches(session: iRODSSession, research_path: str, collection_
     - Direct child: /research_path/collection_name
     - Nested subcollections ending in /collection_name
     """
-    matches = set()
+    matches: Set[str] = set()
 
     # Match top-level
     if research_path.split('/')[-1] == collection_name:
@@ -86,31 +86,37 @@ def _get_collection_tree(session: iRODSSession, coll_path: str) -> Dict[str, Dic
     - 'files': {relative_path: size}
     - 'subcollections': sorted list of relative paths of all subcollections
     """
-    result = {
+    result: Dict[str, Any] = {
         "files": {},
         "subcollections": set()
     }
 
     # Include base collection if it exists
     if collection_exists(session, coll_path):
-        result["subcollections"].add("")  # base collection
+        result["subcollections"].add("")
 
     # Get all subcollections (even empty ones)
     query_subcolls = session.query(Collection.name).filter(
         Like(Collection.name, f"{coll_path}/%")
     )
     for row in query_subcolls.get_results():
-        rel_coll_path = row[Collection.name].replace(coll_path, "").lstrip("/")
+        rel_coll_path = row[Collection.name].replace(coll_path, "", 1).lstrip("/")
         if rel_coll_path:
             result["subcollections"].add(rel_coll_path)
 
-    # Get all files
-    query_files = session.query(Collection.name, DataObject.name, DataObject.size).filter(
+    # Get data objects in collection
+    coll_data_objects = session.query(Collection.name, DataObject.name, DataObject.size).filter(
+        Collection.name == coll_path
+    )
+    # Get all data objects in all subcollections
+    subcoll_data_objects = session.query(Collection.name, DataObject.name, DataObject.size).filter(
         Like(Collection.name, f"{coll_path}/%")
     )
-    for row in query_files.get_results():
+
+    all_data_objects = list(coll_data_objects.get_results()) + list(subcoll_data_objects.get_results())
+    for row in all_data_objects:
         full_path = f"{row[Collection.name]}/{row[DataObject.name]}"
-        rel_path = full_path.replace(coll_path, "").lstrip("/")
+        rel_path = full_path.replace(coll_path, "", 1).lstrip("/")
         result["files"][rel_path] = row[DataObject.size]
 
     result["subcollections"] = sorted(result["subcollections"])
@@ -151,7 +157,7 @@ def collections_exist(session: iRODSSession, *paths: str) -> bool:
 
 def process_collection(session: iRODSSession, args: argparse.Namespace, coll_path: str) -> List[Dict[str, str]]:
     """Process one vault collection and return any matching research collections."""
-    matches = []
+    matches: List[Dict[str, str]] = []
 
     if not is_valid_collection_path(coll_path):
         return matches
