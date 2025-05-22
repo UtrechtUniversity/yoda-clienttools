@@ -95,6 +95,7 @@ Summary of tools:
 * [yreport_dataobjectspercollection](https://github.com/utrechtuniversity/yoda-clienttools#yreport_dataobjectspercollection) - report of number of data objects per collection
 * [yreport_datapackagestatus](https://github.com/utrechtuniversity/yoda-clienttools#yreport_datapackagestatus) - print or email report on status of data packages
 * [yreport_datapackageinfo](https://github.com/utrechtuniversity/yoda-clienttools#yreport_datapackageinfo) - print extended report with data package information
+* [yreport_dataduplication](https://github.com/utrechtuniversity/yoda-clienttools#yreport_dataduplication) - print report on directory trees that appear both in a research and vault collection
 * [yreport_depositpending](https://github.com/utrechtuniversity/yoda-clienttools#yreport_depositpending) - print report on pending data package in deposit module
 * [yreport_grouplifecycle](https://github.com/utrechtuniversity/yoda-clienttools#yreport_grouplifecycle) - print extended report on Yoda groups
 * [yreport_intake](https://github.com/utrechtuniversity/yoda-clienttools#yreport_intake) - print report on intake module data
@@ -373,6 +374,23 @@ options:
   --help                show help information
   -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
                         instead of 1000000
+```
+
+### yreport_dataduplication
+```
+usage: yreport_dataduplication
+
+Generates a data duplication report that shows which directory trees appear both in a
+research and vault collection.
+
+options:
+  -h, --help            show this help message and exit
+  -e ENVIRONMENT, --environment ENVIRONMENT
+                        Contents of environment column to add to output, so that output of
+                        multiple Yoda environments can be concatenated.
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+                        Override Yoda version on the server
+
 ```
 
 ### yreport_datapackagestatus
