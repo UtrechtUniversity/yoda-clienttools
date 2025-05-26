@@ -1,6 +1,6 @@
 # Change log
 
-## NOT YET RELEASED
+## 2025-05-26 v1.12.0
 
 - add "data duplication" report - prints report that shows which directory trees appear
   both in a research and vault collection.
