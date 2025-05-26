@@ -378,19 +378,18 @@ options:
 
 ### yreport_dataduplication
 ```
-usage: yreport_dataduplication
-
-Generates a data duplication report that shows which directory trees appear both in a
-research and vault collection.
+usage: yreport_dataduplication [-h] [-e ENVIRONMENT] [-s] [-H] [-y {1.7,1.8,1.9,1.10,2.0}]
 
 options:
   -h, --help            show this help message and exit
   -e ENVIRONMENT, --environment ENVIRONMENT
-                        Contents of environment column to add to output, so that output of
-                        multiple Yoda environments can be concatenated.
+                        Optional environment label to include in the output
+  -s, --size            Include size of research/deposit collection, vault collection and revisions in
+                        output
+  -H, --human-readable  Report sizes in human-readable figures (only relevant in combination with --size
+                        parameter)
   -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
-
 ```
 
 ### yreport_datapackagestatus

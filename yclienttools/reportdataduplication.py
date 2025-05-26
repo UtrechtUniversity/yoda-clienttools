@@ -1,15 +1,17 @@
 import argparse
 import csv
 import sys
-from typing import List, Dict, Tuple, Any, Set
+from typing import List, Dict, Tuple, Any, Set, Union
 
+import humanize
 from irods.session import iRODSSession
 from irods.models import Collection, DataObject
 from irods.column import Like
 
-from yclienttools import session as s
+from yclienttools import common_args, session as s
 from yclienttools.common_config import get_default_yoda_version
-from yclienttools.common_queries import get_vault_data_packages, collection_exists
+from yclienttools.common_queries import get_vault_data_packages, collection_exists, get_collection_size
+from yclienttools.options import GroupByOption
 
 
 def entry():
@@ -29,15 +31,22 @@ def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-e", "--environment", type=str, default=None,
                         help="Optional environment label to include in the output")
-    parser.add_argument("--yoda-version", type=str, default=None,
-                        help="Optional Yoda version (default defined in config)")
+    parser.add_argument("-s", "--size", default=False, action='store_true',
+                        help='Include size of research/deposit collection, vault collection and revisions in output')
+    parser.add_argument("-H", "--human-readable", default=False, action='store_true',
+                        help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
+    common_args.add_default_args(parser)
     return parser.parse_args()
 
 
 def _get_output_columns(args: argparse.Namespace) -> List[str]:
     """Determines output CSV column headers based on the presence of the environment flag."""
     columns = ["Research Group", "Research Path", "Vault Path"]
-    return columns if args.environment is None else ["Environment"] + columns
+    if args.environment:
+        columns.insert(0, "Environment")
+    if args.size:
+        columns.append("Size")
+    return columns
 
 
 def _get_research_group_name(vault_group: str) -> str:
@@ -53,6 +62,15 @@ def _get_research_group_path(zone: str, research_group: str) -> str:
 def _get_collection_name(data_package_name: str) -> str:
     """Get the base collection name from a data package name."""
     return data_package_name.split("[")[0]
+
+
+def _size_to_str(value: Union[int, None], human_readable: bool) -> str:
+    if value is None:
+        return "N/A"
+    elif human_readable:
+        return humanize.naturalsize(value, binary=True)
+    else:
+        return str(value)
 
 
 def _get_research_matches(session: iRODSSession, research_path: str, collection_name: str) -> List[str]:
@@ -155,7 +173,7 @@ def collections_exist(session: iRODSSession, *paths: str) -> bool:
     return all(collection_exists(session, path) for path in paths)
 
 
-def process_collection(session: iRODSSession, args: argparse.Namespace, coll_path: str) -> List[Dict[str, str]]:
+def process_collection(session: iRODSSession, args: argparse.Namespace, coll_path: str) -> List[Dict[str, Any]]:
     """Process one vault collection and return any matching research collections."""
     matches: List[Dict[str, str]] = []
 
@@ -176,13 +194,20 @@ def process_collection(session: iRODSSession, args: argparse.Namespace, coll_pat
 
     for candidate in research_candidates:
         if are_collections_identical(session, vault_original_path, candidate):
-            matches.append({
+            match: Dict[str, Any] = {
                 'research_group': research_group,
                 'research_path': candidate,
                 'vault_path': coll_path
-            })
+            }
+            if args.size:
+                match["size"] = _get_collection_size_for_ddr(session, candidate)
+            matches.append(match)
 
     return matches
+
+
+def _get_collection_size_for_ddr(session: iRODSSession, collection_name: str) -> int:
+    return get_collection_size(session, collection_name, True, GroupByOption.none, False)['all']
 
 
 def report_dataduplication(args: argparse.Namespace, session: iRODSSession):
@@ -201,9 +226,7 @@ def report_dataduplication(args: argparse.Namespace, session: iRODSSession):
                 write_report_row(
                     args=args,
                     writer=writer,
-                    research_group=match['research_group'],
-                    research_path=match['research_path'],
-                    vault_path=match['vault_path']
+                    match=match
                 )
         except Exception as e:
             print(f"Error processing collection {coll_path}: {e}", file=sys.stderr)
@@ -211,17 +234,17 @@ def report_dataduplication(args: argparse.Namespace, session: iRODSSession):
 
 def write_report_row(args: argparse.Namespace,
                      writer: csv.DictWriter,
-                     research_group: str,
-                     research_path: str,
-                     vault_path: str):
+                     match: Dict[str, Any]):
     """Write a single row of duplication report to CSV output."""
     row = {
-        "Research Group": research_group,
-        "Research Path": research_path,
-        "Vault Path": vault_path
+        "Research Group": match["research_group"],
+        "Research Path": match["research_path"],
+        "Vault Path": match["vault_path"]
     }
     if args.environment:
         row["Environment"] = args.environment
+    if args.size:
+        row["Size"] = _size_to_str(match["size"], args.human_readable)
     try:
         writer.writerow(row)
     except Exception as e:
