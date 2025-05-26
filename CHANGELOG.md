@@ -1,5 +1,10 @@
 # Change log
 
+## NOT YET RELEASED
+
+- add "data duplication" report - prints report that shows which directory trees appear
+  both in a research and vault collection.
+
 ## 2025-05-07 v1.11.0
 
 - add "old vs new data" report - prints report on total replica size of data objects,
