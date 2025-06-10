@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Upgrade python-irodsclient to v3.1.1
+
 ## 2025-05-26 v1.12.0
 
 - add "data duplication" report - prints report that shows which directory trees appear
