@@ -5,7 +5,7 @@ intended for data managers and key users.
 
 ## Installation
 
-These tools require Python 3. They are compatible with Yoda 1.7.x through 1.10.x.
+These tools require Python 3.8 or higher. They are compatible with Yoda 1.9.x through 1.10.x.
 
 ### Linux
 
