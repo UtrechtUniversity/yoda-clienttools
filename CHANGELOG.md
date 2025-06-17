@@ -5,6 +5,7 @@
 - Upgrade python-irodsclient to v3.1.1
 - Minimum Yoda version: changed to 1.9.x
 - Minimum Python version: changed to to 3.8
+- Add depth-first collection removal tool (ydf_irm)
 
 ## 2025-05-26 v1.12.0
 

@@ -87,6 +87,7 @@ OK
 
 Summary of tools:
 * [ycleanup_files](https://github.com/utrechtuniversity/yoda-clienttools#ycleanup_files) - clean up temporary data objects
+* [ydf_irm](https://github.com/utrechtuniversity/yoda-clienttools#ydf_irm) - remove large collection trees depth-first
 * [yensuremembers](https://github.com/utrechtuniversity/yoda-clienttools#yensuremembers) - ensure list of groups has a common set of members
 * [ygrepgroups](https://github.com/utrechtuniversity/yoda-clienttools#ygrepgroups) - search for groups
 * [ygroupinfo](https://github.com/utrechtuniversity/yoda-clienttools#ygroupinfo) - print group (sub)category information
@@ -128,6 +129,32 @@ Overview of files to be removed:
 | .\_*      | MacOS resource fork            |   |   |   |
 | .DS_Store | MacOS custom folder attributes |   |   |   |
 | Thumbs.db | Windows thumbnail data         |   |   |   |
+
+### ydf_irm
+
+```
+usage: ydf_irm [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-v] [-c] [-d] [-m MIN_DEPTH]
+               [-k KEEP_COLLECTION_ITSELF]
+               collection
+
+ydf_irm: recursively remove collection trees on iRODS (depth-first)
+
+positional arguments:
+  collection            Collection to remove (absolute path)
+
+options:
+  -h, --help            show this help message and exit
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+                        Override Yoda version on the server
+  -v, --verbose         Verbose mode for printing debug information
+  -c, --continue-failure
+                        Continue if an error occurs while removing data
+  -d, --dry-run         Dry run mode - does not actually delete collection
+  -m MIN_DEPTH, --min-depth MIN_DEPTH
+                        Minimum depth of tree to remove (default: 3)
+  -k KEEP_COLLECTION_ITSELF, --keep-collection-itself KEEP_COLLECTION_ITSELF
+                        Only remove subcollections from this collection. Keep collection itself.
+```
 
 ### yensuremembers
 
