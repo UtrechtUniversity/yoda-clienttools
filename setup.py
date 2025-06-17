@@ -27,6 +27,7 @@ setup(
             'yreport_linecount= yclienttools.reportlinecount:entry',
             'yreport_oldvsnewdata= yclienttools.reportoldvsnewdata:entry',
             'ycleanup_files= yclienttools.cleanupfiles:entry',
+            'ydf_irm= yclienttools.depthfirst_irm:entry',
             'ywhichgroups=yclienttools.whichgroups:entry',
             'ygrepgroups=yclienttools.grepgroups:entry',
             'ygroupinfo=yclienttools.groupinfo:entry',
