@@ -6,6 +6,8 @@
 - Minimum Yoda version: changed to 1.9.x
 - Minimum Python version: changed to to 3.8
 - Add depth-first collection removal tool (ydf_irm)
+- Print dry run output for ydf_irm and yrmgroups to standard output consistently, so
+  that output can be processed more conveniently using tools such as grep and sed.
 
 ## 2025-05-26 v1.12.0
 

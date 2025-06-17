@@ -25,7 +25,7 @@ def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, continue_failu
 
     for object in _get_dataobjects_in_coll(stempath):
         if dry_run:
-            _print_v("Dry run - would remove data object {} ...".format(object))
+            print("Dry run - would remove data object {} ...".format(object))
         else:
             if verbose:
                 _print_v("Removing data object {} ...".format(object))
@@ -40,7 +40,7 @@ def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, continue_failu
         for coll in sorted(collections[depth]):
             assert (coll.startswith(stempath + "/") or coll == stempath)
             if dry_run:
-                _print_v("Dry run - would remove collection {} ...".format(coll))
+                print("Dry run - would remove collection {} ...".format(coll))
             else:
                 if verbose:
                     _print_v("Removing collection {} ...".format(coll))
