@@ -28,6 +28,8 @@ def _get_args():
                         help='Check mode: verifies groups exist, and checks if they are empty')
     parser.add_argument('--verbose', '-v', action='store_true', default=False,
                         help='Verbose mode: print additional debug information.')
+    parser.add_argument('--force', '-f', action='store_true', default=False,
+                        help='Delete with force flag: delete data permanently rather than moving it to the trash.')
     parser.add_argument('--dry-run', '-d', action='store_true', default=False,
                         help="Dry run mode: show what action would be taken.")
     parser.add_argument('--continue-failure', '-C', action='store_true', default=False,
@@ -109,9 +111,7 @@ def remove_groups(session, rule_interface, args, groups):
             remove_group_contents(session,
                                   rule_interface,
                                   group,
-                                  args.verbose,
-                                  args.dry_run,
-                                  args.continue_failure)
+                                  args)
 
         if args.dry_run:
             print(f"Would remove group {group} ...")
@@ -127,26 +127,31 @@ def remove_groups(session, rule_interface, args, groups):
                     _exit_with_error(message)
 
 
-def remove_group_contents(session, rule_interface, group, verbose, dry_run, continue_failure):
+def remove_group_contents(session, rule_interface, group, args):
     group_coll = f"/{session.zone}/home/{group}"
     rods_role = rule_interface.call_uuGroupGetMemberType(group, "rods")
     if rods_role == "none":
-        if dry_run:
+        if args.dry_run:
             print(f"Would add rods user to group {group} in order to remove data")
         else:
-            if verbose:
+            if args.verbose:
                 print(f"Adding rods user to group {group} in order to remove data ...")
             rule_interface.call_uuGroupUserAdd(group, "rods")
     if rods_role != "manager":
-        if dry_run:
+        if args.dry_run:
             print(f"Would make rods user manager of group {group} in order to remove data")
         else:
-            if verbose:
+            if args.verbose:
                 print(f"Making rods user manager of group {group} in order to remove data ...")
             rule_interface.call_uuGroupUserChangeRole(group, "rods", "manager")
-    if verbose:
-        print(f"Removing data from group {group_coll} (dry run mode: {str(dry_run)} ...")
-    remove_collection_data(group_coll, verbose, dry_run, continue_failure, False)
+    if args.verbose:
+        print(f"Removing data from group {group_coll} (dry run mode: {str(args.dry_run)} ...")
+    remove_collection_data(group_coll,
+                           verbose=args.verbose,
+                           dry_run=args.dry_run,
+                           continue_failure=args.continue_failure,
+                           remove_collection_itself=False,
+                           force=args.force)
 
 
 def group_collection_exists(session, group):

@@ -8,6 +8,7 @@
 - Add depth-first collection removal tool (ydf_irm)
 - Print dry run output for ydf_irm and yrmgroups to standard output consistently, so
   that output can be processed more conveniently using tools such as grep and sed.
+- Add --force option to ydf_irm and yrmgroups
 
 ## 2025-05-26 v1.12.0
 
