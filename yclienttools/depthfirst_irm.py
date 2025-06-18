@@ -22,9 +22,11 @@ def parse_args():
                         action="store_true", default=False)
     parser.add_argument("-c", "--continue-failure", help="Continue if an error occurs while removing data",
                         action="store_true", default=False)
+    parser.add_argument('--force', '-f', action='store_true', default=False,
+                        help='Delete with force flag: delete data permanently rather than moving it to the trash.')
     parser.add_argument("-d", "--dry-run", help="Dry run mode - does not actually delete collection", action="store_true", default=False)
     parser.add_argument("-m", "--min-depth", help="Minimum depth of tree to remove (default: 3)", type=int, default=3)
-    parser.add_argument("-k", "--keep-collection-itself",
+    parser.add_argument("-k", "--keep-collection-itself", action='store_true', default=False,
                         help="Only remove subcollections from this collection. Keep collection itself.")
     return parser.parse_args()
 
@@ -75,7 +77,8 @@ def main():
     if not collection_exists(session, args.collection):
         _exit_with_error("Error: collection does not exist.")
     remove_collection_data(args.collection,
-                           args.verbose,
-                           args.dry_run,
-                           args.continue_failure,
-                           not args.keep_collection_itself)
+                           verbose=args.verbose,
+                           dry_run=args.dry_run,
+                           continue_failure=args.continue_failure,
+                           remove_collection_itself=not args.keep_collection_itself,
+                           force=args.force)

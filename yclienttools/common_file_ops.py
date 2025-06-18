@@ -13,12 +13,18 @@ import sys
 """
 
 
-def remove_collection_data(collection, verbose, dry_run, continue_failure, remove_coll_itself):
+def remove_collection_data(collection, verbose=False, dry_run=False, continue_failure=False, remove_collection_itself=True, force=False):
     collection_tree = _get_subcollections_by_depth(collection)
-    _remove_leaf_to_stem(collection_tree, collection, dry_run, verbose, continue_failure, remove_coll_itself)
+    _remove_leaf_to_stem(collection_tree,
+                         collection,
+                         dry_run=dry_run,
+                         verbose=verbose,
+                         continue_failure=continue_failure,
+                         remove_collection_itself=remove_collection_itself,
+                         force=force)
 
 
-def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, continue_failure, remove_coll_itself):
+def _remove_leaf_to_stem(collections, stempath, verbose=False, dry_run=False, continue_failure=False, remove_collection_itself=True, force=False):
     stem_depth = _get_depth(stempath)
     depths = sorted(collections.keys())
     depths.reverse()
@@ -32,7 +38,7 @@ def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, continue_failu
             _irm_do(object, continue_failure)
 
     for depth in depths:
-        if depth == stem_depth and not remove_coll_itself:
+        if depth == stem_depth and not remove_collection_itself:
             continue
         assert (depth >= stem_depth)
         if verbose:
@@ -44,7 +50,7 @@ def _remove_leaf_to_stem(collections, stempath, dry_run, verbose, continue_failu
             else:
                 if verbose:
                     _print_v("Removing collection {} ...".format(coll))
-                _irm_coll(coll, continue_failure)
+                _irm_coll(coll, continue_failure=continue_failure, force=force)
 
 
 def _exit_with_error(message):
@@ -56,8 +62,12 @@ def _print_v(message):
     print(message, file=sys.stderr)
 
 
-def _irm_coll(path, continue_failure):
-    result = subprocess.Popen(["irm", "-r", path])
+def _irm_coll(path, continue_failure=False, force=False):
+    command = ["irm", "-r", path]
+    if force:
+        command.insert(1, "-f")
+
+    result = subprocess.Popen(command)
     returncode = result.wait()
     if returncode != 0:
         message = "Error: irm command for collection {} failed.".format(path)
@@ -67,8 +77,12 @@ def _irm_coll(path, continue_failure):
             _exit_with_error(message)
 
 
-def _irm_do(path, continue_failure):
-    result = subprocess.Popen(["irm", path])
+def _irm_do(path, continue_failure=False, force=False):
+    command = ["irm", path]
+    if force:
+        command.insert(1, "-f")
+
+    result = subprocess.Popen(command)
     returncode = result.wait()
     if returncode != 0:
         message = "Error: irm command for data object {} failed.".format(path)

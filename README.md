@@ -133,9 +133,7 @@ Overview of files to be removed:
 ### ydf_irm
 
 ```
-usage: ydf_irm [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-v] [-c] [-d] [-m MIN_DEPTH]
-               [-k KEEP_COLLECTION_ITSELF]
-               collection
+usage: ydf_irm [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-v] [-c] [--force] [-d] [-m MIN_DEPTH] [-k] collection
 
 ydf_irm: recursively remove collection trees on iRODS (depth-first)
 
@@ -149,10 +147,11 @@ options:
   -v, --verbose         Verbose mode for printing debug information
   -c, --continue-failure
                         Continue if an error occurs while removing data
+  --force, -f           Delete with force flag: delete data permanently rather than moving it to the trash.
   -d, --dry-run         Dry run mode - does not actually delete collection
   -m MIN_DEPTH, --min-depth MIN_DEPTH
                         Minimum depth of tree to remove (default: 3)
-  -k KEEP_COLLECTION_ITSELF, --keep-collection-itself KEEP_COLLECTION_ITSELF
+  -k, --keep-collection-itself
                         Only remove subcollections from this collection. Keep collection itself.
 ```
 
@@ -583,8 +582,8 @@ options:
 ### yrmgroups
 
 ```
-usage: yrmgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [--remove-data] [--check]
-                 [--verbose] [--dry-run] [--continue-failure]
+usage: yrmgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [--remove-data] [--check] [--verbose] [--force]
+                 [--dry-run] [--continue-failure]
                  groupfile
 
 Removes a list of (research) groups
@@ -599,6 +598,7 @@ options:
   --remove-data, -r     Remove any data from the group, if needed.
   --check, -c           Check mode: verifies groups exist, and checks if they are empty
   --verbose, -v         Verbose mode: print additional debug information.
+  --force, -f           Delete with force flag: delete data permanently rather than moving it to the trash.
   --dry-run, -d         Dry run mode: show what action would be taken.
   --continue-failure, -C
                         Continue if operations to remove collections or data objects return an error code
