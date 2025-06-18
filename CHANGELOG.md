@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2025-06-18 v2.0.0
 
 - Upgrade python-irodsclient to v3.1.1
 - Minimum Yoda version: changed to 1.9.x
