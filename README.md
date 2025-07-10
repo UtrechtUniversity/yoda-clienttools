@@ -572,8 +572,7 @@ options:
   -e ENVIRONMENT, --environment ENVIRONMENT
                         Contents of environment column to add to output, so that output of
                         multiple Yoda environments can be concatenated.
-  -H, --human-readable  Report sizes in human-readable figures (only relevant in combination
-                        with --size parameter)
+  -H, --human-readable  Report sizes in human-readable figures
   -p, --progress        Print progress updates
   -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
                         Override Yoda version on the server

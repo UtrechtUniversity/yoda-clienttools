@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Minor help text fix in old vs. new data report
+
 ## 2025-06-18 v2.0.0
 
 - Upgrade python-irodsclient to v3.1.1

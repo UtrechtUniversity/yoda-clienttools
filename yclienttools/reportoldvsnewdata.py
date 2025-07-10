@@ -51,7 +51,7 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument("-e", "--environment", type=str, default=None,
                         help="Contents of environment column to add to output, so that output of multiple Yoda environments can be concatenated.")
     parser.add_argument("-H", "--human-readable", default=False, action='store_true',
-                        help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
+                        help='Report sizes in human-readable figures')
     parser.add_argument("-p", "--progress", action='store_true', default=False,
                         help="Print progress updates")
     common_args.add_default_args(parser)
