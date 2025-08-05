@@ -342,6 +342,7 @@ def apply_data(rule_interface: RuleInterface, args: argparse.Namespace, data: li
                 print("Number of current members group is too large.")
                 continue
 
+            currentusers = [user.split('#')[0] for user in currentusers]
             for user in currentusers:
                 if user not in allusers:
                     if user in managers:

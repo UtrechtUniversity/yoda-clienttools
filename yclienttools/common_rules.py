@@ -84,8 +84,10 @@ Whether to specify the rule engine on rule calls
     def call_uuGroupGetMembers(self, groupname: str) -> List[str]:
         """Returns list of group members"""
         parms = OrderedDict([
-            ('groupname', groupname)])
-        [out] = self.call_rule('uuGroupGetMembers', parms, 1)
+            ('groupname', groupname),
+            ('includeRo', False),
+            ('addTypePrefix', False)])
+        [out] = self.call_rule('uuGroupGetMembers', parms, 3)
         if len(out) >= 1023 and not out.endswith("]"):
             raise SizeNotSupportedException(
                 "Group member list exceeds 1023 bytes")
