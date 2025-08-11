@@ -2,7 +2,7 @@ import datetime
 import itertools
 import os
 from itertools import chain
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 from irods.column import Like
 from irods.models import Collection, DataObject, Resource, User, UserGroup
@@ -169,9 +169,7 @@ def get_dataobjects_in_collection(session, collection_name):
         dataobjects = (session.query(Collection.name, DataObject.name)
                        .filter(Collection.name == collection[Collection.name])
                        .get_results())
-        result.extend(map(
-            lambda d: "{}/{}".format(d[Collection.name], d[DataObject.name]),
-            dataobjects))
+        result.extend(("{}/{}".format(d[Collection.name], d[DataObject.name]) for d in dataobjects))
 
     return result
 
@@ -215,3 +213,58 @@ def get_vault_data_packages(session):
         datapackage_collections.extend([coll[Collection.name] for coll in these_datapackage_collections])
 
     return datapackage_collections
+
+
+def get_prefixed_groups(session: iRODSSession, prefix_list: List[str]) -> List[str]:
+    groups = session.query(User).filter(User.type == 'rodsgroup').get_results()
+    return [x[User.name]
+            for x in groups if x[User.name].startswith(prefix_list)]
+
+
+def get_group_attributes(session: iRODSSession, group_name: str, single_attrs: set, multi_attrs: set) -> Dict[str, Union[str, List[str]]]:
+    """Retrieves a dictionary of attribute-values of group metadata.
+
+       :param session: iRODS session
+       :param group_name: group name
+       :param single_attrs: set of attributes that we are interested in that can only appear once
+       :param multi_attrs: set of attributes that we are interested in that can appear more than once
+
+       :returns: dictionary of attribute-values. Values can be either strings, or lists of strings
+                 for multi-value attributes
+    """
+    relevant_single_attributes = single_attrs
+    relevant_multiple_attributes = multi_attrs
+    result: Dict[str, Union[str, List[str]]] = {}
+    group_objects = list(session.query(User).filter(
+        User.name == group_name).filter(
+        User.type == "rodsgroup").get_results())
+
+    if len(group_objects) > 0:
+        for attribute in relevant_multiple_attributes:
+            result[attribute] = []
+        for group_object in group_objects:
+            obj = session.users.get(group_object[User.name])
+            avus = obj.metadata.items()
+            for avu in avus:
+                if avu.name in relevant_single_attributes:
+                    result[avu.name] = avu.value
+                elif avu.name in relevant_multiple_attributes:
+                    result[avu.name].append(avu.value)  # type: ignore
+
+    return result
+
+
+def are_roles_equivalent(a: str, b: str) -> bool:
+    """Checks whether two roles are equivalent. Needed because Yoda and Yoda-clienttools
+       use slightly different names for the roles."""
+    r_role_names = ["viewer", "reader"]
+    m_role_names = ["member", "normal"]
+
+    if a == b:
+        return True
+    elif a in r_role_names and b in r_role_names:
+        return True
+    elif a in m_role_names and b in m_role_names:
+        return True
+    else:
+        return False

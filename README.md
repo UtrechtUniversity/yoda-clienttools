@@ -300,6 +300,40 @@ options:
 
 ```
 
+### yexportgroups
+Exports groups and group membership into a CSV file.
+
+```
+usage: yexportgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}]
+
+Exports groups and group membership into a CSV file
+
+options:
+  -h, --help            show this help message and exit
+  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+                        Override Yoda version on the server
+
+        This script only supports Yoda versions 1.9 and higher.
+        The CSV returned to stdout is formatted to have the following labels in its header (the first row):
+        'category'        = category for the group
+        'subcategory'     = subcategory for the group
+        'groupname'       = name of the group (without the "research-" prefix)
+
+        These labels may optionally be included:
+        'expiration_date' = expiration date for the group. Can only be set when the group is first created.
+        'schema_id'       = schema id for the group. Can only be set when the group is first created.
+
+        The remainder of the columns are labels that indicate the role of each group member:
+        'manager'         = user that will be given the role of manager
+        'member'          = user that will be given the role of member with read/write
+        'viewer'          = user that will be given the role of viewer with read
+
+        Example:
+        category,subcategory,groupname,manager,member,expiration_date,schema_id
+        departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2055-01-01,default-3
+        departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
+```
+
 ### yreport\_collectionsize
 
 Shows a report of the size of all data objects in a (set of) collections.

@@ -9,6 +9,7 @@ import sys
 
 from yclienttools import common_args, common_config
 from yclienttools import session as s
+from yclienttools.common_queries import are_roles_equivalent
 from yclienttools.common_rules import RuleInterface
 
 
@@ -112,7 +113,7 @@ def apply_data_to_group(rule_interface, args, userdata, group, verbose, dry_run)
                     print("Failed to add user {} to group {} ({}).".format(user, group, msg))
 
         # Adjust user role, if needed
-        if _are_roles_equivalent(role, current_role):
+        if are_roles_equivalent(role, current_role):
             if verbose:
                 print("Role user {} for group {} is already {} (okay)".format(user, group, role))
         else:
@@ -136,22 +137,6 @@ def _to_yoda_role_name(role):
         return mapping[role]
     else:
         _exit_with_error("Cannot map role {} to Yoda role.".format(role))
-
-
-def _are_roles_equivalent(a, b):
-    """Checks whether two roles are equivalent. Needed because Yoda and Yoda-clienttools
-       use slightly different names for the roles."""
-    r_role_names = ["viewer", "reader"]
-    m_role_names = ["member", "normal"]
-
-    if a == b:
-        return True
-    elif a in r_role_names and b in r_role_names:
-        return True
-    elif a in m_role_names and b in m_role_names:
-        return True
-    else:
-        return False
 
 
 def print_parsed_data(userdata, groupdata):

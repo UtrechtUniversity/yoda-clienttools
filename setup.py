@@ -32,6 +32,7 @@ setup(
             'ygrepgroups=yclienttools.grepgroups:entry',
             'ygroupinfo=yclienttools.groupinfo:entry',
             'yimportgroups=yclienttools.importgroups:entry',
+            'yexportgroups=yclienttools.exportgroups:entry',
             'yensuremembers=yclienttools.ensuremembers:entry',
             'yrmusers=yclienttools.rmusers:entry',
             'yrmgroups=yclienttools.rmgroups:entry'

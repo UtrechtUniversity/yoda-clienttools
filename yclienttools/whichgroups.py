@@ -24,7 +24,7 @@ def entry():
             UserGroup.name).filter(
                 User.name == args.username).get_results()
 
-        for group in sorted(list(map(lambda g: g[UserGroup.name], groups))):
+        for group in sorted([g[UserGroup.name] for g in groups]):
             print(group)
 
         session.cleanup()

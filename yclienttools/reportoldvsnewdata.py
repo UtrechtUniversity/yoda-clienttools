@@ -12,10 +12,10 @@ from typing import Dict, List, Union
 
 import humanize
 from irods.message import (ET, XML_Parser_Type)
-from irods.models import Collection, DataObject, User
+from irods.models import Collection, DataObject
 from irods.session import iRODSSession
 from yclienttools import common_args, common_config, session as s
-from yclienttools.common_queries import collection_exists, get_collections_in_root
+from yclienttools.common_queries import collection_exists, get_collections_in_root, get_group_attributes, get_prefixed_groups
 
 
 def entry():
@@ -58,37 +58,6 @@ def _get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _get_group_attributes(session: iRODSSession, group_name: str) -> Dict[str, Union[str, List[str]]]:
-    """Retrieves a dictionary of attribute-values of group metadata.
-
-       :param session: iRODS session
-       :param group_name: group name
-
-       :returns: dictionary of attribute-values. Values can be either strings, or lists of strings
-                 for multi-value attributes
-    """
-    relevant_single_attributes = {"category", "subcategory", "expiration_date"}
-    relevant_multiple_attributes = {"manager"}
-    result: Dict[str, Union[str, List[str]]] = dict()
-    group_objects = list(session.query(User).filter(
-        User.name == group_name).filter(
-        User.type == "rodsgroup").get_results())
-
-    if len(group_objects) > 0:
-        for attribute in relevant_multiple_attributes:
-            result[attribute] = []
-        for group_object in group_objects:
-            obj = session.users.get(group_object[User.name])
-            avus = obj.metadata.items()
-            for avu in avus:
-                if avu.name in relevant_single_attributes:
-                    result[avu.name] = avu.value
-                elif avu.name in relevant_multiple_attributes:
-                    result[avu.name].append(avu.value)  # type: ignore
-
-    return result
-
-
 def _get_vault_group_collection(session: iRODSSession, group_name: str) -> str:
     if group_name.startswith("research-"):
         return f"/{session.zone}/home/{group_name}".replace(
@@ -106,12 +75,6 @@ def _get_research_group_collection(session: iRODSSession, group_name: str) -> st
 
 def _get_revision_group_collection(session: iRODSSession, group_name: str) -> str:
     return f"/{session.zone}/yoda/revisions/{group_name}"
-
-
-def _get_relevant_groups_list(session: iRODSSession) -> List[str]:
-    groups = session.query(User).filter(User.type == 'rodsgroup').get_results()
-    return [x[User.name]
-            for x in groups if x[User.name].startswith(("research-", "deposit-"))]
 
 
 def _get_columns(args: argparse.Namespace) -> List[str]:
@@ -132,7 +95,7 @@ def _size_to_str(value: Union[int, None], human_readable: bool) -> str:
 
 
 def _get_group_rowdata(session: iRODSSession, group: str, environment: Union[str, None]):
-    attributes = _get_group_attributes(session, group)
+    attributes = get_group_attributes(session, group, {"category", "subcategory", "expiration_date"}, {"manager"})
 
     rowdata = {"Group name": group}
 
@@ -184,8 +147,8 @@ def get_collection_data(session: iRODSSession,
                        .get_results())
 
         # Divide replica size across old and new data on a per data object basis
-        old_data: Dict[str, int] = dict()
-        new_data: Dict[str, int] = dict()
+        old_data: Dict[str, int] = {}
+        new_data: Dict[str, int] = {}
         for d in dataobjects:
             if d[DataObject.modify_time].timestamp() >= cutoff_timestamp:
                 _add_up(new_data, d[DataObject.name], d[DataObject.size])
@@ -213,7 +176,7 @@ def get_cutoff_timestamp(days_ago: int) -> int:
 
 
 def aggregate_by_category(inputdata: List[Dict[str, Union[str, int]]], environment: Union[str, None]) -> List[Dict[str, Union[str, Union[str, int]]]]:
-    data_by_category: Dict[str, Dict[str, Union[str, int]]] = dict()
+    data_by_category: Dict[str, Dict[str, Union[str, int]]] = {}
 
     def _update_category(category_data: Dict[str, Union[str, int]], rowdata: Dict[str, Union[str, int]]) -> None:
         for k in [k for k in category_data.keys() if "size" in k]:
@@ -223,7 +186,7 @@ def aggregate_by_category(inputdata: List[Dict[str, Union[str, int]]], environme
 
     def _add_category(category_data: Dict[str, Dict[str, Union[str, int]]], rowdata: Dict[str, Union[str, int]]) -> None:
         category = str(rowdata["Category"])
-        category_data[category] = dict()
+        category_data[category] = {}
         for k in [k for k in rowdata.keys() if "size" in k]:
             category_data[category][k] = int(rowdata[k])
 
@@ -255,7 +218,7 @@ def report_oldvsnewdata(args: argparse.Namespace, session: iRODSSession):
     cutoff_timestamp = get_cutoff_timestamp(args.days_ago)
     outputdata = []
 
-    for group in sorted(_get_relevant_groups_list(session)):
+    for group in sorted(get_prefixed_groups(session, ("research-", "deposit-"))):
         if args.progress:
             _print_v(f"Processing data for group {group} ...")
 
@@ -281,7 +244,7 @@ def report_oldvsnewdata(args: argparse.Namespace, session: iRODSSession):
                                                   "Revisions size",
                                                   args.progress)
 
-        total_coll_data = dict()
+        total_coll_data = {}
         total_coll_data["Total size (old data)"] = (research_coll_data["Research collection size (old data)"]
                                                     + vault_coll_data["Vault collection size (old data)"]
                                                     + revisions_coll_data["Revisions size (old data)"])
