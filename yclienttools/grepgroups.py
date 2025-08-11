@@ -17,7 +17,7 @@ def entry():
 
         groups = session.query(UserGroup.name).filter(
             Like(UserGroup.name, "%{}%".format(args.searchstring))).get_results()
-        for group in sorted(list(map(lambda g: g[UserGroup.name], groups))):
+        for group in sorted([g[UserGroup.name] for g in groups]):
             if (args.all
                     or group.startswith("research-")
                     or group.startswith("vault-")):

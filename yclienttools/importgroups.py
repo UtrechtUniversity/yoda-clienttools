@@ -9,6 +9,7 @@ from iteration_utilities import duplicates, unique_everseen
 from yclienttools import common_args, common_config
 
 from yclienttools import session as s
+from yclienttools.common_queries import are_roles_equivalent
 from yclienttools.common_rules import RuleInterface
 from yclienttools.exceptions import SizeNotSupportedException
 from yclienttools import yoda_names
@@ -122,7 +123,7 @@ def _get_duplicate_columns(fields_list: List[str], yoda_version: str) -> Set[str
 
 
 def _get_duplicate_groups(row_data: list) -> List[str]:
-    group_names = list(map(lambda r: r[2], row_data))
+    group_names = [r[2] for r in row_data]
     return list(unique_everseen(duplicates(group_names)))
 
 
@@ -184,22 +185,6 @@ def _process_csv_line(line: dict, args: argparse.Namespace, yoda_version: str) -
     row_data = (category, subcategory, groupname, managers,
                 members, viewers, schema_id, expiration_date)
     return row_data, None
-
-
-def _are_roles_equivalent(a: str, b: str) -> bool:
-    """Checks whether two roles are equivalent. Needed because Yoda and Yoda-clienttools
-       use slightly different names for the roles."""
-    r_role_names = ["viewer", "reader"]
-    m_role_names = ["member", "normal"]
-
-    if a == b:
-        return True
-    elif a in r_role_names and b in r_role_names:
-        return True
-    elif a in m_role_names and b in m_role_names:
-        return True
-    else:
-        return False
 
 
 def validate_data(rule_interface: RuleInterface, args: argparse.Namespace, data: list) -> List[str]:
@@ -285,7 +270,7 @@ def apply_data(rule_interface: RuleInterface, args: argparse.Namespace, data: li
             if username in managers:
                 role = 'manager'
 
-            if _are_roles_equivalent(role, currentrole):
+            if are_roles_equivalent(role, currentrole):
                 if args.verbose:
                     print("Notice: user {} already has role {} in group {}.".format(
                         username, role, groupname))
