@@ -66,11 +66,15 @@ def _write_csv(data: List[Dict], max_counts: Dict):
     output = csv.writer(sys.stdout, delimiter=',', quoting=csv.QUOTE_NOTNULL)
 
     for rowdata in data:
-        output_row = ([rowdata['category'], rowdata['subcategory'], rowdata['groupname'],
-                      rowdata.get('schema_id', None), rowdata.get('expiration_date', None)])
-        for user_type in ("manager", "member", "viewer"):
-            output_row += rowdata[user_type] + [None] * (max_counts[user_type] - len(rowdata[user_type]))
-        output.writerow(output_row)
+        output.writerow(_create_output_row(rowdata, max_counts))
+
+
+def _create_output_row(rowdata, max_counts):
+    output_row = ([rowdata['category'], rowdata['subcategory'], rowdata['groupname'],
+                   rowdata.get('schema_id', None), rowdata.get('expiration_date', None)])
+    for user_type in ("manager", "member", "viewer"):
+        output_row += rowdata[user_type] + [None] * (max_counts[user_type] - len(rowdata[user_type]))
+    return output_row
 
 
 def _get_group_rowdata(session: iRODSSession, group: str) -> Dict:
