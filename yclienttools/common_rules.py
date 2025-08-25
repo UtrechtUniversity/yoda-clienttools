@@ -15,15 +15,10 @@ class RuleInterface:
         """constructor
 
            :param session: IrodsSession object to call
-           :param yoda_version: which Yoda version to assume (e.g. 1.7, 1.8, 1.9)
-
-Whether to specify the rule engine on rule calls
-                          (enable for Yoda 1.8 and higher, disable for Yoda 1.7)
+           :param yoda_version: which Yoda version to assume (e.g. 1.8, 1.9)
         """
         self.session = session
-        self.set_re = False if yoda_version == "1.7" else True
-        self.uuGroupAdd_version = "1.7" if yoda_version in [
-            "1.7", "1.8"] else "1.9"
+        self.uuGroupAdd_version = "1.8" if yoda_version in ["1.8"] else "1.9"
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
 
         try:
@@ -55,11 +50,8 @@ Whether to specify the rule engine on rule calls
                         for (k, v) in params.items()}
         output_params = 'ruleExecOut'
 
-        if self.set_re:
-            re_config = {'instance_name': self.default_rule_engine if rule_engine is None
-                         else rule_engine}
-        else:
-            re_config = {}
+        re_config = {'instance_name': self.default_rule_engine if rule_engine is None
+                     else rule_engine}
 
         myrule = Rule(
             self.session,
@@ -194,7 +186,7 @@ Whether to specify the rule engine on rule calls
            :returns: (status, message). Status not 0 means error,
                      -1089000 means group name already exists
         """
-        if self.uuGroupAdd_version == "1.7":
+        if self.uuGroupAdd_version == "1.8":
             parms = OrderedDict([
                 ('groupname', groupname),
                 ('category', category),
