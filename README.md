@@ -89,6 +89,7 @@ Summary of tools:
 * [ycleanup_files](https://github.com/utrechtuniversity/yoda-clienttools#ycleanup_files) - clean up temporary data objects
 * [ydf_irm](https://github.com/utrechtuniversity/yoda-clienttools#ydf_irm) - remove large collection trees depth-first
 * [yensuremembers](https://github.com/utrechtuniversity/yoda-clienttools#yensuremembers) - ensure list of groups has a common set of members
+* [yexportgroups](https://github.com/utrechtuniversity/yoda-clienttools#yexportgroups) - export groups and group memberships into a CSV file.
 * [ygrepgroups](https://github.com/utrechtuniversity/yoda-clienttools#ygrepgroups) - search for groups
 * [ygroupinfo](https://github.com/utrechtuniversity/yoda-clienttools#ygroupinfo) - print group (sub)category information
 * [yimportgroups](https://github.com/utrechtuniversity/yoda-clienttools#yimportgroups) - import group data from CSV file
