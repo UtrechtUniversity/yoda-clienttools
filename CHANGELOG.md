@@ -1,8 +1,12 @@
 # Change log
 
-## UNRELEASED
+## 2025-08-25 v2.1.0
 
 - Minor help text fix in old vs. new data report
+- Add groups export tool (export groups and group memberships into a CSV file)
+- Replace calls to deprecated/removed rule uuGroupGetMember, for compatibility with
+  Yoda 2.0.x
+- Drop support for Yoda 1.7
 
 ## 2025-06-18 v2.0.0
 
