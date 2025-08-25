@@ -85,7 +85,7 @@ def parse_csv_file(input_file: str, args: argparse.Namespace, yoda_version: str)
 
 
 def _get_csv_possible_labels(yoda_version: str) -> List[str]:
-    if yoda_version in ('1.7', '1.8'):
+    if yoda_version in ('1.8'):
         return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager']
     else:
         return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager', 'expiration_date', 'schema_id']
@@ -101,7 +101,7 @@ def _get_csv_1_9_exclusive_labels() -> List[str]:
 
 
 def _get_csv_predefined_labels(yoda_version: str) -> List[str]:
-    if yoda_version in ('1.7', '1.8'):
+    if yoda_version in ('1.8'):
         return ['category', 'subcategory', 'groupname']
     else:
         return ['category', 'subcategory', 'groupname', 'expiration_date', 'schema_id']
@@ -145,7 +145,7 @@ def _process_csv_line(line: dict, args: argparse.Namespace, yoda_version: str) -
     for column_name, item_list in line.items():
         if column_name == '':
             return None, 'Column cannot have an empty label'
-        elif yoda_version in ('1.7', '1.8') and column_name in _get_csv_1_9_exclusive_labels():
+        elif yoda_version in ('1.8') and column_name in _get_csv_1_9_exclusive_labels():
             return None, 'Column "{}" is only supported in Yoda 1.9 and higher'.format(column_name)
         elif column_name in _get_csv_predefined_labels(yoda_version):
             continue
@@ -385,7 +385,7 @@ def entry() -> None:
         _exit_with_error(
             "Using the --creator-user option without the --creator-zone option is not supported.")
 
-    if (args.creator_user and (yoda_version in ('1.7', '1.8'))):
+    if (args.creator_user and (yoda_version in ('1.8'))):
         _exit_with_error(
             "The --creator-user and --creator-zone options are only supported with Yoda versions 1.9 and higher.")
 

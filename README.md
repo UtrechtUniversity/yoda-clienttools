@@ -110,14 +110,14 @@ Summary of tools:
 ### ycleanup\_files
 
 ```
-usage: ycleanup_files [-h] [-y {1.7,1.8,1.9,1.10,2.0}] -r ROOT
+usage: ycleanup_files [-h] [-y {1.8,1.9,1.10,2.0}] -r ROOT
 
 Recursively finds data objects in a collection that will typically have to be
 cleaned up when a dataset is archived, and deletes them.
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -r ROOT, --root ROOT  Delete unwanted files in this collection, as well as
                         its subcollections
@@ -134,7 +134,7 @@ Overview of files to be removed:
 ### ydf_irm
 
 ```
-usage: ydf_irm [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-v] [-c] [--force] [-d] [-m MIN_DEPTH] [-k] collection
+usage: ydf_irm [-h] [-y {1.8,1.9,1.10,2.0}] [-v] [-c] [--force] [-d] [-m MIN_DEPTH] [-k] collection
 
 ydf_irm: recursively remove collection trees on iRODS (depth-first)
 
@@ -143,7 +143,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -v, --verbose         Verbose mode for printing debug information
   -c, --continue-failure
@@ -159,7 +159,7 @@ options:
 ### yensuremembers
 
 ```
-usage: yensuremembers [-h] [-y {1.7,1.8,1.9,1.10,2.0}] -i INTERNAL_DOMAINS
+usage: yensuremembers [-h] [-y {1.8,1.9,1.10,2.0}] -i INTERNAL_DOMAINS
                       [--offline-check | --online-check] [--verbose]
                       [--dry-run]
                       userfile groupfile
@@ -173,7 +173,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server, or "all"
@@ -204,7 +204,7 @@ options:
 ### ygrepgroups
 
 ```
-usage: ygrepgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-a] searchstring
+usage: ygrepgroups [-h] [-y {1.8,1.9,1.10,2.0}] [-a] searchstring
 
 Searches for groups by a search string
 
@@ -213,7 +213,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -a, --all             Show all groups (not just research and vault groups)
 ```
@@ -223,7 +223,7 @@ options:
 Prints the category and subcategory of a Yoda research group.
 
 ```
-usage: ygroupinfo [-h] [-y {1.7,1.8,1.9,1.10,2.0}] groupname
+usage: ygroupinfo [-h] [-y {1.8,1.9,1.10,2.0}] groupname
 
 Shows information about a Yoda research group
 
@@ -232,14 +232,14 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
 ### yimportgroups
 
 ```
-usage: yimportgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] -i INTERNAL_DOMAINS
+usage: yimportgroups [-h] [-y {1.8,1.9,1.10,2.0}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
                      [--delete] [--verbose] [--no-validate-domains]
                      [--creator-user CREATOR_USER]
@@ -253,7 +253,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
                         Comma-separated list of internal email domains to the Yoda server, or "all"
@@ -305,13 +305,13 @@ options:
 Exports groups and group membership into a CSV file.
 
 ```
-usage: yexportgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}]
+usage: yexportgroups [-h] [-y {1.8,1.9,1.10,2.0}]
 
 Exports groups and group membership into a CSV file
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 
         This script only supports Yoda versions 1.9 and higher.
@@ -340,14 +340,14 @@ options:
 Shows a report of the size of all data objects in a (set of) collections.
 
 ```
-usage: yreport_collectionsize [-y {1.7,1.8,1.9,1.10,2.0}] [--help] [-q] [-h] [-r]
+usage: yreport_collectionsize [-y {1.8,1.9,1.10,2.0}] [--help] [-q] [-h] [-r]
                               [-R] [-g GROUP_BY]
                               (-c COLLECTION | -H | -C COMMUNITY)
 
 Shows a report of the size of all data objects in a (set of) collections
 
 options:
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --help                show help information
   -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse
@@ -387,14 +387,14 @@ Prints a report of the number of subcollections and data objects
 per collection. The output is in CSV format.
 
 ```
-usage: yreport_dataobjectspercollection [-h] [-y {1.7,1.8,1.9,1.10,2.0}]
+usage: yreport_dataobjectspercollection [-h] [-y {1.8,1.9,1.10,2.0}]
                                         [-r ROOT] [-e]
 
 Shows a report of number of data objects and subcollections per collection
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -r ROOT, --root ROOT  show only collections in this root collection
                         (default: show all collections
@@ -423,14 +423,14 @@ path, size, publication status and date, archiving date, README file, license, d
 metadata schema. The output is in CSV format.
 
 ```
-usage: yreport_datapackageinfo [-y {1.7,1.8,1.9,1.10,2.0}] [--help] [-h]
+usage: yreport_datapackageinfo [-y {1.8,1.9,1.10,2.0}] [--help] [-h]
 
 Shows an extended data package report for each data package in the vault that includes
 path, size, publication status and date, archiving date, README file, license, data access type, and
 metadata schema. The output is in CSV format.
 
 options:
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --help                show help information
   -h, --human-readable  Show sizes in human readable format, e.g. 1.0MB
@@ -439,7 +439,7 @@ options:
 
 ### yreport_dataduplication
 ```
-usage: yreport_dataduplication [-h] [-e ENVIRONMENT] [-s] [-H] [-y {1.7,1.8,1.9,1.10,2.0}]
+usage: yreport_dataduplication [-h] [-e ENVIRONMENT] [-s] [-H] [-y {1.8,1.9,1.10,2.0}]
 
 options:
   -h, --help            show this help message and exit
@@ -449,7 +449,7 @@ options:
                         output
   -H, --human-readable  Report sizes in human-readable figures (only relevant in combination with --size
                         parameter)
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
@@ -459,7 +459,7 @@ options:
 usage: yreport_datapackagestatus [-h] [--email EMAIL]
                                  [--email-subject EMAIL_SUBJECT]
                                  [--email-sender EMAIL_SENDER] [--pending]
-                                 [--stale] [-y {1.7,1.8,1.9,1.10,2.0}]
+                                 [--stale] [-y {1.8,1.9,1.10,2.0}]
 
 Produces a report of data packages and their vault status. The script can
 either report all data packages, or only the pending ones (i.e. ones with a
@@ -481,14 +481,14 @@ optional arguments:
   --stale               Only print data packages which have last been modified
                         over approximately four hours ago (or with unavailable
                         modification time)
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
 ### yreport\_depositpending
 
 ```
-usage: yreport_depositpending [-h] [-q] [-H] [-y {1.7,1.8,1.9,1.10,2.0}] group
+usage: yreport_depositpending [-h] [-q] [-H] [-y {1.8,1.9,1.10,2.0}] group
 
 Generates a list of direct subcollections of a deposit group collection, along with their size,
 owner, creation date and last modified date. The report can be used by data managers to tell which
@@ -502,14 +502,14 @@ options:
   -q, --quasi-xml       Enable Quasi-XML parser in order to be able to parse characters not
                         supported by regular XML parser
   -H, --human-readable  Report sizes in human-readable figures
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
 ### yreport\_grouplifecycle
 
 ```
-usage: yreport_grouplifecycle [-h] [-q] [-s] [-H] [-m] [-y {1.7,1.8,1.9,1.10,2.0}]
+usage: yreport_grouplifecycle [-h] [-q] [-s] [-H] [-m] [-y {1.8,1.9,1.10,2.0}]
 
 Generates a list of research and deposit groups, along with their creation date,
 expiration date (if available), lists of group managers, regular members, and readonly
@@ -528,7 +528,7 @@ options:
                         combination with --size parameter)
   -m, --modified        Include last modified date research/deposit collection,
                         revisions and vault collection in output
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 
 ```
@@ -543,13 +543,13 @@ On systems with a significant number of datasets, it is recommended to use the
 up report generation.
 
 ```
-usage: yreport_intake [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [-p] -s STUDY [-c CACHE]
+usage: yreport_intake [-h] [-y {1.8,1.9,1.10,2.0}] [-p] -s STUDY [-c CACHE]
 
 Generates a report of the contents of an intake collection.
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -p, --progress        Show progress updates.
   -s STUDY, --study STUDY
@@ -567,14 +567,14 @@ options:
 Prints a report of the number of lines per data object.
 
 ```
-usage: yreport_linecount [-h] [-y {1.7,1.8,1.9,1.10,2.0}]
+usage: yreport_linecount [-h] [-y {1.8,1.9,1.10,2.0}]
                          (-c COLLECTION | -d DATA_OBJECT)
 
 Shows a report of the line counts of data objects.
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   -c COLLECTION, --collection COLLECTION
                         show line counts of all data objects in this
@@ -587,7 +587,7 @@ options:
 
 ```
 usage: yreport_oldvsnewdata [-h] [-c] [-q] [-d DAYS_AGO] [-e ENVIRONMENT] [-H] [-p]
-                            [-y {1.7,1.8,1.9,1.10,2.0}]
+                            [-y {1.8,1.9,1.10,2.0}]
 
 Generates a list of research and deposit groups. The report lists the amount of replica data
 in each research group collection, along with its vault group collection and revisions
@@ -609,14 +609,14 @@ options:
                         multiple Yoda environments can be concatenated.
   -H, --human-readable  Report sizes in human-readable figures
   -p, --progress        Print progress updates
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
 
 ### yrmgroups
 
 ```
-usage: yrmgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [--remove-data] [--check] [--verbose] [--force]
+usage: yrmgroups [-h] [-y {1.8,1.9,1.10,2.0}] [--remove-data] [--check] [--verbose] [--force]
                  [--dry-run] [--continue-failure]
                  groupfile
 
@@ -627,7 +627,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --remove-data, -r     Remove any data from the group, if needed.
   --check, -c           Check mode: verifies groups exist, and checks if they are empty
@@ -643,7 +643,7 @@ The group file is a text file, with one group name (e.g.: research-foo) on each 
 ### yrmusers
 
 ```
-usage: yrmusers [-h] [-y {1.7,1.8,1.9,1.10,2.0}] [--check] [--verbose]
+usage: yrmusers [-h] [-y {1.8,1.9,1.10,2.0}] [--check] [--verbose]
                 [--dry-run]
                 userfile
 
@@ -654,7 +654,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
   --check, -c           Check mode: verifies user exist and trash/home directories are empty
   --verbose, -v         Verbose mode: print additional debug information.
@@ -668,7 +668,7 @@ The user file is a text file, with one user name on each line.
 Prints a list of all groups a user is a member of.
 
 ```
-usage: ywhichgroups [-h] [-y {1.7,1.8,1.9,1.10,2.0}] username
+usage: ywhichgroups [-h] [-y {1.8,1.9,1.10,2.0}] username
 
 Returns a list of groups of which a user is a member
 
@@ -677,6 +677,6 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -y {1.7,1.8,1.9,1.10,2.0}, --yoda-version {1.7,1.8,1.9,1.10,2.0}
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```

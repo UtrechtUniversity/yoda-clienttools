@@ -14,8 +14,6 @@ from yclienttools import common_config
 def setup_session(yoda_version_override, session_timeout=120):
     """Use irods environment files to configure a iRODSSession"""
 
-    yoda_version = yoda_version_override if yoda_version_override is not None else common_config.get_default_yoda_version()
-    require_ssl = yoda_version != "1.7"
     ca_file = common_config.get_ca_file()
 
     env_json = os.path.expanduser("~/.irods/irods_environment.json")
@@ -37,31 +35,22 @@ def setup_session(yoda_version_override, session_timeout=120):
         )
         password = getpass(prompt="Please provide your irods password:")
 
-    if require_ssl:
-        ssl_context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH, cafile=ca_file, capath=None, cadata=None)
-        ssl_settings = {'client_server_negotiation': 'request_server_negotiation',
-                        'client_server_policy': 'CS_NEG_REQUIRE',
-                        'encryption_algorithm': 'AES-256-CBC',
-                        'encryption_key_size': 32,
-                        'encryption_num_hash_rounds': 16,
-                        'encryption_salt_size': 8,
-                        'ssl_context': ssl_context}
-        session = iRODSSession(
-            host=irods_env["irods_host"],
-            port=irods_env["irods_port"],
-            user=irods_env["irods_user_name"],
-            password=password,
-            zone=irods_env["irods_zone_name"],
-            **ssl_settings
-        )
-    else:
-        session = iRODSSession(
-            host=irods_env["irods_host"],
-            port=irods_env["irods_port"],
-            user=irods_env["irods_user_name"],
-            password=password,
-            zone=irods_env["irods_zone_name"],
-        )
+    ssl_context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH, cafile=ca_file, capath=None, cadata=None)
+    ssl_settings = {'client_server_negotiation': 'request_server_negotiation',
+                    'client_server_policy': 'CS_NEG_REQUIRE',
+                    'encryption_algorithm': 'AES-256-CBC',
+                    'encryption_key_size': 32,
+                    'encryption_num_hash_rounds': 16,
+                    'encryption_salt_size': 8,
+                    'ssl_context': ssl_context}
+    session = iRODSSession(
+        host=irods_env["irods_host"],
+        port=irods_env["irods_port"],
+        user=irods_env["irods_user_name"],
+        password=password,
+        zone=irods_env["irods_zone_name"],
+        **ssl_settings
+    )
 
     session.connection_timeout = session_timeout
     return session
