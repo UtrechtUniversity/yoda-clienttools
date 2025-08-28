@@ -2,6 +2,7 @@
 
 ## UNRELEASED
 
+- Upgrade Python-irodsclient to v3.2.0
 - Remove deprecated UserGroup / user_groups references, which have been removed
   in Python-irodsclient v3.2.0
 
