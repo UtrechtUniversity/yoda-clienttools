@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from irods.models import UserGroup, UserMeta
+from irods.models import Group, UserMeta
 from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 
@@ -46,7 +46,7 @@ def _exit_with_error(session, message):
 
 def _get_group_metadata_single(session, groupname, attributename):
     meta = list(session.query(UserMeta.value).filter(
-        UserGroup.name == groupname).filter(
+        Group.name == groupname).filter(
         UserMeta.name == attributename).get_results())
     if len(meta) == 0:
         raise Exception("Attribute {} not found".format(attributename))

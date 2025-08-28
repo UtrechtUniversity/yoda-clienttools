@@ -187,14 +187,14 @@ def _get_relevant_groups_list(session: iRODSSession) -> List[str]:
 
 
 def _get_regular_members(session: iRODSSession, group_name: str, attributes: Dict[str, Union[str, List[str]]]) -> List[str]:
-    members_and_managers = session.user_groups.getmembers(group_name)
+    members_and_managers = session.groups.getmembers(group_name)
     return [
         member.name for member in members_and_managers if member.name + "#" + session.zone not in attributes["manager"]]
 
 
 def _get_readonly_members(session: iRODSSession, group_name: str, attributes: Dict[str, Union[str, List[str]]]) -> List[str]:
     readonly_group = group_name.replace("research-", "read-", 1)
-    return [u.name for u in session.user_groups.getmembers(readonly_group)]
+    return [u.name for u in session.groups.getmembers(readonly_group)]
 
 
 def _get_group_managers(session: iRODSSession, group_name: str, attributes: Dict[str, Union[str, List[str]]]) -> List[str]:

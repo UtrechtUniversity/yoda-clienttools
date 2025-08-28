@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from irods.models import User, UserGroup
+from irods.models import Group, User
 from yclienttools import common_args, common_config, common_queries
 from yclienttools import session as s
 
@@ -21,10 +21,10 @@ def entry():
             sys.exit(1)
 
         groups = session.query(
-            UserGroup.name).filter(
+            Group.name).filter(
                 User.name == args.username).get_results()
 
-        for group in sorted([g[UserGroup.name] for g in groups]):
+        for group in sorted([g[Group.name] for g in groups]):
             print(group)
 
         session.cleanup()

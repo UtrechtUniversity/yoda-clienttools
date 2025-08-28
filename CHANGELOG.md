@@ -1,5 +1,10 @@
 # Change log
 
+## UNRELEASED
+
+- Remove deprecated UserGroup / user_groups references, which have been removed
+  in Python-irodsclient v3.2.0
+
 ## 2025-08-25 v2.1.0
 
 - Minor help text fix in old vs. new data report
