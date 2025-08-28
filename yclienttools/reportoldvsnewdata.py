@@ -49,7 +49,7 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument("-d", "--days-ago", default=4 * 365, type=int,
                         help="Cutoff date for dividing data in old vs. new data, in terms of number of days ago.")
     parser.add_argument("--use-create-time", action='store_true', default=False,
-                    help="Use data object's creation time instead of modification time for old vs. new categorization")
+                        help="Use data object's creation time instead of modification time for old vs. new categorization")
     parser.add_argument("-e", "--environment", type=str, default=None,
                         help="Contents of environment column to add to output, so that output of multiple Yoda environments can be concatenated.")
     parser.add_argument("-H", "--human-readable", default=False, action='store_true',
