@@ -5,7 +5,7 @@ from itertools import chain
 from typing import Dict, List, Union
 
 from irods.column import Like
-from irods.models import Collection, DataObject, Resource, User, UserGroup
+from irods.models import Collection, DataObject, Group, Resource, User
 from irods.session import iRODSSession
 from yclienttools import exceptions
 from yclienttools.options import GroupByOption
@@ -195,8 +195,8 @@ def user_exists(session, username):
 
 def group_exists(session, groupname):
     '''Returns a boolean value that indicates whether a user group with the provided name exists.'''
-    return (len(list(session.query(UserGroup.name).filter(
-        UserGroup.name == groupname).get_results())) > 0)
+    return (len(list(session.query(Group.name).filter(
+        Group.name == groupname).get_results())) > 0)
 
 
 def get_vault_data_packages(session):

@@ -3,7 +3,7 @@
 import argparse
 import sys
 from irods.column import Like
-from irods.models import UserGroup
+from irods.models import Group
 from yclienttools import common_args, common_config
 from yclienttools import session as s
 
@@ -15,9 +15,9 @@ def entry():
         yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
         session = s.setup_session(yoda_version)
 
-        groups = session.query(UserGroup.name).filter(
-            Like(UserGroup.name, "%{}%".format(args.searchstring))).get_results()
-        for group in sorted([g[UserGroup.name] for g in groups]):
+        groups = session.query(Group.name).filter(
+            Like(Group.name, "%{}%".format(args.searchstring))).get_results()
+        for group in sorted([g[Group.name] for g in groups]):
             if (args.all
                     or group.startswith("research-")
                     or group.startswith("vault-")):

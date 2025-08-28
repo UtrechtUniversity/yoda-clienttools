@@ -4,7 +4,7 @@ import csv
 import sys
 from typing import Dict, List, Tuple
 from irods.session import iRODSSession
-from irods.models import User, UserGroup
+from irods.models import Group, User
 from yclienttools import session as s
 from yclienttools.common_queries import get_group_attributes, get_prefixed_groups
 
@@ -95,7 +95,7 @@ def _get_group_read_members(session: iRODSSession, group: str) -> List[str]:
     members = []
 
     iter = list(session.query(User).filter(
-        UserGroup.name == group).filter(
+        Group.name == group).filter(
         User.type != "rodsgroup").get_results())
 
     for row in iter:
@@ -110,7 +110,7 @@ def _get_group_members(session: iRODSSession, group: str) -> List[str]:
     """Get group memberships"""
     members = []
     iter = list(session.query(User).filter(
-        UserGroup.name == group).filter(
+        Group.name == group).filter(
         User.type != "rodsgroup").get_results())
 
     for row in iter:
