@@ -37,7 +37,7 @@ def _get_args() -> argparse.Namespace:
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('intakefile', help='File name of the list of intake vault groups')
     parser.add_argument('researchfile', help='File name of the list of research groups')
-    parser.add_argument("-H", "--human-readable", default=False, action='store_true',
+    parser.add_argument('-H', '--human-readable', default=False, action='store_true',
                         help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
     common_args.add_default_args(parser)
     return parser.parse_args()
@@ -60,7 +60,7 @@ def parse_groups_file(file):
 
     if not os.path.isfile(file):
         exit_with_error("File {} does not exist or is not a regular file.".format(file))
-    with open(file, "r") as input:
+    with open(file, 'r') as input:
         for line in input:
             groups.append(line.strip())
 
@@ -88,18 +88,18 @@ def get_data_objs(session, grp, grp_coll):
 
     for row in all_data_objs.get_results():
         data_obj: Dict[str, Any] = {
-            "group": "",
-            "parent": "",
-            "dataobj": "",
-            "chksum": "",
-            "size": ""
+            'group': '',
+            'parent': '',
+            'dataobj': '',
+            'chksum': '',
+            'size': ''
         }
 
-        data_obj["group"] = grp
-        data_obj["parent"] = row[Collection.name]
-        data_obj["dataobj"] = row[DataObject.name]
-        data_obj["chksum"] = row[DataObject.checksum]
-        data_obj["size"] = row[DataObject.size]
+        data_obj['group'] = grp
+        data_obj['parent'] = row[Collection.name]
+        data_obj['dataobj'] = row[DataObject.name]
+        data_obj['chksum'] = row[DataObject.checksum]
+        data_obj['size'] = row[DataObject.size]
 
         data_objs.append(data_obj)
 
@@ -136,16 +136,16 @@ def get_duplicates(args, session, intake_grps, research_grps):
     duplicates = []
     for i_dataobj in intake_dataobjs:
         for r_dataobj in research_dataobjs:
-            if i_dataobj["dataobj"] == r_dataobj["dataobj"] and i_dataobj["chksum"] == r_dataobj["chksum"]:
-                r_dataobj["duplicateOf"] = f"{i_dataobj["parent"]}/{i_dataobj["dataobj"]}"
+            if i_dataobj['dataobj'] == r_dataobj['dataobj'] and i_dataobj['chksum'] == r_dataobj['chksum']:
+                r_dataobj['duplicateOf'] = f"{i_dataobj['parent']}/{i_dataobj['dataobj']}"
                 duplicates.append(r_dataobj)
 
     return duplicates
 
 
 def size_to_str(value, human_readable) -> str:
-    if value is None or value == "":
-        return "N/A"
+    if value is None or value == '':
+        return 'N/A'
     elif human_readable:
         return humanize.naturalsize(value, binary=True)
     else:
@@ -154,22 +154,22 @@ def size_to_str(value, human_readable) -> str:
 
 def report_intake_duplication(args, session, intake_grps, research_grps):
     """Generate duplication report between intake and research collections."""
-    writer = csv.DictWriter(sys.stdout, fieldnames=["Group", "Collection", "Data object", "Chksum", "Size", "Duplicate of"], delimiter=',')
+    writer = csv.DictWriter(sys.stdout, fieldnames=['Group', 'Collection', 'Data object', 'Chksum', 'Size', 'Duplicate of'], delimiter=',')
     writer.writeheader()
 
     duplicates = get_duplicates(args, session, intake_grps, research_grps)
     total_size = 0
     for dup in duplicates:
         row = {
-            "Group": dup["group"],
-            "Collection": dup["parent"],
-            "Data object": dup["dataobj"],
-            "Chksum": dup["chksum"],
-            "Size": size_to_str(dup["size"], args.human_readable),
-            "Duplicate of": dup["duplicateOf"]
+            'Group': dup['group'],
+            'Collection': dup['parent'],
+            'Data object': dup['dataobj'],
+            'Chksum': dup['chksum'],
+            'Size': size_to_str(dup['size'], args.human_readable),
+            'Duplicate of': dup['duplicateOf']
         }
 
-        total_size += int(dup["size"])
+        total_size += int(dup['size'])
 
         try:
             writer.writerow(row)
