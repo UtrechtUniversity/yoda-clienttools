@@ -2,10 +2,9 @@ import argparse
 import sys
 import os
 import csv
-from typing import Dict, Any, Union
+from typing import Dict, Any
 
 import humanize
-from irods.session import iRODSSession
 from irods.models import Collection, DataObject
 from irods.column import Like
 
@@ -34,14 +33,13 @@ def _get_args() -> argparse.Namespace:
     """Parses command line arguments"""
     parser = argparse.ArgumentParser(
         description=__doc__,
-        epilog=_get_format_help_text())
-    common_args.add_default_args(parser)
+        epilog=_get_format_help_text(),
+        formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('intakefile', help='File name of the list of intake vault groups')
     parser.add_argument('researchfile', help='File name of the list of research groups')
-    parser.add_argument('-v', '--verbose', default=False, action='store_true',
-                        help='Verbose mode: print additional debug information.')
     parser.add_argument("-H", "--human-readable", default=False, action='store_true',
                         help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
+    common_args.add_default_args(parser)
     return parser.parse_args()
 
 
@@ -76,13 +74,13 @@ def get_data_objs(session, grp, grp_coll):
     """
     Returns a lists of dicts containing:
     - 'group': group owner of parent collection
-    - 'parent': parent collection 
-    - 'dataobj': name of data object 
-    - 'chksum': checksum of data object 
+    - 'parent': parent collection
+    - 'dataobj': name of data object
+    - 'chksum': checksum of data object
     - 'size': size of data object
     """
     data_objs = []
-    
+
     # Get all data objects in all subcollections
     all_data_objs = session.query(Collection.name, DataObject.name, DataObject.size, DataObject.checksum).filter(
         Like(Collection.name, f"{grp_coll}/%")
@@ -90,12 +88,12 @@ def get_data_objs(session, grp, grp_coll):
 
     for row in all_data_objs.get_results():
         data_obj: Dict[str, Any] = {
-                "group": "",
-                "parent": "",
-                "dataobj": "",
-                "chksum": "",
-                "size": ""
-            }
+            "group": "",
+            "parent": "",
+            "dataobj": "",
+            "chksum": "",
+            "size": ""
+        }
 
         data_obj["group"] = grp
         data_obj["parent"] = row[Collection.name]
@@ -105,8 +103,8 @@ def get_data_objs(session, grp, grp_coll):
 
         data_objs.append(data_obj)
 
-    return data_objs 
-    
+    return data_objs
+
 
 def get_duplicates(args, session, intake_grps, research_grps):
     intake_dataobjs = []
@@ -118,7 +116,7 @@ def get_duplicates(args, session, intake_grps, research_grps):
             if len(grp_dataobjs) > 0:
                 for dataobj in grp_dataobjs:
                     intake_dataobjs.append(dataobj)
-    
+
     if len(intake_dataobjs) == 0:
         exit_with_error("No data objects found for any of the intake vault groups provided.")
 
@@ -127,7 +125,7 @@ def get_duplicates(args, session, intake_grps, research_grps):
         grp_coll = f"/{session.zone}/home/{grp}"
         if collection_exists(session, grp_coll):
             grp_dataobjs = get_data_objs(session, grp, grp_coll)
-            
+
             if len(grp_dataobjs) > 0:
                 for dataobj in grp_dataobjs:
                     research_dataobjs.append(dataobj)
@@ -142,7 +140,7 @@ def get_duplicates(args, session, intake_grps, research_grps):
                 r_dataobj["duplicateOf"] = f"{i_dataobj["parent"]}/{i_dataobj["dataobj"]}"
                 duplicates.append(r_dataobj)
 
-    return duplicates                
+    return duplicates
 
 
 def size_to_str(value, human_readable) -> str:
@@ -177,7 +175,7 @@ def report_intake_duplication(args, session, intake_grps, research_grps):
             writer.writerow(row)
         except Exception as e:
             print(f"Error writing row: {e}", file=sys.stderr)
-    
+
     print(f"Total size of duplicates: {size_to_str(total_size, args.human_readable)}")
 
 
