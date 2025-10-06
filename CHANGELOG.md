@@ -2,7 +2,9 @@
 
 ## UNRELEASED
 
-- Upgrade Python-irodsclient to v3.2.0
+- Provide unofficial fallback to Python-irodsclient v3.1.1 on Python versions
+  older than 3.9 as a temporary workaround so that it still runs there.
+- Upgrade Python-irodsclient to v3.2.0.
 - Remove deprecated UserGroup / user_groups references, which have been removed
   in Python-irodsclient v3.2.0
 - Drop support for Python 3.8. It is end-of-life.

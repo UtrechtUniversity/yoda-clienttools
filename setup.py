@@ -5,7 +5,8 @@ setup(
     author_email="yoda@uu.nl",
     description=('Client-side tools for Yoda / iRODS'),
     install_requires=[
-        'python-irodsclient==3.2.0',
+        'python-irodsclient==3.2.0; python_version >= "3.9"',
+        'python-irodsclient==3.1.1; python_version < "3.9"',
         'humanize>=0.5',
         'iteration_utilities==0.11.0',
         'dnspython>=2.2.0',
