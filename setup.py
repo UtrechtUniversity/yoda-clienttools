@@ -11,7 +11,8 @@ setup(
         'iteration_utilities==0.11.0',
         'dnspython>=2.2.0',
         'backports.functools-lru-cache>=1.6.4',
-        'PyYaml'
+        'PyYaml',
+        'cryptography==46.0.2'
     ],
     name='yclienttools',
     packages=['yclienttools'],

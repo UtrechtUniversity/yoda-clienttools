@@ -2,6 +2,9 @@
 
 ## UNRELEASED
 
+- Improve autodetection of CA certificate setting by checking whether iRODS
+  certificate is self-signed, and only using the iRODS certificate as a CA
+  certificate if that is the case.
 - Provide unofficial fallback to Python-irodsclient v3.1.1 on Python versions
   older than 3.9 as a temporary workaround so that it still runs there.
 - Upgrade Python-irodsclient to v3.2.0.

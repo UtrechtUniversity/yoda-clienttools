@@ -5,6 +5,8 @@ import os
 import sys
 from typing import Optional
 
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 import yaml
 
 
@@ -15,6 +17,11 @@ def get_ca_file() -> str:
                                   "/etc/ssl/certs/ca-certificates.crt",
                                   "/etc/pki/tls/certs/ca-bundle.crt"]:
             if os.path.isfile(standard_location):
+                if is_irods_certificate(standard_location) and not is_self_signed(standard_location):
+                    # If the certificate is not self-signed we should
+                    # use the default CA location instead
+                    continue
+
                 return standard_location
 
         print("Error: could not find CA bundle in a standard location. You will need to configure it (see the README file for details)")
@@ -22,6 +29,17 @@ def get_ca_file() -> str:
 
     else:
         return configured_ca_file
+
+
+def is_irods_certificate(path: str) -> bool:
+    return path == "/etc/irods/localhost_and_chain.crt"
+
+
+def is_self_signed(path: str) -> bool:
+    with open(path, "rb") as f:
+        cert_data = f.read()
+    cert = x509.load_pem_x509_certificate(cert_data, default_backend())
+    return cert.subject == cert.issuer
 
 
 def get_default_yoda_version() -> str:
