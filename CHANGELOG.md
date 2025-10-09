@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2025-10-09 v2.2.0
 
 - Improve autodetection of CA certificate setting by checking whether iRODS
   certificate is self-signed, and only using the iRODS certificate as a CA
