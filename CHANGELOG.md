@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Add --use-create-time parameter to old vs. new data report
+
 ## 2025-10-09 v2.2.0
 
 - Improve autodetection of CA certificate setting by checking whether iRODS
