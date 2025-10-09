@@ -5,12 +5,12 @@
 - Improve autodetection of CA certificate setting by checking whether iRODS
   certificate is self-signed, and only using the iRODS certificate as a CA
   certificate if that is the case.
-- Provide unofficial fallback to Python-irodsclient v3.1.1 on Python versions
-  older than 3.9 as a temporary workaround so that it still runs there.
 - Upgrade Python-irodsclient to v3.2.0.
 - Remove deprecated UserGroup / user_groups references, which have been removed
   in Python-irodsclient v3.2.0
-- Drop support for Python 3.8. It is end-of-life.
+- Provide fallback to Python-irodsclient v3.1.1 on Python versions
+  older than 3.9 as a temporary workaround so that it still runs there.
+- Drop official support for Python 3.8. It is end-of-life.
 
 ## 2025-08-25 v2.1.0
 
