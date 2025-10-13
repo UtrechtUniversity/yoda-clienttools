@@ -1,3 +1,5 @@
+'''Prints a report for data objects that have a copy in both an intake vault group and one or more research groups (in CSV format).'''
+
 import argparse
 import sys
 import os

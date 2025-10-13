@@ -6,6 +6,7 @@
 - Remove deprecated UserGroup / user_groups references, which have been removed
   in Python-irodsclient v3.2.0
 - Drop support for Python 3.8. It is end-of-life.
+- Add "intake data duplication" report that prints a report for data objects that have a copy in both an intake vault group and one or more research groups
 
 ## 2025-08-25 v2.1.0
 
