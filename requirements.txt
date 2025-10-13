@@ -1,7 +1,9 @@
-python_irodsclient==3.2.0
+python-irodsclient==3.2.0; python_version >= "3.9"
+python-irodsclient==3.1.1; python_version < "3.9"
 humanize>=0.5
 iteration_utilities==0.11.0
 dnspython>=2.2.0
 backports.functools-lru-cache>=1.6.4
-typing_extensions==4.1.1
+typing_extensions==4.13.2
 PyYaml
+cryptography==46.0.2

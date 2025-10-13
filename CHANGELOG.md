@@ -2,11 +2,20 @@
 
 ## UNRELEASED
 
-- Upgrade Python-irodsclient to v3.2.0
+- Add --use-create-time parameter to old vs. new data report
+- Add "intake data duplication" report that prints a report for data objects that have a copy in both an intake vault group and one or more research groups
+
+## 2025-10-09 v2.2.0
+
+- Improve autodetection of CA certificate setting by checking whether iRODS
+  certificate is self-signed, and only using the iRODS certificate as a CA
+  certificate if that is the case.
+- Upgrade Python-irodsclient to v3.2.0.
 - Remove deprecated UserGroup / user_groups references, which have been removed
   in Python-irodsclient v3.2.0
-- Drop support for Python 3.8. It is end-of-life.
-- Add "intake data duplication" report that prints a report for data objects that have a copy in both an intake vault group and one or more research groups
+- Provide fallback to Python-irodsclient v3.1.1 on Python versions
+  older than 3.9 as a temporary workaround so that it still runs there.
+- Drop official support for Python 3.8. It is end-of-life.
 
 ## 2025-08-25 v2.1.0
 

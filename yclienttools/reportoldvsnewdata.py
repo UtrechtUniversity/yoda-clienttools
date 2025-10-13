@@ -1,7 +1,7 @@
 '''Generates a list of research and deposit groups. The report lists the amount of replica data in each research group
    collection, along with its vault group collection and revisions collection, split across old and new data. Data objects
-   that have a replica that was modified after the user-provided cutoff date are considered 'new'. Data objects that do not
-   have any replica that was modified after the user-provided cutoff date are considered 'old'.
+   that have a replica that was created or modified after the user-provided cutoff date are considered 'new'. Data objects that do not
+   have any replica that was created or modified after the user-provided cutoff date are considered 'old'.
 '''
 
 import argparse
@@ -48,6 +48,8 @@ def _get_args() -> argparse.Namespace:
                         help='Enable Quasi-XML parser in order to be able to parse characters not supported by regular XML parser')
     parser.add_argument("-d", "--days-ago", default=4 * 365, type=int,
                         help="Cutoff date for dividing data in old vs. new data, in terms of number of days ago.")
+    parser.add_argument("--use-create-time", action='store_true', default=False,
+                        help="Use data object's creation time instead of modification time for old vs. new categorization")
     parser.add_argument("-e", "--environment", type=str, default=None,
                         help="Contents of environment column to add to output, so that output of multiple Yoda environments can be concatenated.")
     parser.add_argument("-H", "--human-readable", default=False, action='store_true',
@@ -116,7 +118,8 @@ def get_collection_data(session: iRODSSession,
                         root_collection: str,
                         cutoff_timestamp: int,
                         column_label: str,
-                        print_progress: bool) -> Dict[str, int]:
+                        print_progress: bool,
+                        use_create_time: bool = False) -> Dict[str, int]:
 
     old_data_label = column_label + " (old data)"
     new_data_label = column_label + " (new data)"
@@ -142,7 +145,7 @@ def get_collection_data(session: iRODSSession,
         if print_progress and (collection_number % 10 == 0 or (len(collections) > 10 and collection_number == len(collections))):
             _print_v(f" Processing data for {collection} - subcollection {collection_number}/{len(collections)} ...")
 
-        dataobjects = (session.query(DataObject.name, DataObject.size, DataObject.replica_number, DataObject.modify_time)
+        dataobjects = (session.query(DataObject.name, DataObject.size, DataObject.replica_number, DataObject.create_time, DataObject.modify_time)
                        .filter(Collection.name == collection)
                        .get_results())
 
@@ -150,7 +153,8 @@ def get_collection_data(session: iRODSSession,
         old_data: Dict[str, int] = {}
         new_data: Dict[str, int] = {}
         for d in dataobjects:
-            if d[DataObject.modify_time].timestamp() >= cutoff_timestamp:
+            timestamp = d[DataObject.create_time].timestamp() if use_create_time else d[DataObject.modify_time].timestamp()
+            if timestamp >= cutoff_timestamp:
                 _add_up(new_data, d[DataObject.name], d[DataObject.size])
             else:
                 _add_up(old_data, d[DataObject.name], d[DataObject.size])
@@ -232,17 +236,20 @@ def report_oldvsnewdata(args: argparse.Namespace, session: iRODSSession):
                                                  research_coll,
                                                  cutoff_timestamp,
                                                  "Research collection size",
-                                                 args.progress)
+                                                 args.progress,
+                                                 use_create_time=args.use_create_time)
         vault_coll_data = get_collection_data(session,
                                               vault_coll,
                                               cutoff_timestamp,
                                               "Vault collection size",
-                                              args.progress)
+                                              args.progress,
+                                              use_create_time=args.use_create_time)
         revisions_coll_data = get_collection_data(session,
                                                   revisions_coll,
                                                   cutoff_timestamp,
                                                   "Revisions size",
-                                                  args.progress)
+                                                  args.progress,
+                                                  use_create_time=args.use_create_time)
 
         total_coll_data = {}
         total_coll_data["Total size (old data)"] = (research_coll_data["Research collection size (old data)"]

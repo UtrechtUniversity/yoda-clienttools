@@ -617,11 +617,12 @@ options:
 usage: yreport_oldvsnewdata [-h] [-c] [-q] [-d DAYS_AGO] [-e ENVIRONMENT] [-H] [-p]
                             [-y {1.8,1.9,1.10,2.0}]
 
-Generates a list of research and deposit groups. The report lists the amount of replica data
-in each research group collection, along with its vault group collection and revisions
+Generates a list of research and deposit groups. The report lists the amount of replica
+data in each research group collection, along with its vault group collection and revisions
 collection, split across old and new data. Data objects that have a replica that was
-modified after the user-provided cutoff date are considered 'new'. Data objects that do not
-have any replica that was modified after the user-provided cutoff date are considered 'old'.
+created or modified after the user-provided cutoff date are considered 'new'. Data objects
+that do not have any replica that was created or modified after the user-provided cutoff
+date are considered 'old'.
 
 options:
   -h, --help            show this help message and exit
@@ -632,6 +633,7 @@ options:
   -d DAYS_AGO, --days-ago DAYS_AGO
                         Cutoff date for dividing data in old vs. new data, in terms of
                         number of days ago.
+  --use-create-time     Use data object's creation time instead of modification time for old vs. new categorization
   -e ENVIRONMENT, --environment ENVIRONMENT
                         Contents of environment column to add to output, so that output of
                         multiple Yoda environments can be concatenated.
