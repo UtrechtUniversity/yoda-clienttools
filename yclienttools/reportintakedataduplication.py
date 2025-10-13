@@ -15,14 +15,13 @@ from yclienttools.common_queries import collection_exists
 
 def entry():
     """Entry point"""
-    try:
-        args = _get_args()
-        yoda_version = args.yoda_version or get_default_yoda_version()
-        session = s.setup_session(yoda_version, session_timeout=600)
+    args = _get_args()
+    yoda_version = args.yoda_version or get_default_yoda_version()
+    session = s.setup_session(yoda_version, session_timeout=600)
 
+    try:
         intake_grps = parse_groups_file(args.intakefile)
         research_grps = parse_groups_file(args.researchfile)
-
         report_intake_duplication(args, session, intake_grps, research_grps)
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
