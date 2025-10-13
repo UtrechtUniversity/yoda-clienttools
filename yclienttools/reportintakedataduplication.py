@@ -24,9 +24,10 @@ def entry():
         research_grps = parse_groups_file(args.researchfile)
 
         report_intake_duplication(args, session, intake_grps, research_grps)
-        session.cleanup()
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
+    finally:
+        session.cleanup()
 
 
 def _get_args() -> argparse.Namespace:
