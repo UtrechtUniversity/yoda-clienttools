@@ -38,7 +38,7 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument('intakefile', help='File name of the list of intake vault groups')
     parser.add_argument('researchfile', help='File name of the list of research groups')
     parser.add_argument('-H', '--human-readable', default=False, action='store_true',
-                        help='Report sizes in human-readable figures (only relevant in combination with --size parameter)')
+                        help='Report sizes in human-readable figures')
     common_args.add_default_args(parser)
     return parser.parse_args()
 
