@@ -101,6 +101,7 @@ Summary of tools:
 * [yreport_depositpending](https://github.com/utrechtuniversity/yoda-clienttools#yreport_depositpending) - print report on pending data package in deposit module
 * [yreport_grouplifecycle](https://github.com/utrechtuniversity/yoda-clienttools#yreport_grouplifecycle) - print extended report on Yoda groups
 * [yreport_intake](https://github.com/utrechtuniversity/yoda-clienttools#yreport_intake) - print report on intake module data
+* [yreport_intakedataduplication](https://github.com/utrechtuniversity/yoda-clienttools#yreport_intakedataduplication) - print report on data objects that have a copy in both an intake and one or more research groups
 * [yreport_oldvsnewdata](https://github.com/utrechtuniversity/yoda-clienttools#yreport_oldvsnewdata) - print report on total replica size of data objects, grouped by old (not recently modified) vs new (recently modified) data objects
 * [yreport_linecount](https://github.com/utrechtuniversity/yoda-clienttools#yreport_linecount) - print report on line count per data object
 * [yrmgroups](https://github.com/utrechtuniversity/yoda-clienttools#yrmgroups) - remove a list of groups
@@ -560,6 +561,33 @@ options:
                         order to speed up report generation. The script will
                         also store newly collected dataset information in the
                         cache.
+```
+
+### yreport\_intakedataduplication
+
+Prints a report for data objects that have a copy in both an intake vault group and one or more research groups (in CSV format).
+
+```
+usage: yreport_intakedataduplication [-h] [-H] [-y {1.8,1.9,1.10,2.0}] intakefile researchfile
+
+Prints a report for data objects that have a copy in both an intake vault group and one or more research groups (in CSV format).
+
+positional arguments:
+  intakefile            File name of the list of intake vault groups
+  researchfile          File name of the list of research groups
+
+options:
+  -h, --help            show this help message and exit
+  -H, --human-readable  Report sizes in human-readable figures
+  -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
+                        Override Yoda version on the server
+
+The input files should be text files. Each new line should be the name of a group with no separator (intake vault groups for 'intakefile', research groups for 'research file').
+
+Example file:
+research-core-0
+research-default-1
+research-initial
 ```
 
 ### yreport\_linecount

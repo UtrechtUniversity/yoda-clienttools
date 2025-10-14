@@ -3,6 +3,7 @@
 ## UNRELEASED
 
 - Add --use-create-time parameter to old vs. new data report
+- Add "intake data duplication" report that prints a report for data objects that have a copy in both an intake vault group and one or more research groups
 
 ## 2025-10-09 v2.2.0
 
