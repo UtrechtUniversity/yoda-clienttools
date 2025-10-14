@@ -132,7 +132,7 @@ def get_duplicates(args, session, intake_grps, research_grps):
                 for dataobj in grp_dataobjs:
                     research_dataobjs.append(dataobj)
 
-    if len(intake_dataobjs) == 0:
+    if len(research_dataobjs) == 0:
         exit_with_error("No data objects found for any of the research groups provided.")
 
     duplicates = []
