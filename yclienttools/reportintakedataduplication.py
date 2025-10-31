@@ -4,18 +4,19 @@ import argparse
 import sys
 import os
 import csv
-from typing import Dict, Any
+from typing import Any, Dict, List
 
 import humanize
-from irods.models import Collection, DataObject
 from irods.column import Like
+from irods.models import Collection, DataObject
+from irods.session import iRODSSession
 
 from yclienttools import common_args, session as s
 from yclienttools.common_config import get_default_yoda_version
 from yclienttools.common_queries import collection_exists
 
 
-def entry():
+def entry() -> None:
     """Entry point"""
     args = _get_args()
     yoda_version = args.yoda_version or get_default_yoda_version()
@@ -45,7 +46,7 @@ def _get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _get_format_help_text():
+def _get_format_help_text() -> str:
     return '''
         The input files should be text files. Each new line should be the name of a group with no separator (intake vault groups for 'intakefile', research groups for 'research file').
 
@@ -56,9 +57,9 @@ def _get_format_help_text():
     '''
 
 
-def parse_groups_file(file):
+def parse_groups_file(file: str) -> List[str]:
     """Parses input file and returns list of groups"""
-    groups = []
+    groups: List[str] = []
 
     if not os.path.isfile(file):
         exit_with_error("File {} does not exist or is not a regular file.".format(file))
@@ -72,7 +73,7 @@ def parse_groups_file(file):
     return groups
 
 
-def get_data_objs(session, grp, grp_coll):
+def get_data_objs(session: iRODSSession, grp: str, grp_coll: str) -> List[Dict[str, Any]]:
     """
     Returns a lists of dicts containing:
     - 'group': group owner of parent collection
@@ -108,7 +109,7 @@ def get_data_objs(session, grp, grp_coll):
     return data_objs
 
 
-def get_duplicates(args, session, intake_grps, research_grps):
+def get_duplicates(args: argparse.Namespace, session: iRODSSession, intake_grps: List[str], research_grps: List[str]) -> List[Dict[str, Any]]:
     intake_dataobjs = []
     for grp in intake_grps:
         grp_coll = f"/{session.zone}/home/{grp}"
@@ -145,7 +146,7 @@ def get_duplicates(args, session, intake_grps, research_grps):
     return duplicates
 
 
-def size_to_str(value, human_readable) -> str:
+def size_to_str(value: int, human_readable: bool) -> str:
     if value is None or value == '':
         return 'N/A'
     elif human_readable:
@@ -154,7 +155,7 @@ def size_to_str(value, human_readable) -> str:
         return str(value)
 
 
-def report_intake_duplication(args, session, intake_grps, research_grps):
+def report_intake_duplication(args: argparse.Namespace, session: iRODSSession, intake_grps: List[str], research_grps: List[str]) -> None:
     """Generate duplication report between intake and research collections."""
     writer = csv.DictWriter(sys.stdout, fieldnames=['Group', 'Collection', 'Data object', 'Chksum', 'Size', 'Duplicate of'], delimiter=',')
     writer.writeheader()
@@ -181,6 +182,6 @@ def report_intake_duplication(args, session, intake_grps, research_grps):
     print(f"Total size of duplicates: {size_to_str(total_size, args.human_readable)}")
 
 
-def exit_with_error(message):
+def exit_with_error(message: str):
     print("Error: {}".format(message), file=sys.stderr)
     sys.exit(1)
