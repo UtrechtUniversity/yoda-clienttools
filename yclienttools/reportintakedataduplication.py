@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 import csv
+from itertools import chain
 from typing import Any, Dict, List
 
 import humanize
@@ -73,8 +74,10 @@ def parse_groups_file(file: str) -> List[str]:
     return groups
 
 
-def get_data_objs(session: iRODSSession, grp: str, grp_coll: str) -> List[Dict[str, Any]]:
+def get_data_objs_with_checksum(session: iRODSSession, grp: str, grp_coll: str) -> List[Dict[str, Any]]:
     """
+    Returns data of all data objects with a checksum in a group
+
     Returns a lists of dicts containing:
     - 'group': group owner of parent collection
     - 'parent': parent collection
@@ -84,25 +87,30 @@ def get_data_objs(session: iRODSSession, grp: str, grp_coll: str) -> List[Dict[s
     """
     data_objs = []
 
-    # Get all data objects in all subcollections
-    all_data_objs = session.query(Collection.name, DataObject.name, DataObject.size, DataObject.checksum).filter(
-        Like(Collection.name, f"{grp_coll}/%")
-    )
+    # Get all data objects in collection and its subcollections
+    searchstring = f"{grp_coll}/%"
+    generator_collection = (session.query(Collection.name, DataObject.name, DataObject.size, DataObject.checksum)
+                            .filter(Collection.name == grp_coll)
+                            .filter(DataObject.checksum != "")
+                            .filter(DataObject.replica_status == "1")
+                            .get_results()
+                            )
+    generator_subcollections = (session.query(Collection.name, DataObject.name, DataObject.size, DataObject.checksum)
+                                .filter(Like(Collection.name, searchstring))
+                                .filter(DataObject.checksum != "")
+                                .filter(DataObject.replica_status == "1")
+                                .get_results()
+                                )
+    all_data_objs = chain(generator_collection, generator_subcollections)
 
-    for row in all_data_objs.get_results():
+    for row in all_data_objs:
         data_obj: Dict[str, Any] = {
-            'group': '',
-            'parent': '',
-            'dataobj': '',
-            'chksum': '',
-            'size': ''
+            'group': grp,
+            'parent': row[Collection.name],
+            'dataobj': row[DataObject.name],
+            'chksum': row[DataObject.checksum],
+            'size': row[DataObject.size]
         }
-
-        data_obj['group'] = grp
-        data_obj['parent'] = row[Collection.name]
-        data_obj['dataobj'] = row[DataObject.name]
-        data_obj['chksum'] = row[DataObject.checksum]
-        data_obj['size'] = row[DataObject.size]
 
         data_objs.append(data_obj)
 
@@ -114,11 +122,7 @@ def get_duplicates(args: argparse.Namespace, session: iRODSSession, intake_grps:
     for grp in intake_grps:
         grp_coll = f"/{session.zone}/home/{grp}"
         if collection_exists(session, grp_coll):
-            grp_dataobjs = get_data_objs(session, grp, grp_coll)
-
-            if len(grp_dataobjs) > 0:
-                for dataobj in grp_dataobjs:
-                    intake_dataobjs.append(dataobj)
+            intake_dataobjs.extend(get_data_objs_with_checksum(session, grp, grp_coll))
 
     if len(intake_dataobjs) == 0:
         exit_with_error("No data objects found for any of the intake vault groups provided.")
@@ -127,11 +131,7 @@ def get_duplicates(args: argparse.Namespace, session: iRODSSession, intake_grps:
     for grp in research_grps:
         grp_coll = f"/{session.zone}/home/{grp}"
         if collection_exists(session, grp_coll):
-            grp_dataobjs = get_data_objs(session, grp, grp_coll)
-
-            if len(grp_dataobjs) > 0:
-                for dataobj in grp_dataobjs:
-                    research_dataobjs.append(dataobj)
+            research_dataobjs.extend(get_data_objs_with_checksum(session, grp, grp_coll))
 
     if len(research_dataobjs) == 0:
         exit_with_error("No data objects found for any of the research groups provided.")
