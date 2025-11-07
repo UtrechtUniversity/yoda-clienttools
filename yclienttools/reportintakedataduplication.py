@@ -117,7 +117,9 @@ def get_data_objs_with_checksum(session: iRODSSession, grp: str, grp_coll: str) 
     return data_objs
 
 
-def get_duplicates(args: argparse.Namespace, session: iRODSSession, intake_grps: List[str], research_grps: List[str]) -> List[Dict[str, Any]]:
+def run_get_duplicates(session: iRODSSession, intake_grps: List[str], research_grps: List[str]) -> List[Dict[str, Any]]:
+    """Retrieves a list of data objects for a list of research groups and intake groups, then
+       calculates duplicates."""
     intake_dataobjs = []
     for grp in intake_grps:
         grp_coll = f"/{session.zone}/home/{grp}"
@@ -136,14 +138,43 @@ def get_duplicates(args: argparse.Namespace, session: iRODSSession, intake_grps:
     if len(research_dataobjs) == 0:
         exit_with_error("No data objects found for any of the research groups provided.")
 
-    duplicates = []
-    for i_dataobj in intake_dataobjs:
-        for r_dataobj in research_dataobjs:
-            if i_dataobj['dataobj'] == r_dataobj['dataobj'] and i_dataobj['chksum'] == r_dataobj['chksum']:
-                r_dataobj['duplicateOf'] = f"{i_dataobj['parent']}/{i_dataobj['dataobj']}"
-                duplicates.append(r_dataobj)
+    return get_duplicates(research_dataobjs, intake_dataobjs)
+
+
+def get_duplicates(research_dataobjs: List[Dict[str, Any]], intake_dataobjs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    intake_chksum_lookup = _get_dataobject_lookup_dict(intake_dataobjs, "chksum")
+    intake_name_lookup = _get_dataobject_lookup_dict(intake_dataobjs, "dataobj")
+
+    duplicates: List[Dict[str, Any]] = []
+    for r_dataobj in research_dataobjs:
+        checksum: str = r_dataobj['chksum']
+        name: str = r_dataobj['dataobj']
+
+        if checksum in intake_chksum_lookup and name in intake_name_lookup:
+            intake_objects_by_name = intake_name_lookup[name]
+            intake_objects_by_checksum  = intake_chksum_lookup[checksum]
+            intake_objects_that_match: List[Dict[str, Any]] = [o for o in intake_objects_by_name if o in intake_objects_by_checksum]
+            if len(intake_objects_that_match) > 0:
+                match = r_dataobj.copy()
+                match["duplicateOf"] = ",".join([o['parent'] + "/" + o['dataobj'] for o in intake_objects_that_match])
+                duplicates.append(match)
 
     return duplicates
+
+
+def _get_dataobject_lookup_dict(data: List[Dict[str, Any]], indexkey: str) -> Dict[str, List[Dict[str, Any]]]:
+    """Creates a lookup dictionary for a list of dictionaries by a particular
+       key."""
+    output: Dict[str, List[Dict[str, Any]]] = {}
+
+    for entry in data:
+        k: str = entry[indexkey]
+        if k in output:
+            output[k].append(entry)
+        else:
+            output[k] = [entry]
+
+    return output
 
 
 def size_to_str(value: int, human_readable: bool) -> str:
@@ -160,8 +191,8 @@ def report_intake_duplication(args: argparse.Namespace, session: iRODSSession, i
     writer = csv.DictWriter(sys.stdout, fieldnames=['Group', 'Collection', 'Data object', 'Chksum', 'Size', 'Duplicate of'], delimiter=',')
     writer.writeheader()
 
-    duplicates = get_duplicates(args, session, intake_grps, research_grps)
-    total_size = 0
+    duplicates = run_get_duplicates(session, intake_grps, research_grps)
+    total_size: int = 0
     for dup in duplicates:
         row = {
             'Group': dup['group'],
