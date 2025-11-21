@@ -59,7 +59,7 @@ Example:
 
 ```
 ca_file: /etc/ssl/certs/ca-certificates.crt
-default_yoda_version: 1.8
+default_yoda_version: 2.0
 ```
 
 The following parameters are available:
@@ -67,7 +67,7 @@ The following parameters are available:
    the tools try to find the CA file in the default locations of Ubuntu/Debian, RedHat/AlmaLinux and Yoda.
 - `default_yoda_version`: the Yoda client tools need to know the Yoda version running on the server. This version can be provided when running a tool
    using the `--yoda-version` parameter. When this parameter is not provided, the tools use the default version specified in the configuration file, or
-   `1.8` if no default version is configured.
+   `2.0` if no default version is configured.
 
 ## Running tests
 

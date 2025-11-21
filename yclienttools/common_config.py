@@ -43,7 +43,7 @@ def is_self_signed(path: str) -> bool:
 
 
 def get_default_yoda_version() -> str:
-    return str(_get_parameter_with_default("default_yoda_version", "1.8"))
+    return str(_get_parameter_with_default("default_yoda_version", "2.0"))
 
 
 def _get_parameter_with_default(parameter: str, default_value: str) -> str:
