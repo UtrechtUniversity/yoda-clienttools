@@ -1,9 +1,10 @@
 # Change log
 
-## UNRELEASED
+## 2025-11-21 v2.3.0
 
 - Add --use-create-time parameter to old vs. new data report
-- Add "intake data duplication" report that prints a report for data objects that have a copy in both an intake vault group and one or more research groups
+- Add "intake data duplication" report that prints a report for data objects
+  that have a copy in both an intake vault group and one or more research groups
 - Update default Yoda version from 1.8 to 2.0
 
 ## 2025-10-09 v2.2.0
