@@ -12,7 +12,7 @@ setup(
         'dnspython>=2.2.0',
         'backports.functools-lru-cache>=1.6.4',
         'PyYaml',
-        'cryptography==46.0.2'
+        'cryptography==46.0.5'
     ],
     name='yclienttools',
     packages=['yclienttools'],
