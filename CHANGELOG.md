@@ -1,5 +1,9 @@
 # Change log
 
+## 2026-02-11 v2.3.1
+
+- Upgrade Python cryptography package to v46.0.5 (security update)
+
 ## 2025-11-21 v2.3.0
 
 - Add --use-create-time parameter to old vs. new data report
