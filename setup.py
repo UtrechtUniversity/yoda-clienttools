@@ -37,6 +37,7 @@ setup(
             'yimportgroups=yclienttools.importgroups:entry',
             'yexportgroups=yclienttools.exportgroups:entry',
             'yensuremembers=yclienttools.ensuremembers:entry',
+            'yrecatgroups=yclienttools.recatgroups:entry',
             'yrmusers=yclienttools.rmusers:entry',
             'yrmgroups=yclienttools.rmgroups:entry'
         ]
