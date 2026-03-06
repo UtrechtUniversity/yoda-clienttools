@@ -364,15 +364,15 @@ options:
                         as manager in group "datamanager-<category>"
 
         Notes:
-        - CSV delimiter may be ',' or ';' (auto-detected).
+        - CSV delimiter as ','.
         - Empty rows are ignored.
         - The datamanager column uses ';' as separator (independent of CSV delimiter).
         - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
 
         Example:
         groupname,category,subcategory,datamanager
-        research-abc,departmentx,teama,dm1@example.org;dm2@example.org
-        research-def,departmenty,,dm3@example.org
+        research-abc,categoryabc,subcategoryabc,dm1@example.org;dm2@example.org
+        research-def,categoryabc,,dm3@example.org
 ```
 
 ### yreport\_collectionsize

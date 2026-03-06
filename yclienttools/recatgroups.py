@@ -121,12 +121,11 @@ def _get_format_help_text() -> str:
     """
 
 
-# ---------- CSV parsing / offline validation ----------
 
 RecatRow = Tuple[str, str, str, List[str], int]
 # (groupname, category, subcategory, datamanagers, row_number)
 
-
+# CSV parsing
 def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
     """
     Parse a CSV with required headers:
