@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 sys.path.append("../yclienttools")
 
-from recatgroups import (  # type: ignore[import-not-found]
+from recatgroups import (
     _normalize_category,
     _split_datamanagers,
     parse_csv_file_recat,

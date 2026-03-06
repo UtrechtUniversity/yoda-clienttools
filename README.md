@@ -352,8 +352,8 @@ positional arguments:
 
 options:
   -h, --help     show this help message and exit
-  --check, -c    Check mode (offline): verify CSV format/content only. Does not connect to iRODS.
-  --dry-run, -d  Dry-run mode (online): connects to iRODS, validates, and prints what would change. Does not modify iRODS.
+  --check, -c    Check mode (offline): verify CSV format/content only.
+  --dry-run, -d  Dry-run mode (online): connects to iRODS, validates, and prints what would change. Does not modify any groups.
   --verbose, -v  Increase verbosity. Use -v for per-row progress, -vv for details.
 
         The CSV file is expected to include the following labels in its header (the first row):
