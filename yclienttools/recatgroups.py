@@ -397,7 +397,7 @@ def _call_group_modify(
         _log(args, "  Updated {}: {}='{}'".format(groupname, prop, value))
         return
 
-    print("Error while attempting to update group {}: {}='{}'".format(groupname, prop, value),file=sys.stderr)
+    print("Error while attempting to update group {}: {}='{}'".format(groupname, prop, value), file=sys.stderr)
     print("Status: {} , Message: {}".format(status, msg), file=sys.stderr)
     raise Exception("uuGroupModify failed for group={}, property={}".format(groupname, prop))
 
