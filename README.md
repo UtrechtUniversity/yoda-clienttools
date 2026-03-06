@@ -93,6 +93,7 @@ Summary of tools:
 * [ygrepgroups](https://github.com/utrechtuniversity/yoda-clienttools#ygrepgroups) - search for groups
 * [ygroupinfo](https://github.com/utrechtuniversity/yoda-clienttools#ygroupinfo) - print group (sub)category information
 * [yimportgroups](https://github.com/utrechtuniversity/yoda-clienttools#yimportgroups) - import group data from CSV file
+* [yrecatgroups](https://github.com/utrechtuniversity/yoda-clienttools#yrecatgroups) - Bulk (sub)category changes for Yoda research groups.
 * [yreport_collectionsize](https://github.com/utrechtuniversity/yoda-clienttools#yreport_collectionsize) - report of collection sizes
 * [yreport_dataobjectspercollection](https://github.com/utrechtuniversity/yoda-clienttools#yreport_dataobjectspercollection) - report of number of data objects per collection
 * [yreport_datapackagestatus](https://github.com/utrechtuniversity/yoda-clienttools#yreport_datapackagestatus) - print or email report on status of data packages
@@ -334,6 +335,43 @@ options:
         category,subcategory,groupname,manager,member,expiration_date,schema_id
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2055-01-01,default-3
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
+```
+
+### yrecatgroups
+
+Bulk-updates the category and/or subcategory of existing Yoda research groups based on a CSV file.
+
+```
+usage: yrecatgroups [-h]
+                    [--check | --dry-run]
+                    [--verbose]
+                    csvfile
+
+positional arguments:
+  csvfile        CSV file containing recategorization groups and their records.
+
+options:
+  -h, --help     show this help message and exit
+  --check, -c    Check mode (offline): verify CSV format/content only.
+  --dry-run, -d  Dry-run mode (online): connects to iRODS, validates, and prints what would change. Does not modify any groups.
+  --verbose, -v  Verbose mode.
+
+        The CSV file is expected to include the following labels in its header (the first row):
+        'groupname'   = full research group name (must start with "research-")
+        'category'    = new category (mandatory)
+        'subcategory' = new subcategory (optional; empty means do not change subcategory)
+        'datamanager' = optional list of datamanager users (separated by ';') that will be set
+                        as manager in group "datamanager-<category>"
+
+        Notes:
+        - CSV delimiter as ','.
+        - Empty rows are ignored.
+        - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
+
+        Example:
+        groupname,category,subcategory,datamanager
+        research-abc,categoryabc,subcategoryabc,dm1@example.org;dm2@example.org
+        research-def,categoryabc,,dm3@example.org
 ```
 
 ### yreport\_collectionsize
@@ -710,3 +748,4 @@ options:
   -y {1.8,1.9,1.10,2.0}, --yoda-version {1.8,1.9,1.10,2.0}
                         Override Yoda version on the server
 ```
+
