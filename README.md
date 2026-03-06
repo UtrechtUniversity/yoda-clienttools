@@ -348,13 +348,13 @@ usage: yrecatgroups [-h]
                     csvfile
 
 positional arguments:
-  csvfile        CSV file containing recategorization records.
+  csvfile        CSV file containing recategorization groups and their records.
 
 options:
   -h, --help     show this help message and exit
   --check, -c    Check mode (offline): verify CSV format/content only.
   --dry-run, -d  Dry-run mode (online): connects to iRODS, validates, and prints what would change. Does not modify any groups.
-  --verbose, -v  Increase verbosity. Use -v for per-row progress, -vv for details.
+  --verbose, -v  Verbose mode.
 
         The CSV file is expected to include the following labels in its header (the first row):
         'groupname'   = full research group name (must start with "research-")
@@ -366,7 +366,6 @@ options:
         Notes:
         - CSV delimiter as ','.
         - Empty rows are ignored.
-        - The datamanager column uses ';' as separator (independent of CSV delimiter).
         - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
 
         Example:
