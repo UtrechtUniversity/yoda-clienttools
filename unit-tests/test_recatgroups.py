@@ -44,16 +44,21 @@ class RecatGroupsTest(TestCase):
 
     def test_parse_valid_csv_comma(self):
         path = self._write_tmp_csv(
-            "groupname,category,subcategory,datamanager\n"
-            "research-groupa,test-automation,initial,alice@example.org;bob@example.org\n"
-            "research-groupb,test-automation,,\n"
+            "groupname,category,subcategory\n"
+            "research-groupa,test-automation,initial\n"
+            "research-groupb,test-automation,\n"
         )
         data = parse_csv_file_recat(path)
         self.assertEqual(len(data), 2)
+
         self.assertEqual(data[0][0], "research-groupa")
         self.assertEqual(data[0][1], "test-automation")
         self.assertEqual(data[0][2], "initial")
-        self.assertEqual(data[0][3], ["alice@example.org", "bob@example.org"])
+        self.assertEqual(data[0][3], 2)  # line number in the CSV file
+
+        self.assertEqual(data[1][0], "research-groupb")
+        self.assertEqual(data[1][2], "")  # unchanged/empty subcategory
+        self.assertEqual(data[1][3], 3)
 
     @patch("sys.stderr", new_callable=StringIO)
     def test_parse_missing_header(self, mock_stderr):
@@ -67,18 +72,17 @@ class RecatGroupsTest(TestCase):
     @patch("sys.stderr", new_callable=StringIO)
     def test_parse_unknown_header(self, mock_stderr):
         path = self._write_tmp_csv(
-            "groupname,category,subcategory,datamanager,unknown\n"
-            "research-groupa,test-automation,initial,\n"
+            "groupname,category,subcategory,unknown\n"
+            "research-groupa,test-automation,initial,x\n"
         )
         with self.assertRaises(SystemExit):
             parse_csv_file_recat(path)
 
     @patch("sys.stderr", new_callable=StringIO)
     def test_parse_too_many_columns(self, mock_stderr):
-        # DictReader puts extras in __extra__
         path = self._write_tmp_csv(
-            "groupname,category,subcategory,datamanager\n"
-            "research-groupa,test-automation,initial,alice@example.org,EXTRA\n"
+            "groupname,category,subcategory\n"
+            "research-groupa,test-automation,initial,EXTRA\n"
         )
         with self.assertRaises(SystemExit):
             parse_csv_file_recat(path)
