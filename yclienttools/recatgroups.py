@@ -401,9 +401,12 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
 
 
 def _get_pending_collection_path(zone: str, groupname: str, old_category: str) -> str:
+    if not groupname.startswith("research-"):
+        raise ValueError(
+            "Invalid groupname '{}': only groups starting with 'research-' are supported for now".format(groupname)
+        )
     suffix = groupname[len("research-"):]  # research-xxx -> vault-xxx
     return "/{}/home/datamanager-{}/vault-{}".format(zone, old_category, suffix)
-
 
 def _update_group_category_subcategory(
     rule_interface: RuleInterface,
