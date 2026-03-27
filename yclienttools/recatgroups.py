@@ -15,6 +15,10 @@ from yclienttools import session as s
 from yclienttools.common_rules import RuleInterface
 
 
+# ============================================================================
+# Entry point and command-line parsing
+# ============================================================================
+
 def entry() -> None:
     """Entry point."""
     args = _get_args()
@@ -62,18 +66,10 @@ def _get_args() -> argparse.Namespace:
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument(
-        "csvfile",
-        help="CSV file containing recategorization records.",
-    )
+    parser.add_argument("csvfile", help="CSV file containing recategorization records.")
 
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument(
-        "--check",
-        "-c",
-        action="store_true",
-        help="Check mode: verify CSV format and content.",
-    )
+    mode.add_argument("--check", "-c", action="store_true", help="Check mode: verify CSV format and content.")
     mode.add_argument(
         "--dry-run",
         "-d",
@@ -84,7 +80,7 @@ def _get_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--datamanagers-new-category",
-        "--datamagers-new-category",  # backward/typo-friendly alias
+        "--datamagers-new-category",
         dest="datamanagers_new_category",
         required=True,
         help=(
@@ -96,37 +92,8 @@ def _get_args() -> argparse.Namespace:
         ),
     )
 
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="Verbose output.",
-    )
-
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output.")
     return parser.parse_args()
-
-
-def _basic(args: argparse.Namespace, message: str) -> None:
-    """Progress output when NOT running with --verbose."""
-    if not getattr(args, "verbose", False):
-        print(message)
-
-
-def _log(args: argparse.Namespace, message: str) -> None:
-    """Log to stdout if verbose enabled."""
-    if getattr(args, "verbose", False):
-        print(message)
-
-
-def _warn(message: str) -> None:
-    print("Warning: {}".format(message), file=sys.stderr)
-
-
-def _exit_with_error(session, message: str) -> None:
-    print("Error: {}".format(message), file=sys.stderr)
-    if session is not None:
-        session.cleanup()
-    sys.exit(1)
 
 
 def _get_format_help_text() -> str:
@@ -155,6 +122,37 @@ def _get_format_help_text() -> str:
         recat.py input.csv --datamanagers-new-category ''   # allow creating new categories without DMs
     """
 
+
+# ============================================================================
+# Output logging and error handling
+# ============================================================================
+
+def _basic(args: argparse.Namespace, message: str) -> None:
+    """Progress output when NOT running with --verbose."""
+    if not getattr(args, "verbose", False):
+        print(message)
+
+
+def _log(args: argparse.Namespace, message: str) -> None:
+    """Log to stdout only if verbose enabled."""
+    if getattr(args, "verbose", False):
+        print(message)
+
+
+def _warn(message: str) -> None:
+    print("Warning: {}".format(message), file=sys.stderr)
+
+
+def _exit_with_error(session, message: str) -> None:
+    print("Error: {}".format(message), file=sys.stderr)
+    if session is not None:
+        session.cleanup()
+    sys.exit(1)
+
+
+# ============================================================================
+# CSV parsing and validation
+# ============================================================================
 
 RecatRow = Tuple[str, str, str, int]
 # (groupname, category, subcategory, row_number)
@@ -208,7 +206,8 @@ def _is_effectively_empty_row(row: dict) -> bool:
 
 
 def _parse_and_validate_row(row: dict, row_number: int, seen_groups: set) -> RecatRow:
-    """Parse and validate a single CSV row.
+    """
+    Parse and validate a single CSV row.
     Returns (groupname, category, subcategory, row_number) if valid, otherwise exits with error.
     """
     if row.get("__extra__"):
@@ -249,14 +248,10 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
     """
     Parse a CSV with required headers:
       groupname, category, subcategory
-
-    Returns:
-      [(groupname, category, subcategory, row_number)]
     """
     extracted_data: List[RecatRow] = []
 
     with open(input_file, mode="r", encoding="utf-8-sig", newline="") as csv_file:
-        # CSV dialect check
         dialect = _sniff_csv_dialect_or_exit(csv_file)
 
         reader = csv.DictReader(
@@ -274,28 +269,21 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
         _validate_header(header)
 
         seen_groups = set()
-
         for row in reader:
             row_number = reader.line_num
-
             if _is_effectively_empty_row(row):
                 continue
-
             extracted_data.append(_parse_and_validate_row(row, row_number, seen_groups))
 
     return extracted_data
 
 
 def _normalize_category(value: str) -> str:
-    # Derived from importgroups.py
     return (value or "").strip().lower().replace(".", "")
 
 
 def _split_datamanagers(value: str) -> List[str]:
-    """
-    Split a datamanager cell into a list of entries.
-    We use ';' as separator because ',' is used as CSV delimiter.
-    """
+    """Split a ';'-separated datamanager list into entries."""
     if value is None:
         return []
     value = value.strip()
@@ -323,13 +311,16 @@ def print_parsed_data(data: Sequence[RecatRow]) -> None:
         print()
 
 
+# ============================================================================
+# Main online validation and apply flow
+# ============================================================================
+
 def _ensure_rodsadmin(session) -> None:
     """Exit unless the script user is a rodsadmin."""
     username = getattr(session, "username", None)
     if not username:
         _exit_with_error(session, "Could not determine connected iRODS username (session.username missing).")
 
-    # Fetch user type from iRODS and check if rodsadmin
     rows = list(session.query(User.type).filter(User.name == username).get_results())
     user_type = rows[0][User.type]
     if user_type != "rodsadmin":
@@ -337,14 +328,7 @@ def _ensure_rodsadmin(session) -> None:
 
 
 def _run_online_checks(session, rule_interface: RuleInterface, args: argparse.Namespace, data: Sequence[RecatRow]) -> None:
-    """
-    Online validation without making changes:
-    - group exists
-    - old category readable
-    - pending metadata of publications does not exist in datamanager-grp
-    - optional datamanager users exist (from CLI option)
-    """
-    # Validate CLI datamanager users exist (only once, not per-row)
+    """Online validation without making changes."""
     for username in sorted(set(args.datamanagers_new_category or [])):
         try:
             exists = rule_interface.call_rule_user_exists(username)
@@ -360,7 +344,6 @@ def _run_online_checks(session, rule_interface: RuleInterface, args: argparse.Na
             _exit_with_error(session, "Data error in row {}: group '{}' does not exist".format(row_number, groupname))
 
         old_category = _get_group_metadata_single(session, groupname, "category")
-
         pending_collection = _get_pending_collection_path(session.zone, groupname, old_category)
         if collection_exists(session, pending_collection):
             _warn(
@@ -375,20 +358,15 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
         # Basic output (non-verbose)
         _basic(args, "Row {}: processing {}".format(row_number, groupname))
 
-        # Per-row verbose logging
+        # Verbose logging
         _log(args, "Row {}: {}".format(row_number, groupname))
 
-        # Research group checks
         if not common_queries.group_exists(session, groupname):
             _exit_with_error(session, "Data error in row {}: group '{}' does not exist".format(row_number, groupname))
         if not groupname.startswith("research-"):
-            # Required for correct pending metadata path
             _exit_with_error(session, "Data error in row {}: '{}' is not a research group".format(row_number, groupname))
 
-        # Read old/current category
         old_category = _get_group_metadata_single(session, groupname, "category")
-
-        # Skip row if unprocessed publications collection exists in datamanager-grp
         pending_collection = _get_pending_collection_path(session.zone, groupname, old_category)
         if collection_exists(session, pending_collection):
             _warn(
@@ -427,21 +405,19 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
             _basic(args, "Row {}: dry-run OK (no changes)".format(row_number))
             continue
 
-        # Apply changes to the research group
         _update_group_category_subcategory(rule_interface, groupname, category, subcategory, args)
 
-        # Ensure datamanager group exists; only assign managers if the group is newly created
         _ensure_datamanager_group_and_assign_managers_if_created(
             session=session,
             rule_interface=rule_interface,
             category=category,
-            subcategory=subcategory,  # may be ""
+            subcategory=subcategory,
             datamanagers=args.datamanagers_new_category,
             row_number=row_number,
             args=args,
         )
 
-        # Basic “done” line (non-verbose)
+        # Basic output (non-verbose)
         _basic(
             args,
             "Row {}: processed {} -> category='{}'{}".format(
@@ -495,6 +471,10 @@ def _call_group_modify(
     raise Exception("uuGroupModify failed for group={}, property={}".format(groupname, prop))
 
 
+# ============================================================================
+# Create dmgroup and assign dms
+# ============================================================================
+
 _ALREADY_EXISTS_CODES = {"-1089000", "-809000", "-806000"}
 
 
@@ -510,10 +490,7 @@ def _ensure_datamanager_group_exists(
     row_number: int,
     args: argparse.Namespace,
 ) -> bool:
-    """
-    Ensure datamanager-<category> exists.
-    Returns True if the group was created by this function, False otherwise.
-    """
+    """Ensure datamanager-<category> exists."""
     dm_groupname = _datamanager_groupname(category)
 
     _log(args, "  Ensuring datamanager group exists: {}".format(dm_groupname))
@@ -561,7 +538,7 @@ def _ensure_user_is_manager(
     args: argparse.Namespace,
 ) -> None:
     """
-    Ensure the user is a manager of the datamanager group. 
+    Ensure the user is a manager of the dmgroup. 
     Add user if not present, then set role to manager.
     """
     currentrole = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
