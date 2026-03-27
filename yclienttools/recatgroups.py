@@ -160,6 +160,91 @@ RecatRow = Tuple[str, str, str, int]
 # (groupname, category, subcategory, row_number)
 
 
+def _sniff_csv_dialect_or_exit(csv_file) -> csv.Dialect:
+    """
+    Sniff CSV sample dialect, to ensure ',' is used as delimiter.
+    """
+    try:
+        sample = csv_file.read(4096)
+        dialect = csv.Sniffer().sniff(sample, delimiters=",")
+    except Exception:
+        _exit_with_error(None, 'CSV is not correctly delimited with ","')
+    finally:
+        csv_file.seek(0)
+    return dialect
+
+
+def _normalize_header(fieldnames: Sequence[str]) -> List[str]:
+    """
+    Removing trailing spaces.
+    """
+    return [h.strip() for h in fieldnames]
+
+
+def _validate_header(header: Sequence[str]) -> None:
+    """Check required fields and unknown fields in CSV header."""
+    required = set(_get_csv_required_labels())
+    possible = set(_get_csv_possible_labels())
+
+    missing = [h for h in required if h not in header]
+    if missing:
+        _exit_with_error(None, 'CSV header is missing compulsory field(s): {}'.format(", ".join(missing)))
+
+    unknown = [h for h in header if h not in possible]
+    if unknown:
+        _exit_with_error(None, 'CSV header contains unknown field(s): {}'.format(", ".join(unknown)))
+
+
+def _is_effectively_empty_row(row: dict) -> bool:
+    """Determine if a CSV row is effectively empty (ignoring extra columns)."""
+    if not row:
+        return True
+    for k, v in row.items():
+        if k == "__extra__":
+            continue
+        if v is not None and str(v).strip() != "":
+            return False
+    return True
+
+
+def _parse_and_validate_row(row: dict, row_number: int, seen_groups: set) -> RecatRow:
+    """Parse and validate a single CSV row.
+    Returns (groupname, category, subcategory, row_number) if valid, otherwise exits with error.
+    """
+    if row.get("__extra__"):
+        _exit_with_error(None, "Data error in row {}: too many columns: {}".format(row_number, row["__extra__"]))
+
+    groupname = (row.get("groupname") or "").strip()
+    category_raw = (row.get("category") or "").strip()
+    subcategory_raw = (row.get("subcategory") or "").strip()
+
+    if groupname == "":
+        _exit_with_error(None, "Data error in row {}: missing groupname".format(row_number))
+    if not groupname.startswith("research-"):
+        _exit_with_error(
+            None,
+            "Data error in row {}: '{}' is not a research group (must start with 'research-')".format(row_number, groupname),
+        )
+
+    if groupname in seen_groups:
+        _exit_with_error(None, "Data error in row {}: duplicate groupname '{}' in CSV".format(row_number, groupname))
+    seen_groups.add(groupname)
+
+    category = _normalize_category(category_raw)
+    subcategory = subcategory_raw.strip()
+
+    if category == "":
+        _exit_with_error(None, "Data error in row {}: missing category (mandatory)".format(row_number))
+
+    if not yoda_names.is_valid_category(category):
+        _exit_with_error(None, "Data error in row {}: '{}' is not a valid category name".format(row_number, category))
+
+    if subcategory not in ("", None) and not yoda_names.is_valid_category(subcategory):
+        _exit_with_error(None, "Data error in row {}: '{}' is not a valid subcategory name".format(row_number, subcategory))
+
+    return (groupname, category, subcategory, row_number)
+
+    
 def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
     """
     Parse a CSV with required headers:
@@ -169,17 +254,10 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
       [(groupname, category, subcategory, row_number)]
     """
     extracted_data: List[RecatRow] = []
-    required = set(_get_csv_required_labels())
-    possible = set(_get_csv_possible_labels())
 
     with open(input_file, mode="r", encoding="utf-8-sig", newline="") as csv_file:
-        try:
-            sample = csv_file.read(4096)
-            dialect = csv.Sniffer().sniff(sample, delimiters=",")
-        except Exception:
-            _exit_with_error(None, 'CSV is not correctly delimited with ","')
-
-        csv_file.seek(0)
+        # CSV dialect check
+        dialect = _sniff_csv_dialect_or_exit(csv_file)
 
         reader = csv.DictReader(
             csv_file,
@@ -189,68 +267,21 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
         )
 
         if reader.fieldnames is None:
-            _exit_with_error(None, "CSV is empty")
+            _exit_with_error(None, "CSV file is empty")
 
-        header = [h.strip() for h in reader.fieldnames]
-        reader.fieldnames = header  # normalize keys
-
-        missing = [h for h in required if h not in header]
-        if missing:
-            _exit_with_error(None, 'CSV header is missing compulsory field(s): {}'.format(", ".join(missing)))
-
-        unknown = [h for h in header if h not in possible]
-        if unknown:
-            _exit_with_error(None, 'CSV header contains unknown field(s): {}'.format(", ".join(unknown)))
+        header = _normalize_header(reader.fieldnames)
+        reader.fieldnames = header
+        _validate_header(header)
 
         seen_groups = set()
 
         for row in reader:
             row_number = reader.line_num
 
-            # Skip empty rows
-            if not row or all((str(v).strip() == "" for v in row.values() if v is not None)):
+            if _is_effectively_empty_row(row):
                 continue
 
-            if row.get("__extra__"):
-                _exit_with_error(None, "Data error in row {}: too many columns: {}".format(row_number, row["__extra__"]))
-
-            groupname = (row.get("groupname") or "").strip()
-            category_raw = (row.get("category") or "").strip()
-            subcategory_raw = (row.get("subcategory") or "").strip()
-
-            if groupname == "":
-                _exit_with_error(None, "Data error in row {}: missing groupname".format(row_number))
-            if not groupname.startswith("research-"):
-                _exit_with_error(
-                    None,
-                    "Data error in row {}: '{}' is not a research group (must start with 'research-')".format(
-                        row_number, groupname
-                    ),
-                )
-
-            category = _normalize_category(category_raw)
-            subcategory = subcategory_raw.strip()
-
-            if category == "":
-                _exit_with_error(None, "Data error in row {}: missing category (mandatory)".format(row_number))
-
-            if not yoda_names.is_valid_category(category):
-                _exit_with_error(
-                    None,
-                    "Data error in row {}: '{}' is not a valid category name".format(row_number, category),
-                )
-
-            if subcategory not in ("", None) and not yoda_names.is_valid_category(subcategory):
-                _exit_with_error(
-                    None,
-                    "Data error in row {}: '{}' is not a valid subcategory name".format(row_number, subcategory),
-                )
-
-            if groupname in seen_groups:
-                _exit_with_error(None, "Data error in row {}: duplicate groupname '{}' in CSV".format(row_number, groupname))
-            seen_groups.add(groupname)
-
-            extracted_data.append((groupname, category, subcategory, row_number))
+            extracted_data.append(_parse_and_validate_row(row, row_number, seen_groups))
 
     return extracted_data
 
@@ -429,6 +460,7 @@ def _get_pending_collection_path(zone: str, groupname: str, old_category: str) -
         )
     suffix = groupname[len("research-"):]  # research-xxx -> vault-xxx
     return "/{}/home/datamanager-{}/vault-{}".format(zone, old_category, suffix)
+
 
 def _update_group_category_subcategory(
     rule_interface: RuleInterface,
