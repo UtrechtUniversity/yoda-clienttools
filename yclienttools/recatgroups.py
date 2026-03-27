@@ -312,7 +312,7 @@ def print_parsed_data(data: Sequence[RecatRow]) -> None:
 
 
 # ============================================================================
-# Main online validation and apply flow
+# CSV validation and applying changes
 # ============================================================================
 
 def _ensure_rodsadmin(session) -> None:
@@ -538,7 +538,7 @@ def _ensure_user_is_manager(
     args: argparse.Namespace,
 ) -> None:
     """
-    Ensure the user is a manager of the dmgroup. 
+    Ensure the user is a manager of the dmgroup.
     Add user if not present, then set role to manager.
     """
     currentrole = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
