@@ -20,12 +20,21 @@ def entry() -> None:
     args = _get_args()
     yoda_version = common_config.get_default_yoda_version()
 
+    # -datamanagers_new_category is required, can be empty string => empty list
+    args.datamanagers_new_category = _split_datamanagers(args.datamanagers_new_category)
+
     data = parse_csv_file_recat(args.csvfile)
     if len(data) == 0:
         _exit_with_error(None, "CSV contains no data rows")
 
     if args.check:
         _log(args, "CSV check (offline) OK. Rows: {}".format(len(data)))
+        _log(
+            args,
+            "Datamanagers for NEW categories (CLI): {}".format(
+                ";".join(args.datamanagers_new_category) if args.datamanagers_new_category else "(none)"
+            ),
+        )
         if args.verbose:
             print_parsed_data(data)
         sys.exit(0)
@@ -35,6 +44,7 @@ def entry() -> None:
 
     try:
         _ensure_rodsadmin(session)
+        _run_online_checks(session, rule_interface, args, data)
         _apply_data(session, rule_interface, args, data)
 
     except KeyboardInterrupt:
@@ -73,6 +83,20 @@ def _get_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--datamanagers-new-category",
+        "--datamagers-new-category",  # backward/typo-friendly alias
+        dest="datamanagers_new_category",
+        required=True,
+        help=(
+            "Required. List of datamanager usernames (separated by ';') to assign as managers "
+            "For a new datamanager-<category> group to be created.\n"
+            "Use an empty string (\"\") to explicitly allow creating new categories without datamanagers.\n"
+            "Example: --datamanagers-new-category 'dm1@example.org;dm2@example.org'\n"
+            "Example (no DMs): --datamanagers-new-category ''"
+        ),
+    )
+
+    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -105,33 +129,38 @@ def _get_format_help_text() -> str:
         'groupname'   = full research group name (must start with "research-")
         'category'    = new category (mandatory)
         'subcategory' = new subcategory (optional; empty means do not change subcategory)
-        'datamanager' = optional list of datamanager users (separated by ';') that will be set
-                        as manager in group "datamanager-<category>"
+
+        Datamanagers:
+        - Use the required command line option --datamanagers-new-category.
+        - It accepts a ';' separated list, or an empty string "" to allow no datamanagers.
 
         Notes:
         - CSV delimiter may be ','
         - Empty rows are ignored.
-        - The datamanager column uses ';' as separator (independent of CSV delimiter).
         - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
 
-        Example:
-        groupname,category,subcategory,datamanager
-        research-abc,departmentx,teama,dm1@example.org;dm2@example.org
-        research-def,departmenty,,dm3@example.org
+        Example CSV:
+        groupname,category,subcategory
+        research-abc,departmentx,teama
+        research-def,departmenty,
+
+        Example usage:
+        recat.py input.csv --datamanagers-new-category 'dm1@example.org;dm2@example.org'
+        recat.py input.csv --datamanagers-new-category ''   # allow creating new categories without DMs
     """
 
 
-RecatRow = Tuple[str, str, str, List[str], int]
-# (groupname, category, subcategory, datamanagers, row_number)
+RecatRow = Tuple[str, str, str, int]
+# (groupname, category, subcategory, row_number)
 
 
 def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
     """
     Parse a CSV with required headers:
-      groupname, category, subcategory, datamanager
+      groupname, category, subcategory
 
     Returns:
-      [(groupname, category, subcategory, datamanagers, row_number)]
+      [(groupname, category, subcategory, row_number)]
     """
     extracted_data: List[RecatRow] = []
     required = set(_get_csv_required_labels())
@@ -182,7 +211,6 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
             groupname = (row.get("groupname") or "").strip()
             category_raw = (row.get("category") or "").strip()
             subcategory_raw = (row.get("subcategory") or "").strip()
-            datamanager_cell = (row.get("datamanager") or "").strip()
 
             if groupname == "":
                 _exit_with_error(None, "Data error in row {}: missing groupname".format(row_number))
@@ -216,9 +244,7 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
                 _exit_with_error(None, "Data error in row {}: duplicate groupname '{}' in CSV".format(row_number, groupname))
             seen_groups.add(groupname)
 
-            datamanagers = _split_datamanagers(datamanager_cell)
-
-            extracted_data.append((groupname, category, subcategory, datamanagers, row_number))
+            extracted_data.append((groupname, category, subcategory, row_number))
 
     return extracted_data
 
@@ -243,21 +269,20 @@ def _split_datamanagers(value: str) -> List[str]:
 
 
 def _get_csv_possible_labels() -> List[str]:
-    return ["groupname", "category", "subcategory", "datamanager"]
+    return ["groupname", "category", "subcategory"]
 
 
 def _get_csv_required_labels() -> List[str]:
-    return ["groupname", "category", "subcategory", "datamanager"]
+    return ["groupname", "category", "subcategory"]
 
 
 def print_parsed_data(data: Sequence[RecatRow]) -> None:
     print("Parsed data:\n")
-    for (groupname, category, subcategory, datamanagers, row_number) in data:
+    for (groupname, category, subcategory, row_number) in data:
         print("Row: {}".format(row_number))
         print("Group: {}".format(groupname))
         print("New category: {}".format(category))
         print("New subcategory: {}".format(subcategory if subcategory else "(unchanged)"))
-        print("Datamanagers: {}".format(";".join(datamanagers) if datamanagers else "(none)"))
         print()
 
 
@@ -280,9 +305,18 @@ def _run_online_checks(session, rule_interface: RuleInterface, args: argparse.Na
     - group exists
     - old category readable
     - pending metadata of publications does not exist in datamanager-grp
-    - optional datamanager users exist
+    - optional datamanager users exist (from CLI option)
     """
-    for (groupname, category, subcategory, datamanagers, row_number) in data:
+    # Validate CLI datamanager users exist (only once, not per-row)
+    for username in sorted(set(args.datamanagers_new_category or [])):
+        try:
+            exists = rule_interface.call_rule_user_exists(username)
+        except Exception as e:
+            _exit_with_error(session, "Could not verify existence of user '{}': {}".format(username, e))
+        if not exists:
+            _exit_with_error(session, "Datamanager user '{}' does not exist in iRODS".format(username))
+
+    for (groupname, category, subcategory, row_number) in data:
         _log(args, "Row {}: checking {}".format(row_number, groupname))
 
         if not common_queries.group_exists(session, groupname):
@@ -298,18 +332,9 @@ def _run_online_checks(session, rule_interface: RuleInterface, args: argparse.Na
                 )
             )
 
-        # Validate datamanager users exist
-        for username in sorted(set(datamanagers)):
-            try:
-                exists = rule_interface.call_rule_user_exists(username)
-            except Exception as e:
-                _exit_with_error(session, "Row {}: could not verify existence of user '{}': {}".format(row_number, username, e))
-            if not exists:
-                _exit_with_error(session, "Row {}: datamanager user '{}' does not exist in iRODS".format(row_number, username))
-
 
 def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace, data: Sequence[RecatRow]) -> None:
-    for (groupname, category, subcategory, datamanagers, row_number) in data:
+    for (groupname, category, subcategory, row_number) in data:
         # Per-row logging
         _log(args, "Row {}: {}".format(row_number, groupname))
 
@@ -333,33 +358,46 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
             )
             continue
 
+        dm_groupname = "datamanager-{}".format(category)
+
         # Plan summary
         _log(
             args,
-            "  Plan: set category='{}'{}{}".format(
+            "  Plan: set category='{}'{}; ensure datamanager group exists: {}".format(
                 category,
                 ", subcategory='{}'".format(subcategory) if subcategory else "",
-                "; ensure managers in datamanager-{}".format(category) if datamanagers else "",
+                dm_groupname,
             ),
         )
 
         if args.dry_run:
             _log(args, "  Dry-run: no changes executed for this row.")
+            # In dry-run, still show what would happen regarding new dm groups
+            if not common_queries.group_exists(session, dm_groupname):
+                _log(
+                    args,
+                    "  Dry-run: would create {} and assign managers: {}".format(
+                        dm_groupname,
+                        ";".join(args.datamanagers_new_category) if args.datamanagers_new_category else "(none)",
+                    ),
+                )
+            else:
+                _log(args, "  Dry-run: {} already exists (no membership changes performed by this script).".format(dm_groupname))
             continue
 
         # Apply changes to the research group
         _update_group_category_subcategory(rule_interface, groupname, category, subcategory, args)
 
-        # Ensure datamanager group exists and datamanagers are group managers
-        if datamanagers:
-            _ensure_datamanager_group_and_assign_managers(
-                rule_interface=rule_interface,
-                category=category,
-                subcategory=subcategory,  # may be ""
-                datamanagers=datamanagers,
-                row_number=row_number,
-                args=args,
-            )
+        # Ensure datamanager group exists; only assign managers if the group is newly created
+        _ensure_datamanager_group_and_assign_managers_if_created(
+            session=session,
+            rule_interface=rule_interface,
+            category=category,
+            subcategory=subcategory,  # may be ""
+            datamanagers=args.datamanagers_new_category,
+            row_number=row_number,
+            args=args,
+        )
 
 
 def _get_pending_collection_path(zone: str, groupname: str, old_category: str) -> str:
@@ -400,7 +438,8 @@ def _call_group_modify(
     raise Exception("uuGroupModify failed for group={}, property={}".format(groupname, prop))
 
 
-def _ensure_datamanager_group_and_assign_managers(
+def _ensure_datamanager_group_and_assign_managers_if_created(
+    session,
     rule_interface: RuleInterface,
     category: str,
     subcategory: str,
@@ -409,11 +448,20 @@ def _ensure_datamanager_group_and_assign_managers(
     args: argparse.Namespace,
 ) -> None:
     """
-    Ensure the datamanager group exists and set each datamanager as manager.
+    Ensure the datamanager group exists.
+
     If the datamanager group does not exist, it will be created and named as: datamanager-<category>
+    and the provided datamanagers (from CLI) will be added as members and promoted to manager.
+
+    If the group already exists, this script will NOT alter its membership/roles.
     """
     dm_groupname = "datamanager-{}".format(category)
     _log(args, "  Ensuring datamanager group exists: {}".format(dm_groupname))
+
+    # Fast path: if group already exists, do not alter membership/roles
+    if common_queries.group_exists(session, dm_groupname):
+        _log(args, '  Notice: datamanager group "{}" already exists (no membership changes)'.format(dm_groupname))
+        return
 
     # Empty values for required parameters that are not relevant for datamanager groups
     description = ""
@@ -436,14 +484,22 @@ def _ensure_datamanager_group_and_assign_managers(
     _ALREADY_EXISTS_CODES = {"-1089000", "-809000", "-806000"}
     if status in _ALREADY_EXISTS_CODES:
         _log(args, '  Notice: datamanager group "{}" already exists'.format(dm_groupname))
-    elif status != "0":
+        return
+    if status != "0":
         raise Exception(
             'Error while attempting to create datamanager group "{}" (row {}). Status/message: {} / {}'.format(
                 dm_groupname, row_number, status, msg
             )
         )
 
-    # Add each datamanager and set role to manager
+    _log(
+        args,
+        "  Created {}. Assigning managers: {}".format(
+            dm_groupname, ";".join(datamanagers) if datamanagers else "(none)"
+        ),
+    )
+
+    # Add each datamanager and set role to manager (only for newly created groups)
     for username in sorted(set(datamanagers)):
         currentrole = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
 
