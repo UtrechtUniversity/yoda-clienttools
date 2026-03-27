@@ -106,6 +106,12 @@ def _get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _basic(args: argparse.Namespace, message: str) -> None:
+    """Progress output when NOT running with --verbose."""
+    if not getattr(args, "verbose", False):
+        print(message)
+
+
 def _log(args: argparse.Namespace, message: str) -> None:
     """Log to stdout if verbose enabled."""
     if getattr(args, "verbose", False):
@@ -335,7 +341,10 @@ def _run_online_checks(session, rule_interface: RuleInterface, args: argparse.Na
 
 def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace, data: Sequence[RecatRow]) -> None:
     for (groupname, category, subcategory, row_number) in data:
-        # Per-row logging
+        # Basic output (non-verbose)
+        _basic(args, "Row {}: processing {}".format(row_number, groupname))
+
+        # Per-row verbose logging
         _log(args, "Row {}: {}".format(row_number, groupname))
 
         # Research group checks
@@ -356,11 +365,12 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
                     row_number, old_category, pending_collection
                 )
             )
+            _basic(args, "Row {}: skipped (pending/unprocessed publications in old category '{}')".format(row_number, old_category))
             continue
 
         dm_groupname = "datamanager-{}".format(category)
 
-        # Plan summary
+        # Plan (verbose)
         _log(
             args,
             "  Plan: set category='{}'{}; ensure datamanager group exists: {}".format(
@@ -372,7 +382,6 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
 
         if args.dry_run:
             _log(args, "  Dry-run: no changes executed for this row.")
-            # In dry-run, still show what would happen regarding new dm groups
             if not common_queries.group_exists(session, dm_groupname):
                 _log(
                     args,
@@ -383,6 +392,8 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
                 )
             else:
                 _log(args, "  Dry-run: {} already exists (no membership changes performed by this script).".format(dm_groupname))
+
+            _basic(args, "Row {}: dry-run OK (no changes)".format(row_number))
             continue
 
         # Apply changes to the research group
@@ -397,6 +408,17 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
             datamanagers=args.datamanagers_new_category,
             row_number=row_number,
             args=args,
+        )
+
+        # Basic “done” line (non-verbose)
+        _basic(
+            args,
+            "Row {}: processed {} -> category='{}'{}".format(
+                row_number,
+                groupname,
+                category,
+                ", subcategory='{}'".format(subcategory) if subcategory else "",
+            ),
         )
 
 
