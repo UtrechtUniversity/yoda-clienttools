@@ -244,7 +244,7 @@ def _parse_and_validate_row(row: dict, row_number: int, seen_groups: set) -> Rec
 
     return (groupname, category, subcategory, row_number)
 
-    
+
 def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
     """
     Parse a CSV with required headers:
@@ -495,6 +495,132 @@ def _call_group_modify(
     raise Exception("uuGroupModify failed for group={}, property={}".format(groupname, prop))
 
 
+_ALREADY_EXISTS_CODES = {"-1089000", "-809000", "-806000"}
+
+
+def _datamanager_groupname(category: str) -> str:
+    return "datamanager-{}".format(category)
+
+
+def _ensure_datamanager_group_exists(
+    session,
+    rule_interface: RuleInterface,
+    category: str,
+    subcategory: str,
+    row_number: int,
+    args: argparse.Namespace,
+) -> bool:
+    """
+    Ensure datamanager-<category> exists.
+    Returns True if the group was created by this function, False otherwise.
+    """
+    dm_groupname = _datamanager_groupname(category)
+
+    _log(args, "  Ensuring datamanager group exists: {}".format(dm_groupname))
+
+    if common_queries.group_exists(session, dm_groupname):
+        _log(args, '  Notice: datamanager group "{}" already exists (no membership changes)'.format(dm_groupname))
+        return False
+
+    description = ""
+    data_classification = ""
+    schema_id = ""
+    expiration_date = ""
+    subcategory_for_add = subcategory if subcategory is not None else ""
+
+    status, msg = rule_interface.call_uuGroupAdd(
+        dm_groupname,
+        category,
+        subcategory_for_add,
+        description,
+        data_classification,
+        schema_id,
+        expiration_date,
+    )
+
+    if status in _ALREADY_EXISTS_CODES:
+        _log(args, '  Notice: datamanager group "{}" already exists'.format(dm_groupname))
+        return False
+
+    if status != "0":
+        raise Exception(
+            'Error while attempting to create datamanager group "{}" (row {}). Status/message: {} / {}'.format(
+                dm_groupname, row_number, status, msg
+            )
+        )
+
+    _log(args, '  Created datamanager group "{}"'.format(dm_groupname))
+    return True
+
+
+def _ensure_user_is_manager(
+    rule_interface: RuleInterface,
+    dm_groupname: str,
+    username: str,
+    row_number: int,
+    args: argparse.Namespace,
+) -> None:
+    """
+    Ensure the user is a manager of the datamanager group. 
+    Add user if not present, then set role to manager.
+    """
+    currentrole = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
+
+    if currentrole == "none":
+        status, msg = rule_interface.call_uuGroupUserAdd(dm_groupname, username)
+        if status != "0":
+            _warn(
+                "Row {}: could not add user {} to group {} (status/message: {} / {})".format(
+                    row_number, username, dm_groupname, status, msg
+                )
+            )
+            return
+        currentrole = "member"
+        _log(args, "  Notice: added user {} to group {}".format(username, dm_groupname))
+    else:
+        _log(args, "  Notice: user {} already present in {}".format(username, dm_groupname))
+
+    requested_role = "manager"
+    if are_roles_equivalent(requested_role, currentrole):
+        _log(args, "  Notice: user {} already has role {} in {}".format(username, requested_role, dm_groupname))
+        return
+
+    status, msg = rule_interface.call_uuGroupUserChangeRole(dm_groupname, username, requested_role)
+    if status == "0":
+        _log(args, "  Notice: changed role of {} in {} to {}".format(username, dm_groupname, requested_role))
+    else:
+        _warn(
+            "Row {}: could not change role of {} in {} to {} (status/message: {} / {})".format(
+                row_number, username, dm_groupname, requested_role, status, msg
+            )
+        )
+
+
+def _assign_managers_to_new_datamanager_group(
+    rule_interface: RuleInterface,
+    dm_groupname: str,
+    datamanagers: List[str],
+    row_number: int,
+    args: argparse.Namespace,
+) -> None:
+    """
+    Assign datamanagers as managers to the created dmgroup.
+    """
+
+    datamanagers_unique = sorted(set(datamanagers or []))
+
+    _log(
+        args,
+        "  Assigning managers to {}: {}".format(
+            dm_groupname,
+            ";".join(datamanagers_unique) if datamanagers_unique else "(none)",
+        ),
+    )
+
+    for username in datamanagers_unique:
+        _ensure_user_is_manager(rule_interface, dm_groupname, username, row_number, args)
+
+
 def _ensure_datamanager_group_and_assign_managers_if_created(
     session,
     rule_interface: RuleInterface,
@@ -507,87 +633,28 @@ def _ensure_datamanager_group_and_assign_managers_if_created(
     """
     Ensure the datamanager group exists.
 
-    If the datamanager group does not exist, it will be created and named as: datamanager-<category>
-    and the provided datamanagers (from CLI) will be added as members and promoted to manager.
-
-    If the group already exists, this script will NOT alter its membership/roles.
+    If it does not exist, create it and assign the provided datamanagers as managers.
+    If it already exists, do not alter membership/roles.
     """
-    dm_groupname = "datamanager-{}".format(category)
-    _log(args, "  Ensuring datamanager group exists: {}".format(dm_groupname))
-
-    # Fast path: if group already exists, do not alter membership/roles
-    if common_queries.group_exists(session, dm_groupname):
-        _log(args, '  Notice: datamanager group "{}" already exists (no membership changes)'.format(dm_groupname))
+    created = _ensure_datamanager_group_exists(
+        session=session,
+        rule_interface=rule_interface,
+        category=category,
+        subcategory=subcategory,
+        row_number=row_number,
+        args=args,
+    )
+    if not created:
         return
 
-    # Empty values for required parameters that are not relevant for datamanager groups
-    description = ""
-    data_classification = ""
-    schema_id = ""
-    expiration_date = ""
-    subcategory_for_add = subcategory if subcategory is not None else ""
-
-    # Create dmgroup
-    status, msg = rule_interface.call_uuGroupAdd(
-        dm_groupname,
-        category,
-        subcategory_for_add,
-        description,
-        data_classification,
-        schema_id,
-        expiration_date,
+    dm_groupname = _datamanager_groupname(category)
+    _assign_managers_to_new_datamanager_group(
+        rule_interface=rule_interface,
+        dm_groupname=dm_groupname,
+        datamanagers=datamanagers,
+        row_number=row_number,
+        args=args,
     )
-
-    _ALREADY_EXISTS_CODES = {"-1089000", "-809000", "-806000"}
-    if status in _ALREADY_EXISTS_CODES:
-        _log(args, '  Notice: datamanager group "{}" already exists'.format(dm_groupname))
-        return
-    if status != "0":
-        raise Exception(
-            'Error while attempting to create datamanager group "{}" (row {}). Status/message: {} / {}'.format(
-                dm_groupname, row_number, status, msg
-            )
-        )
-
-    _log(
-        args,
-        "  Created {}. Assigning managers: {}".format(
-            dm_groupname, ";".join(datamanagers) if datamanagers else "(none)"
-        ),
-    )
-
-    # Add each datamanager and set role to manager (only for newly created groups)
-    for username in sorted(set(datamanagers)):
-        currentrole = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
-
-        if currentrole == "none":
-            status, msg = rule_interface.call_uuGroupUserAdd(dm_groupname, username)
-            if status == "0":
-                currentrole = "member"
-                _log(args, "  Notice: added user {} to group {}".format(username, dm_groupname))
-            else:
-                _warn(
-                    "Row {}: could not add user {} to group {} (status/message: {} / {})".format(
-                        row_number, username, dm_groupname, status, msg
-                    )
-                )
-                continue
-        else:
-            _log(args, "  Notice: user {} already present in {}".format(username, dm_groupname))
-
-        requested_role = "manager"
-        if are_roles_equivalent(requested_role, currentrole):
-            _log(args, "  Notice: user {} already has role {} in {}".format(username, requested_role, dm_groupname))
-        else:
-            status, msg = rule_interface.call_uuGroupUserChangeRole(dm_groupname, username, requested_role)
-            if status == "0":
-                _log(args, "  Notice: changed role of {} in {} to {}".format(username, dm_groupname, requested_role))
-            else:
-                _warn(
-                    "Row {}: could not change role of {} in {} to {} (status/message: {} / {})".format(
-                        row_number, username, dm_groupname, requested_role, status, msg
-                    )
-                )
 
 
 def are_roles_equivalent(role1: str, role2: str) -> bool:
