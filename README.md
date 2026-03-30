@@ -339,39 +339,51 @@ options:
 
 ### yrecatgroups
 
-Bulk-updates the category and/or subcategory of existing Yoda research groups based on a CSV file.
+Bulk (sub)category changes for Yoda research groups.
 
 ```
 usage: yrecatgroups [-h]
                     [--check | --dry-run]
+                    --datamanagers-new-category DATAMANAGERS_NEW_CATEGORY
                     [--verbose]
                     csvfile
 
 positional arguments:
-  csvfile        CSV file containing recategorization groups and their records.
+  csvfile               CSV file containing recategorization records.
 
 options:
-  -h, --help     show this help message and exit
-  --check, -c    Check mode (offline): verify CSV format/content only.
-  --dry-run, -d  Dry-run mode (online): connects to iRODS, validates, and prints what would change. Does not modify any groups.
-  --verbose, -v  Verbose mode.
+  -h, --help            show this help message and exit
+  --check, -c           Check mode: verify CSV format and content.
+  --dry-run, -d         Dry-run mode: connects to iRODS, validates, and prints what would change. Does not modify any groups.
+  --datamanagers-new-category 
+                        Required. List of datamanager usernames (separated by ';') to assign as managers
+                        for a new datamanager-<category> group to be created.
+                        Use an empty string ("") to explicitly allow creating new categories without datamanagers.
+                        Example: --datamanagers-new-category 'dm1@example.org;dm2@example.org'
+                        Example (no DMs): --datamanagers-new-category ''
+  --verbose, -v         Verbose mode.
 
         The CSV file is expected to include the following labels in its header (the first row):
         'groupname'   = full research group name (must start with "research-")
         'category'    = new category (mandatory)
         'subcategory' = new subcategory (optional; empty means do not change subcategory)
-        'datamanager' = optional list of datamanager users (separated by ';') that will be set
-                        as manager in group "datamanager-<category>"
+
+        Datamanagers:
+        - Use the required command line option --datamanagers-new-category.
+        - It accepts a ';' separated list, or an empty string "" to allow no datamanagers.
 
         Notes:
-        - CSV delimiter as ','.
         - Empty rows are ignored.
         - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
 
-        Example:
-        groupname,category,subcategory,datamanager
-        research-abc,categoryabc,subcategoryabc,dm1@example.org;dm2@example.org
-        research-def,categoryabc,,dm3@example.org
+        Example CSV:
+        groupname,category,subcategory
+        research-abc,departmentx,teama
+        research-def,departmenty,
+
+        Example usage:
+        yrecatgroups input.csv --datamanagers-new-category 'dm1@example.org;dm2@example.org'
+        yrecatgroups input.csv --datamanagers-new-category ''   # allow creating new categories without datamanagers
 ```
 
 ### yreport\_collectionsize
