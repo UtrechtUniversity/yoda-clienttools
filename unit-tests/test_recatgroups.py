@@ -63,8 +63,8 @@ class RecatGroupsTest(TestCase):
     @patch("sys.stderr", new_callable=StringIO)
     def test_parse_missing_header(self, mock_stderr):
         path = self._write_tmp_csv(
-            "groupname,category,subcategory\n"
-            "research-groupa,test-automation,initial\n"
+            "groupname,category,\n"
+            "research-groupa,test-automation,\n"
         )
         with self.assertRaises(SystemExit):
             parse_csv_file_recat(path)
