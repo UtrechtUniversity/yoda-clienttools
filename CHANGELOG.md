@@ -1,8 +1,10 @@
 # Change log
 
-## UNRELEASED
+## 2026-03-31 v2.4.0
 
+- Add tool for bulk (sub)category changes of research groups (`yrecatgroups`)
 - Upgrade Python-irodsclient to v3.3.0
+- Upgrade Python cryptography package to v46.0.6 (security update)
 - Migrate from setup.py to pyproject.toml
 
 ## 2026-02-11 v2.3.1

@@ -15,7 +15,7 @@ dependencies = [
 description = "Client-side tools for Yoda / iRODS"
 license = "GPL-3.0-only"
 name = "yclienttools"
-version = "2.3.1"
+version = "2.4.0"
 
 [project.scripts]
 yreport_datapackageinfo = "yclienttools.reportdatapackageinfo:entry"
