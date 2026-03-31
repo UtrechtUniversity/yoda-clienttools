@@ -5,7 +5,7 @@ Bulk (sub)category changes for Yoda research groups.
 import argparse
 import csv
 import sys
-from typing import List, Sequence, Tuple
+from typing import List, Sequence, Set, Tuple, Type
 
 from irods.models import Group, User, UserMeta
 
@@ -158,7 +158,7 @@ RecatRow = Tuple[str, str, str, int]
 # (groupname, category, subcategory, row_number)
 
 
-def _sniff_csv_dialect_or_exit(csv_file) -> csv.Dialect:
+def _sniff_csv_dialect_or_exit(csv_file) -> Type[csv.Dialect]:
     """
     Sniff CSV sample dialect, to ensure ',' is used as delimiter.
     """
@@ -205,7 +205,7 @@ def _is_effectively_empty_row(row: dict) -> bool:
     return True
 
 
-def _parse_and_validate_row(row: dict, row_number: int, seen_groups: set) -> RecatRow:
+def _parse_and_validate_row(row: dict, row_number: int, seen_groups: Set[str]) -> RecatRow:
     """
     Parse and validate a single CSV row.
     Returns (groupname, category, subcategory, row_number) if valid, otherwise exits with error.
@@ -263,12 +263,12 @@ def parse_csv_file_recat(input_file: str) -> List[RecatRow]:
 
         if reader.fieldnames is None:
             _exit_with_error(None, "CSV file is empty")
+        else:
+            header = _normalize_header(reader.fieldnames)
+            reader.fieldnames = header
+            _validate_header(header)
 
-        header = _normalize_header(reader.fieldnames)
-        reader.fieldnames = header
-        _validate_header(header)
-
-        seen_groups = set()
+        seen_groups: Set[str] = set()
         for row in reader:
             row_number = reader.line_num
             if _is_effectively_empty_row(row):
