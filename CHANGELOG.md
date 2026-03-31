@@ -3,6 +3,7 @@
 ## UNRELEASED
 
 - Upgrade Python-irodsclient to v3.3.0
+- Migrate from setup.py to pyproject.toml
 
 ## 2026-02-11 v2.3.1
 
