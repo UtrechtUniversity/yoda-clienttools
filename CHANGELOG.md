@@ -1,5 +1,9 @@
 # Change log
 
+## UNRELEASED
+
+- Upgrade Python-irodsclient to v3.3.0
+
 ## 2026-02-11 v2.3.1
 
 - Upgrade Python cryptography package to v46.0.5 (security update)
