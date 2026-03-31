@@ -51,7 +51,7 @@ def is_valid_domain(domain: str) -> bool:
 
 def is_valid_category(name: str) -> bool:
     """Is this name a valid (sub)category name?"""
-    return re.search(r"^[a-zA-Z0-9\-_]+$", name) is not None
+    return re.search(r"^[a-z0-9\-_]+$", name) is not None
 
 
 def is_valid_groupname(name: str) -> bool:
