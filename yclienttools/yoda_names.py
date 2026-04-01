@@ -3,7 +3,7 @@
 """This class contains utility functions that process names of Yoda entities (e.g. category names, user names, etc.)
 """
 
-__copyright__ = 'Copyright (c) 2019-2024, Utrecht University'
+__copyright__ = 'Copyright (c) 2019-2026, Utrecht University'
 __license__   = 'GPLv3, see LICENSE'
 
 import dns.resolver as resolver
@@ -51,12 +51,18 @@ def is_valid_domain(domain: str) -> bool:
 
 def is_valid_category(name: str) -> bool:
     """Is this name a valid (sub)category name?"""
-    return re.search(r"^[a-z0-9\-_]+$", name) is not None
+    return (
+        re.search(r"^[a-z0-9\-]+$", name) is not None
+        and not name.startswith("-")
+        and not name.endswith("-")
+    )
 
 
 def is_valid_groupname(name: str) -> bool:
     """Is this name a valid group name (prefix such as "research-" can be omitted)"""
-    return re.search(r"^[a-zA-Z0-9\-]+$", name) is not None
+    return (
+        re.search(r"^[A-Za-z0-9 ,._()-]+$", name) is not None
+    )
 
 
 def is_internal_user(username: str, internal_domains: List[str]) -> bool:
