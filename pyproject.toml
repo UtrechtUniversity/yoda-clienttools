@@ -10,7 +10,7 @@ dependencies = [
         'dnspython>=2.2.0',
         'backports.functools-lru-cache>=1.6.4',
         'PyYaml',
-        'cryptography==46.0.6'
+        'cryptography==46.0.7'
 ]
 description = "Client-side tools for Yoda / iRODS"
 license = "GPL-3.0-only"
