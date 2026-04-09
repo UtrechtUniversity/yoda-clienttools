@@ -170,7 +170,7 @@ def _process_csv_line(line: dict, args: argparse.Namespace, yoda_version: str) -
     if not yoda_names.is_valid_category(category):
         return None, '"{}" is not a valid category name.'.format(category)
 
-    if not yoda_names.is_valid_category(subcategory):
+    if not yoda_names.is_valid_subcategory(subcategory):
         return None, '"{}" is not a valid subcategory name.'.format(subcategory)
 
     if not yoda_names.is_valid_groupname(groupname):

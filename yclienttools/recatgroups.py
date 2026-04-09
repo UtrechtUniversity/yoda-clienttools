@@ -238,7 +238,7 @@ def _parse_and_validate_row(row: dict, row_number: int, seen_groups: Set[str]) -
     if not yoda_names.is_valid_category(category):
         _exit_with_error(None, "Data error in row {}: '{}' is not a valid category name".format(row_number, category))
 
-    if subcategory not in ("", None) and not yoda_names.is_valid_category(subcategory):
+    if subcategory not in ("", None) and not yoda_names.is_valid_subcategory(subcategory):
         _exit_with_error(None, "Data error in row {}: '{}' is not a valid subcategory name".format(row_number, subcategory))
 
     return (groupname, category, subcategory, row_number)

@@ -1,5 +1,10 @@
 # Change log
 
+## UNRELEASED
+
+- Update yoda group, category and subcategory name verification logic
+  so that it matches with the Yoda design documentation.
+
 ## 2026-03-31 v2.4.0
 
 - Add tool for bulk (sub)category changes of research groups (`yrecatgroups`)
