@@ -50,19 +50,26 @@ def is_valid_domain(domain: str) -> bool:
 
 
 def is_valid_category(name: str) -> bool:
-    """Is this name a valid (sub)category name?"""
+    """Is this name a valid category name?"""
     return (
         re.search(r"^[a-z0-9\-]+$", name) is not None
         and not name.startswith("-")
         and not name.endswith("-")
+        and len(name) < 2700
+    )
+
+
+def is_valid_subcategory(name: str) -> bool:
+    """Is this name a valid subcategory name"""
+    return (
+        re.search(r"^[A-Za-z0-9 ,._()-]+$", name) is not None
+        and len(name) < 2700
     )
 
 
 def is_valid_groupname(name: str) -> bool:
-    """Is this name a valid group name (prefix such as "research-" can be omitted)"""
-    return (
-        re.search(r"^[A-Za-z0-9 ,._()-]+$", name) is not None
-    )
+    """Is this name a valid group name?"""
+    return re.search(r"^[a-zA-Z0-9\-]+$", name) is not None and len(name) < 64
 
 
 def is_internal_user(username: str, internal_domains: List[str]) -> bool:
