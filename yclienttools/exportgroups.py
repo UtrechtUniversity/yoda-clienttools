@@ -139,7 +139,6 @@ def _get_args() -> argparse.Namespace:
 
 def _get_format_help_text() -> str:
     return '''
-        This script only supports Yoda versions 1.9 and higher.
         The CSV returned to stdout is formatted to have the following labels in its header (the first row):
         'category'        = category for the group
         'subcategory'     = subcategory for the group

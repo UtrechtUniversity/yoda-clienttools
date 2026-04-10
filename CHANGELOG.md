@@ -2,6 +2,9 @@
 
 ## UNRELEASED
 
+- Drop support for Yoda 1.8, 1.9 and 1.10
+- Add support for Yoda 2.1 (excluding support for importgroups and recatgroups,
+  which will be added shortly)
 - Update yoda group, category and subcategory name verification logic
   so that it matches with the Yoda design documentation.
 - Migrate mypy and flake configuration from setup.cfg to pyproject.toml
