@@ -40,3 +40,22 @@ yensuremembers = "yclienttools.ensuremembers:entry"
 yrecatgroups = "yclienttools.recatgroups:entry"
 yrmusers = "yclienttools.rmusers:entry"
 yrmgroups = "yclienttools.rmgroups:entry"
+
+[tool.flake8]
+ignore = [
+    "E221",
+    "E241",
+    "E402",
+    "W503",
+    "W504"
+]
+import-order-style = "smarkets"
+strictness = "short"
+docstring_style = "sphinx"
+max-line-length = 250
+exclude = [
+    "venv"
+]
+
+[tool.mypy]
+ignore_missing_imports = true
