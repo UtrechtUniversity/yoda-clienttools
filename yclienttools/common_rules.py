@@ -15,10 +15,10 @@ class RuleInterface:
         """constructor
 
            :param session: IrodsSession object to call
-           :param yoda_version: which Yoda version to assume (e.g. 1.8, 1.9)
+           :param yoda_version: which Yoda version to assume (e.g. 2.0, 2.1)
         """
         self.session = session
-        self.uuGroupAdd_version = "1.8" if yoda_version in ["1.8"] else "1.9"
+        self.uuGroupAdd_version = "1.9"
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
 
         try:
@@ -183,17 +183,12 @@ class RuleInterface:
            :param schema_id: schema id
            :param expiration_date: expiration date
 
+           :raises Exception: for unsupported Yoda version
+
            :returns: (status, message). Status not 0 means error,
                      -1089000 means group name already exists
         """
-        if self.uuGroupAdd_version == "1.8":
-            parms = OrderedDict([
-                ('groupname', groupname),
-                ('category', category),
-                ('subcategory', subcategory),
-                ('description', description),
-                ('classification', classification)])
-        elif self.uuGroupAdd_version == "1.9":
+        if self.uuGroupAdd_version == "1.9":
             parms = OrderedDict([
                 ('groupname', groupname),
                 ('category', category),
@@ -204,6 +199,8 @@ class RuleInterface:
                 ('dataClassification', classification),
                 ('co_identifier', '')
             ])
+        else:
+            raise Exception("Unsupported Yoda version")
 
         return self.call_rule('uuGroupAdd', parms, 2)
 

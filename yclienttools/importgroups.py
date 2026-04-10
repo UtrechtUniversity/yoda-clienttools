@@ -85,26 +85,15 @@ def parse_csv_file(input_file: str, args: argparse.Namespace, yoda_version: str)
 
 
 def _get_csv_possible_labels(yoda_version: str) -> List[str]:
-    if yoda_version in ('1.8'):
-        return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager']
-    else:
-        return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager', 'expiration_date', 'schema_id']
+    return ['category', 'subcategory', 'groupname', 'viewer', 'member', 'manager', 'expiration_date', 'schema_id']
 
 
 def _get_csv_required_labels() -> List[str]:
     return ['category', 'subcategory', 'groupname']
 
 
-def _get_csv_1_9_exclusive_labels() -> List[str]:
-    """Returns labels that can only appear with yoda version 1.9 and higher."""
-    return ['expiration_date', 'schema_id']
-
-
 def _get_csv_predefined_labels(yoda_version: str) -> List[str]:
-    if yoda_version in ('1.8'):
-        return ['category', 'subcategory', 'groupname']
-    else:
-        return ['category', 'subcategory', 'groupname', 'expiration_date', 'schema_id']
+    return ['category', 'subcategory', 'groupname', 'expiration_date', 'schema_id']
 
 
 def _get_duplicate_columns(fields_list: List[str], yoda_version: str) -> Set[str]:
@@ -145,8 +134,6 @@ def _process_csv_line(line: dict, args: argparse.Namespace, yoda_version: str) -
     for column_name, item_list in line.items():
         if column_name == '':
             return None, 'Column cannot have an empty label'
-        elif yoda_version in ('1.8') and column_name in _get_csv_1_9_exclusive_labels():
-            return None, 'Column "{}" is only supported in Yoda 1.9 and higher'.format(column_name)
         elif column_name in _get_csv_predefined_labels(yoda_version):
             continue
 
@@ -385,10 +372,6 @@ def entry() -> None:
         _exit_with_error(
             "Using the --creator-user option without the --creator-zone option is not supported.")
 
-    if (args.creator_user and (yoda_version in ('1.8'))):
-        _exit_with_error(
-            "The --creator-user and --creator-zone options are only supported with Yoda versions 1.9 and higher.")
-
     duplicate_groups = _get_duplicate_groups(data)
     if duplicate_groups:
         _exit_with_error(
@@ -441,9 +424,9 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument('--no-validate-domains', '-n', action='store_true',
                         help='Do not validate email address domains')
     parser.add_argument('--creator-user', type=str,
-                        help='User who creates user (only available in Yoda 1.9 and higher)')
+                        help='User who creates user')
     parser.add_argument('--creator-zone', type=str,
-                        help='Zone of the user who creates user (only available in Yoda 1.9 and higher)')
+                        help='Zone of the user who creates user')
     return parser.parse_args()
 
 
@@ -454,7 +437,7 @@ def _get_format_help_text() -> str:
         'subcategory'     = subcategory for the group
         'groupname'       = name of the group (without the "research-" prefix)
 
-        For Yoda versions 1.9 and higher, these labels can optionally be included:
+        These labels can optionally be included:
         'expiration_date' = expiration date for the group. Can only be set when the group is first created.
         'schema_id'       = schema id for the group. Can only be set when the group is first created.
 
@@ -473,7 +456,7 @@ def _get_format_help_text() -> str:
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,n.member@example.com
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,
 
-        Example Yoda 1.9 and higher:
+        Example with optional expiration_date and schema_id columns:
         category,subcategory,groupname,manager,member,expiration_date,schema_id
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2055-01-01,default-3
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
