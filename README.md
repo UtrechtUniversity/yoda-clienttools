@@ -245,7 +245,7 @@ usage: yimportgroups [-h] [-y {2.0,2.1}] -i INTERNAL_DOMAINS
                      [--offline-check | --online-check] [--allow-update]
                      [--delete] [--verbose] [--no-validate-domains]
                      [--creator-user CREATOR_USER]
-                     [--creator-zone CREATOR_ZONE]
+                     [--creator-zone CREATOR_ZONE] [--create-sram-co]
                      csvfile
 
 Creates a list of groups based on a CSV file
@@ -258,8 +258,7 @@ options:
   -y {2.0,2.1}, --yoda-version {2.0,2.1}
                         Override Yoda version on the server
   -i INTERNAL_DOMAINS, --internal-domains INTERNAL_DOMAINS
-                        Comma-separated list of internal email domains to the Yoda server, or "all"
-                        if all domains should be considered internal
+                        Comma-separated list of internal email domains to the Yoda server, or "all" if all domains should be considered internal
   --offline-check, -c   Check mode (offline): verify CSV format only. Does not connect to iRODS and does not create groups
   --online-check, -C    Check mode (online): verify CSV format and that groups do not exist. Does not create groups.
   --allow-update, -u    Allows existing groups to be updated
@@ -271,6 +270,7 @@ options:
                         User who creates user
   --creator-zone CREATOR_ZONE
                         Zone of the user who creates user
+  --create-sram-co      Create SRAM CO for new groups (only available on Yoda 2.1+)
 
         The CSV file is expected to include the following labels in its header (the first row):
         'category'        = category for the group
@@ -300,7 +300,6 @@ options:
         category,subcategory,groupname,manager,member,expiration_date,schema_id
         departmentx,teama,groupteama,m.manager@example.com,m.member@example.com,2055-01-01,default-3
         departmentx,teamb,groupteamb,m.manager@example.com,p.member@example.com,,
-
 ```
 
 ### yexportgroups
@@ -341,8 +340,9 @@ options:
 Bulk (sub)category changes for Yoda research groups.
 
 ```
-usage: yrecatgroups [-h] [--check | --dry-run] --datamanagers-new-category
-                    DATAMANAGERS_NEW_CATEGORY [--verbose]
+usage: yrecatgroups [-h] [-y {2.0,2.1}] [--check | --dry-run]
+                    --datamanagers-new-category DATAMANAGERS_NEW_CATEGORY
+                    [--create-sram-co] [--verbose]
                     csvfile
 
 Bulk (sub)category changes for Yoda research groups.
@@ -352,6 +352,8 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  -y {2.0,2.1}, --yoda-version {2.0,2.1}
+                        Override Yoda version on the server
   --check, -c           Check mode: verify CSV format and content.
   --dry-run, -d         Dry-run mode: connects to iRODS, validates, and prints what would change. Does not modify any groups.
   --datamanagers-new-category DATAMANAGERS_NEW_CATEGORY, --datamagers-new-category DATAMANAGERS_NEW_CATEGORY
@@ -359,6 +361,7 @@ options:
                         Use an empty string ("") to explicitly allow creating new categories without datamanagers.
                         Example: --datamanagers-new-category 'dm1@example.org;dm2@example.org'
                         Example (no DMs): --datamanagers-new-category ''
+  --create-sram-co      Create SRAM CO for new groups (only available on Yoda 2.1+)
   --verbose, -v         Verbose output.
 
         The CSV file is expected to include the following labels in its header (the first row):

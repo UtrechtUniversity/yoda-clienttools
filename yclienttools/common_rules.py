@@ -18,7 +18,10 @@ class RuleInterface:
            :param yoda_version: which Yoda version to assume (e.g. 2.0, 2.1)
         """
         self.session = session
-        self.uuGroupAdd_version = "1.9"
+        if yoda_version == "2.0":
+            self.uuGroupAdd_version = "2.0"
+        else:
+            self.uuGroupAdd_version = "2.1"
         self.default_rule_engine = 'irods_rule_engine_plugin-irods_rule_language-instance'
 
         try:
@@ -171,8 +174,15 @@ class RuleInterface:
 
         return out == 'true'
 
-    def call_uuGroupAdd(self, groupname: str, category: str,
-                        subcategory: str, description: str, classification, schema_id: str = 'default-2', expiration_date: str = '') -> List[str]:
+    def call_uuGroupAdd(self,
+                        groupname: str,
+                        category: str,
+                        subcategory: str,
+                        description: str,
+                        classification,
+                        schema_id: str = 'default-2',
+                        expiration_date: str = '',
+                        sram_co: bool = False) -> List[str]:
         """Adds a group
 
            :param groupname: name of group
@@ -182,13 +192,14 @@ class RuleInterface:
            :param classification: security classification
            :param schema_id: schema id
            :param expiration_date: expiration date
+           :param sram_co: create SRAM CO (True/False) - only available on Yoda 2.1+
 
            :raises Exception: for unsupported Yoda version
 
            :returns: (status, message). Status not 0 means error,
                      -1089000 means group name already exists
         """
-        if self.uuGroupAdd_version == "1.9":
+        if self.uuGroupAdd_version == "2.0":
             parms = OrderedDict([
                 ('groupname', groupname),
                 ('category', category),
@@ -198,6 +209,18 @@ class RuleInterface:
                 ('description', description),
                 ('dataClassification', classification),
                 ('co_identifier', '')
+            ])
+        elif self.uuGroupAdd_version == "2.1":
+            parms = OrderedDict([
+                ('groupname', groupname),
+                ('category', category),
+                ('subcategory', subcategory),
+                ('schema_id', schema_id if schema_id not in ("", ".") else "default-2"),
+                ('expiration_date', expiration_date),
+                ('description', description),
+                ('dataClassification', classification),
+                ('co_identifier', ''),
+                ('sram_co', str(sram_co))
             ])
         else:
             raise Exception("Unsupported Yoda version")
