@@ -202,7 +202,14 @@ def apply_data(rule_interface: RuleInterface, args: argparse.Namespace, data: li
         # First create the group. Note that the rodsadmin actor will become a
         # groupmanager.
         [status, msg] = rule_interface.call_uuGroupAdd(
-            groupname, category, subcategory, '', 'unspecified', schema_id, expiration_date)
+            groupname,
+            category,
+            subcategory,
+            '',
+            'unspecified',
+            schema_id,
+            expiration_date,
+            args.create_sram_co)
 
         if ((status in '-1089000', '-809000', '-806000')) and args.allow_update:
             print(
@@ -427,6 +434,8 @@ def _get_args() -> argparse.Namespace:
                         help='User who creates user')
     parser.add_argument('--creator-zone', type=str,
                         help='Zone of the user who creates user')
+    parser.add_argument('--create-sram-co', action='store_true', default=False,
+                        help='Create SRAM CO for new groups (only available on Yoda 2.1+)')
     return parser.parse_args()
 
 

@@ -9,7 +9,7 @@ from typing import List, Sequence, Set, Tuple, Type
 
 from irods.models import Group, User, UserMeta
 
-from yclienttools import common_config, common_queries, yoda_names
+from yclienttools import common_args, common_config, common_queries, yoda_names
 from yclienttools.common_queries import collection_exists
 from yclienttools import session as s
 from yclienttools.common_rules import RuleInterface
@@ -22,7 +22,7 @@ from yclienttools.common_rules import RuleInterface
 def entry() -> None:
     """Entry point."""
     args = _get_args()
-    yoda_version = common_config.get_default_yoda_version()
+    yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
 
     # -datamanagers_new_category is required, can be empty string => empty list
     args.datamanagers_new_category = _split_datamanagers(args.datamanagers_new_category)
@@ -65,6 +65,7 @@ def _get_args() -> argparse.Namespace:
         epilog=_get_format_help_text(),
         formatter_class=argparse.RawTextHelpFormatter,
     )
+    common_args.add_default_args(parser)
 
     parser.add_argument("csvfile", help="CSV file containing recategorization records.")
 
@@ -91,7 +92,8 @@ def _get_args() -> argparse.Namespace:
             "Example (no DMs): --datamanagers-new-category ''"
         ),
     )
-
+    parser.add_argument('--create-sram-co', action='store_true', default=False,
+                        help='Create SRAM CO for new groups (only available on Yoda 2.1+)')
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output.")
     return parser.parse_args()
 
@@ -513,6 +515,7 @@ def _ensure_datamanager_group_exists(
         data_classification,
         schema_id,
         expiration_date,
+        args.create_sram_co
     )
 
     if status in _ALREADY_EXISTS_CODES:
