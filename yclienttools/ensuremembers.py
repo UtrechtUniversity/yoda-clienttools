@@ -189,7 +189,7 @@ def parse_user_file(userfile):
         for line in input:
             fields = line.rstrip().split(":")
             if len(fields) != 2:
-                _exit_with_error("Line \"{}\" in use file has invalid format.".format(line))
+                _exit_with_error("Line \"{}\" in user file has invalid format.".format(line))
             if fields[0] not in ["manager", "member", "viewer"]:
                 _exit_with_error("Role {} in user file is not a valid role.".format(fields[0]))
             username = fields[1].strip().lower()
