@@ -8,6 +8,7 @@
 - Update yoda group, category and subcategory name verification logic
   so that it matches with the Yoda design documentation.
 - Migrate mypy and flake configuration from setup.cfg to pyproject.toml
+- `yrecatgroups`: minor docs and help text tweaks
 
 ## 2026-03-31 v2.4.0
 

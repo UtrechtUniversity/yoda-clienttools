@@ -341,11 +341,11 @@ options:
 Bulk (sub)category changes for Yoda research groups.
 
 ```
-usage: yrecatgroups [-h]
-                    [--check | --dry-run]
-                    --datamanagers-new-category DATAMANAGERS_NEW_CATEGORY
-                    [--verbose]
+usage: yrecatgroups [-h] [--check | --dry-run] --datamanagers-new-category
+                    DATAMANAGERS_NEW_CATEGORY [--verbose]
                     csvfile
+
+Bulk (sub)category changes for Yoda research groups.
 
 positional arguments:
   csvfile               CSV file containing recategorization records.
@@ -354,13 +354,12 @@ options:
   -h, --help            show this help message and exit
   --check, -c           Check mode: verify CSV format and content.
   --dry-run, -d         Dry-run mode: connects to iRODS, validates, and prints what would change. Does not modify any groups.
-  --datamanagers-new-category 
-                        Required. List of datamanager usernames (separated by ';') to assign as managers
-                        for a new datamanager-<category> group to be created.
+  --datamanagers-new-category DATAMANAGERS_NEW_CATEGORY, --datamagers-new-category DATAMANAGERS_NEW_CATEGORY
+                        Required. List of datamanager usernames (separated by ';') to assign as managers For a new datamanager-<category> group to be created.
                         Use an empty string ("") to explicitly allow creating new categories without datamanagers.
                         Example: --datamanagers-new-category 'dm1@example.org;dm2@example.org'
                         Example (no DMs): --datamanagers-new-category ''
-  --verbose, -v         Verbose mode.
+  --verbose, -v         Verbose output.
 
         The CSV file is expected to include the following labels in its header (the first row):
         'groupname'   = full research group name (must start with "research-")
@@ -372,6 +371,7 @@ options:
         - It accepts a ';' separated list, or an empty string "" to allow no datamanagers.
 
         Notes:
+        - CSV delimiter may be ','
         - Empty rows are ignored.
         - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
 
@@ -382,7 +382,7 @@ options:
 
         Example usage:
         yrecatgroups input.csv --datamanagers-new-category 'dm1@example.org;dm2@example.org'
-        yrecatgroups input.csv --datamanagers-new-category ''   # allow creating new categories without datamanagers
+        yrecatgroups input.csv --datamanagers-new-category ''   # allow creating new categories without DMs
 ```
 
 ### yreport\_collectionsize

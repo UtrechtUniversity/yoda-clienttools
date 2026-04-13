@@ -118,8 +118,8 @@ def _get_format_help_text() -> str:
         research-def,departmenty,
 
         Example usage:
-        recat.py input.csv --datamanagers-new-category 'dm1@example.org;dm2@example.org'
-        recat.py input.csv --datamanagers-new-category ''   # allow creating new categories without DMs
+        yrecatgroups input.csv --datamanagers-new-category 'dm1@example.org;dm2@example.org'
+        yrecatgroups input.csv --datamanagers-new-category ''   # allow creating new categories without DMs
     """
 
 
