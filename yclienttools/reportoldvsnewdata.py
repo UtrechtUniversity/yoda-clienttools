@@ -222,7 +222,7 @@ def report_oldvsnewdata(args: argparse.Namespace, session: iRODSSession):
     cutoff_timestamp = get_cutoff_timestamp(args.days_ago)
     outputdata = []
 
-    for group in sorted(get_prefixed_groups(session, ("research-", "deposit-"))):
+    for group in sorted(get_prefixed_groups(session, ["research-", "deposit-"])):
         if args.progress:
             _print_v(f"Processing data for group {group} ...")
 
