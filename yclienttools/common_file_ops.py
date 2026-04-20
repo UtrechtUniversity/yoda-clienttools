@@ -99,7 +99,7 @@ def _get_cmd_stdout_lines(args):
 def _get_subcollections_by_depth(path):
     collections = {_get_depth(path): {path: 1}}
     query_command = ["iquest", "--no-page", "%s",
-                     "SELECT COLL_NAME WHERE COLL_NAME LIKE '{}/%'.".format(path)]
+                     "SELECT COLL_NAME WHERE COLL_NAME LIKE '{}/%'".format(path)]
 
     for line in _get_cmd_stdout_lines(query_command):
         if line.startswith(path + "/"):

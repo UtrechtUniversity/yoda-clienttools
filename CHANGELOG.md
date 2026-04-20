@@ -9,6 +9,9 @@
   so that it matches with the Yoda design documentation.
 - Migrate mypy and flake configuration from setup.cfg to pyproject.toml
 - `yrecatgroups`: minor docs and help text tweaks
+- `ydf_irm`: take into account whether the user indicates that the path
+  itself is to be kept when checking that the path meets the minimum
+  depth requirement.
 
 ## 2026-03-31 v2.4.0
 
