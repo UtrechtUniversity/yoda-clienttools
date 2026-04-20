@@ -13,6 +13,8 @@
   itself is to be kept when checking that the path meets the minimum
   depth requirement.
 - Fix various typing issues.
+- Export groups: quote all fields to retain compatibility with Python versions
+  before v3.12.x for the time being.
 
 ## 2026-03-31 v2.4.0
 

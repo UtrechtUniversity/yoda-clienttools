@@ -72,7 +72,7 @@ def _write_csv(data: List[Dict], max_counts: Dict):
     output_write_header = csv.writer(sys.stdout, delimiter=',')
     output_write_header.writerow(_get_columns(max_counts))
 
-    output = csv.writer(sys.stdout, delimiter=',', quoting=csv.QUOTE_NOTNULL)
+    output = csv.writer(sys.stdout, delimiter=',', quoting=csv.QUOTE_ALL)
 
     for rowdata in data:
         output.writerow(_create_output_row(rowdata, max_counts))
