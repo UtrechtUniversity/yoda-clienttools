@@ -12,6 +12,7 @@
 - `ydf_irm`: take into account whether the user indicates that the path
   itself is to be kept when checking that the path meets the minimum
   depth requirement.
+- Fix various typing issues.
 
 ## 2026-03-31 v2.4.0
 
