@@ -39,12 +39,8 @@ def _is_absolute(path):
     return path.startswith("/")
 
 
-def _get_depth(path):
-    count = 0
-    for char in path.lstrip("/").rstrip("/"):
-        if char == "/":
-            count += 1
-    return count
+def _get_depth(path: str):
+    return path.strip("/").count("/")
 
 
 def sanity_check_args(args):
@@ -52,7 +48,7 @@ def sanity_check_args(args):
         _exit_with_error("Error: collection path must be absolute, for safety reasons.")
     if _contains_dotdot(args.collection):
         _exit_with_error("Error: collection path must not contain .., for safety reasons.")
-    if _get_depth(args.collection) < args.min_depth:
+    if _get_depth(args.collection) < args.min_depth - (1 if args.keep_collection_itself else 0):
         _exit_with_error("Error: collection depth is less than minimum depth set for safety reasons. "
                          + "Reduce minimum depth if you are sure you want to remove this collection.")
 
