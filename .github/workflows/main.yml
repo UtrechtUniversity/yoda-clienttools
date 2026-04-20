@@ -36,7 +36,8 @@ jobs:
 
     - name: Perform type checks with mypy
       run: |
-        pip install mypy==1.10.0
+        pip install mypy==1.19.1 types-PyYAML
+        mypy yclienttools
     
     - name: Run unit tests
       run: |
