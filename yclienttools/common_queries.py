@@ -218,7 +218,7 @@ def get_vault_data_packages(session):
 def get_prefixed_groups(session: iRODSSession, prefix_list: List[str]) -> List[str]:
     groups = session.query(User).filter(User.type == 'rodsgroup').get_results()
     return [x[User.name]
-            for x in groups if x[User.name].startswith(prefix_list)]
+            for x in groups if x[User.name].startswith(tuple(prefix_list))]
 
 
 def get_group_attributes(session: iRODSSession, group_name: str, single_attrs: set, multi_attrs: set) -> Dict[str, Union[str, List[str]]]:

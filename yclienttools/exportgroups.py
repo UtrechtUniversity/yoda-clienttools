@@ -2,7 +2,7 @@
 import argparse
 import csv
 import sys
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from irods.session import iRODSSession
 from irods.models import Group, User
 from yclienttools import session as s
@@ -13,7 +13,7 @@ from yclienttools import common_args, common_config
 
 def entry() -> None:
     '''Entry point'''
-    max_counts = {}
+    max_counts: Dict[str, int] = {}
     try:
         args = _get_args()
         yoda_version = args.yoda_version if args.yoda_version is not None else common_config.get_default_yoda_version()
@@ -30,25 +30,34 @@ def entry() -> None:
         print("Script interrupted by user.\n", file=sys.stderr)
 
 
-def _get_all_visible_groups(session: iRODSSession) -> Tuple[Dict, Dict]:
+def _get_all_visible_groups(
+        session: iRODSSession) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
     """Gather all groups that the current user has access to information on
 
     :param session: iRods session
     :return: Lists of group information in dictionaries, max counts for each member type
     """
-    group_names = get_prefixed_groups(session, "research-")
+    group_names = get_prefixed_groups(session, ["research-"])
     outputdata = []
-    max_counts = {}
+    max_counts: Dict[str, int] = {}
     max_counts["manager"] = 0
     max_counts["member"] = 0
     max_counts["viewer"] = 0
 
     for group in sorted(group_names):
         group_rowdata = _get_group_rowdata(session, group)
-        group_rowdata["groupname"] = _get_group_shortname(group)
+        short_group_name = _get_group_shortname(group)
+
+        if short_group_name is None:
+            raise Exception(
+                f"Unable to determine short group name for group '{group}'")
+
+        group_rowdata["groupname"] = short_group_name
 
         for user_type in {"manager", "member", "viewer"}:
-            max_counts[user_type] = max(max_counts[user_type], len(group_rowdata[user_type]))
+            max_counts[user_type] = max(
+                max_counts[user_type], len(
+                    group_rowdata[user_type]))
         outputdata.append(group_rowdata)
 
     return outputdata, max_counts
@@ -73,25 +82,37 @@ def _create_output_row(rowdata, max_counts):
     output_row = ([rowdata['category'], rowdata['subcategory'], rowdata['groupname'],
                    rowdata.get('schema_id', None), rowdata.get('expiration_date', None)])
     for user_type in ("manager", "member", "viewer"):
-        output_row += rowdata[user_type] + [None] * (max_counts[user_type] - len(rowdata[user_type]))
+        output_row += rowdata[user_type] + [None] * \
+            (max_counts[user_type] - len(rowdata[user_type]))
     return output_row
 
 
-def _get_group_rowdata(session: iRODSSession, group: str) -> Dict:
-    attributes = get_group_attributes(session, group, {"category", "subcategory", "expiration_date", "schema_id"}, {"manager"})
-    attributes["manager"] = [user.split('#')[0] for user in attributes["manager"]]
-    attributes["member"] = list(set(_get_group_members(session, group)) - set(attributes["manager"]))
+def _get_group_rowdata(session: iRODSSession, group: str) -> Dict[str, Any]:
+    attributes = get_group_attributes(
+        session, group, {
+            "category", "subcategory", "expiration_date", "schema_id"}, {"manager"})
+    attributes["manager"] = [user.split('#')[0]
+                             for user in attributes["manager"]]
+    attributes["member"] = list(set(_get_group_members(
+        session, group)) - set(attributes["manager"]))
     attributes["viewer"] = _get_group_read_members(session, group)
     return attributes
 
 
-def _get_group_shortname(group: str) -> str:
+def _get_group_shortname(group: str) -> Optional[str]:
     if group.startswith("research-"):
         return group[9:]
+    else:
+        return None
 
 
 def _get_group_read_members(session: iRODSSession, group: str) -> List[str]:
-    group = "read-" + _get_group_shortname(group)
+    group_shortname = _get_group_shortname(group)
+
+    if group_shortname is None:
+        raise Exception(f"Cannot get short name for group '{group}'")
+
+    group = f"read-{group_shortname}"
     members = []
 
     iter = list(session.query(User).filter(
