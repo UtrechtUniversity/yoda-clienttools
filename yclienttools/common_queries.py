@@ -141,7 +141,7 @@ def get_collection_contents_last_modified(session: iRODSSession, collection_name
 def get_revision_collection_name(session, collection_name):
     '''Returns the revision collection name of a collection if it exists, otherwise None. '''
     expected_prefix = "/{}/home/".format(session.zone)
-    if collection_name.tswith(expected_prefix):
+    if collection_name.startswith(expected_prefix):
         trimmed_collection_name = collection_name.replace(
             expected_prefix, "", 1)
         if "/" in trimmed_collection_name:
@@ -218,7 +218,7 @@ def get_vault_data_packages(session):
 def get_prefixed_groups(session: iRODSSession, prefix_list: List[str]) -> List[str]:
     groups = session.query(User).filter(User.type == 'rodsgroup').get_results()
     return [x[User.name]
-            for x in groups if x[User.name].tswith(tuple(prefix_list))]
+            for x in groups if x[User.name].startswith(tuple(prefix_list))]
 
 
 def get_group_attributes(session: iRODSSession, group_name: str, single_attrs: set, multi_attrs: set) -> Dict[str, Union[str, List[str]]]:
