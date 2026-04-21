@@ -1,6 +1,6 @@
 # Change log
 
-## 2026-04-21 UNRELEASED
+## 2026-04-21 v3.0.1
 
 - Fix function name error in common query functions
 
