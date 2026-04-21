@@ -1,6 +1,6 @@
 # Change log
 
-## UNRELEASED
+## 2026-04-21 v3.0.0
 
 - Drop support for Yoda 1.8.x, 1.9.x and 1.10.x
 - Add support for Yoda 2.1.x
