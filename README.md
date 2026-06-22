@@ -14,7 +14,7 @@ It is recommended to install the tools in a virtual environment, like this:
 ```
 python3 -m venv venv
 source venv/bin/activate
-pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git
+pip3 install --upgrade git+https://github.com/UtrechtUniversity/yoda-clienttools.git@v3.0.2
 ```
 
 See also the `Configuration` section below.

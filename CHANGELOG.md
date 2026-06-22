@@ -1,5 +1,9 @@
 # Change log
 
+## 2026-06-22 v3.0.2
+
+- Upgrade Python cryptography package to v48.0.1 (security update)
+
 ## 2026-04-21 v3.0.1
 
 - Fix function name error in common query functions
