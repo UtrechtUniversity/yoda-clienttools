@@ -180,7 +180,7 @@ class RuleInterface:
                         subcategory: str,
                         description: str,
                         classification,
-                        schema_id: str = 'default-2',
+                        schema_id: str = '',
                         expiration_date: str = '',
                         sram_co: bool = False) -> List[str]:
         """Adds a group
@@ -204,7 +204,7 @@ class RuleInterface:
                 ('groupname', groupname),
                 ('category', category),
                 ('subcategory', subcategory),
-                ('schema_id', schema_id if schema_id not in ("", ".") else "default-2"),
+                ('schema_id', schema_id if schema_id not in ("", ".") else ""),
                 ('expiration_date', expiration_date),
                 ('description', description),
                 ('dataClassification', classification),
@@ -215,7 +215,7 @@ class RuleInterface:
                 ('groupname', groupname),
                 ('category', category),
                 ('subcategory', subcategory),
-                ('schema_id', schema_id if schema_id not in ("", ".") else "default-2"),
+                ('schema_id', schema_id if schema_id not in ("", ".") else ""),
                 ('expiration_date', expiration_date),
                 ('description', description),
                 ('dataClassification', classification),
