@@ -1,5 +1,12 @@
 # Change log
 
+## UNRELEASED
+
+- Change default metadata schema of new groups created by the
+  import groups tool: they now get the category or environment
+  default metadata schema if no specific metadata schema has been
+  selected, rather than the "default-2" metadata schema.
+
 ## 2026-06-22 v3.0.2
 
 - Upgrade Python cryptography package to v48.0.1 (security update)
