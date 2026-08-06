@@ -1,5 +1,9 @@
 # Change log
 
+## 2026-08-06 v3.1.1
+
+- Upgrade Python cryptography package to v50.0.0 (security update)
+
 ## 2026-07-08 v3.1.0
 
 - Change default metadata schema of new groups created by the
