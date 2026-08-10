@@ -771,9 +771,10 @@ def _describe_existing_datamanager_group(session, rule_interface: RuleInterface,
     """
     Describe a datamanager group this run did not create.
 
-    This script deliberately never modifies an existing datamanager group: 
-    Due to publications may still exist in original dm group, and AVUs may 
-    be changed after recreation. it can be done by hand in the portal group manager.
+    This script deliberately never modifies an existing datamanager group:
+    publications may still exist in the original datamanager group, and its
+    AVUs would be changed after recreation. It can be done by hand in the
+    portal group manager instead.
     """
     dm_groupname = _datamanager_groupname(category)
 
