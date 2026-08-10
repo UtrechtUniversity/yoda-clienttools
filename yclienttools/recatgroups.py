@@ -127,7 +127,24 @@ def _get_format_help_text() -> str:
         Notes:
         - CSV delimiter may be ','
         - Empty rows are ignored.
-        - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
+        - Safety check: a row is skipped if the group still has unprocessed publications,
+          that is if /<zone>/home/datamanager-<old category>/vault-<group> exists. This is
+          checked per group, so the other rows are still applied and a skipped group stays
+          in its original category. Skipped rows are listed at the end of the run.
+
+        Datamanager groups:
+        - A datamanager group is created only when the new category does not have one yet.
+          It is filed under its own category, so datamanager-<category> gets
+          category = <category> and subcategory = <category>.
+        - An EXISTING datamanager group is never modified. Its subcategory is left as it is
+          and the datamanagers given on the command line are NOT added to it, because doing
+          so would mean changing a group this script did not create. Any such group is
+          listed at the end of the run, together with what was left undone, so that it can
+          be corrected by hand in the portal group manager.
+        - The datamanager group of the OLD category is left in place, including its category.
+
+        After the changes have been applied, the result is read back from iRODS and reported.
+        The exit status is non-zero if a change did not take effect or a row was skipped.
 
         Example CSV:
         groupname,category,subcategory
@@ -408,7 +425,9 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
             )
             _basic(args, "Row {}: skipped (pending/unprocessed publications in old category '{}')".format(row_number, old_category))
             result.skipped.append(
-                (row_number, groupname, "pending/unprocessed publications in old category '{}'".format(old_category))
+                (row_number, groupname,
+                 "pending/unprocessed publications in old category '{}': {}".format(
+                     old_category, pending_collection))
             )
             continue
 
@@ -734,20 +753,59 @@ def _verify_changes(session, rule_interface: RuleInterface, args: argparse.Names
         dm_groupname = _datamanager_groupname(category)
 
         if category not in result.created_datamanager_groups:
-            if not common_queries.group_exists(session, dm_groupname):
-                notes.append("no datamanager group exists for category '{}'".format(category))
-                continue
-
-            note = "{} already existed and was not modified".format(dm_groupname)
-            if not _get_group_metadata_optional(session, dm_groupname, "subcategory"):
-                note += " - it has no subcategory, so the portal will not display it"
-            notes.append(note)
+            notes.append(_describe_existing_datamanager_group(session, rule_interface, args, category))
             continue
 
         problems.extend(_verify_group_metadata(session, dm_groupname, category, category))
         problems.extend(_verify_datamanager_members(rule_interface, dm_groupname, args))
 
     return problems, notes
+
+
+def _describe_existing_datamanager_group(session, rule_interface: RuleInterface,
+                                         args: argparse.Namespace, category: str) -> str:
+    """
+    Describe a datamanager group this run did not create.
+
+    This script deliberately never modifies an existing datamanager group: 
+    Due to publications may still exist in original dm group, and AVUs may 
+    be changed after recreation. it can be done by hand in the portal group manager.
+    """
+    dm_groupname = _datamanager_groupname(category)
+
+    if not common_queries.group_exists(session, dm_groupname):
+        return "no datamanager group exists for category '{}'".format(category)
+
+    lines = ["{} already existed and was not modified".format(dm_groupname)]
+
+    if not _get_group_metadata_optional(session, dm_groupname, "subcategory"):
+        lines.append("it has no subcategory, so the portal will not display it")
+
+    not_managing = _datamanagers_not_managing(rule_interface, dm_groupname, args)
+    if not_managing:
+        lines.append("not added as manager: {}".format(", ".join(not_managing)))
+
+    if len(lines) > 1:
+        lines.append("adjust this group manually in the portal group manager if needed")
+
+    return "\n".join(lines)
+
+
+def _datamanagers_not_managing(rule_interface: RuleInterface, dm_groupname: str,
+                               args: argparse.Namespace) -> List[str]:
+    """Which of the requested datamanagers do not already manage this group."""
+    not_managing = []
+
+    for username in sorted(set(args.datamanagers_new_category or [])):
+        try:
+            role = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
+        except Exception:
+            # Reporting only.
+            continue
+        if not are_roles_equivalent("manager", role):
+            not_managing.append(username)
+
+    return not_managing
 
 
 def _verify_group_metadata(session, groupname: str, category: str, subcategory: str) -> List[str]:
@@ -804,7 +862,10 @@ def _report_result(args: argparse.Namespace, result: ApplyResult, problems: Sequ
         print("  Skipped row {}: {} ({})".format(row_number, groupname, reason))
 
     for note in notes:
-        print("  Note: {}".format(note))
+        first_line, _, remainder = note.partition("\n")
+        print("  Note: {}".format(first_line))
+        for line in remainder.splitlines():
+            print("        {}".format(line))
 
     if problems:
         print("")
@@ -818,4 +879,5 @@ def _report_result(args: argparse.Namespace, result: ApplyResult, problems: Sequ
         print("Verification OK: all changes confirmed in iRODS.")
 
     if result.skipped:
-        print("Not every row was applied - see the skipped row(s) above.")
+        print("Not every row was applied: the skipped group(s) are still in their original")
+        print("category. Process the publications listed above, then re-run for those groups.")
