@@ -56,7 +56,10 @@ def entry() -> None:
         if not args.dry_run:
             problems, notes = _verify_changes(session, rule_interface, args, result)
             _report_result(args, result, problems, notes)
-            if problems or result.skipped:
+            # Only a failed verification is an error. A skipped row is the
+            # safety check declining to move a group that still has unprocessed
+            # publications: a normal outcome, reported in the summary above.
+            if problems:
                 exit_code = 1
 
     except KeyboardInterrupt:
@@ -144,7 +147,8 @@ def _get_format_help_text() -> str:
         - The datamanager group of the OLD category is left in place, including its category.
 
         After the changes have been applied, the result is read back from iRODS and reported.
-        The exit status is non-zero if a change did not take effect or a row was skipped.
+        The exit status is non-zero if a change did not take effect. Skipped rows do not
+        affect it: they are listed in the summary and the run itself did what it could.
 
         Example CSV:
         groupname,category,subcategory
