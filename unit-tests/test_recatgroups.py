@@ -121,7 +121,7 @@ class DatamanagerGroupCreationTest(TestCase):
             created = recatgroups._ensure_datamanager_group_exists(
                 session=None,
                 rule_interface=rule_interface,
-                category="psg-abe",
+                category="dummycategory",
                 row_number=2,
                 args=argparse.Namespace(verbose=False, create_sram_co=False),
             )
@@ -129,6 +129,6 @@ class DatamanagerGroupCreationTest(TestCase):
         self.assertTrue(created)
 
         groupname, category, subcategory = rule_interface.call_uuGroupAdd.call_args[0][:3]
-        self.assertEqual(groupname, "datamanager-psg-abe")
-        self.assertEqual(category, "psg-abe")
-        self.assertEqual(subcategory, "psg-abe")
+        self.assertEqual(groupname, "datamanager-dummycategory")
+        self.assertEqual(category, "dummycategory")
+        self.assertEqual(subcategory, "dummycategory")
