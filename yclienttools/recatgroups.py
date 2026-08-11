@@ -137,7 +137,7 @@ def _get_format_help_text() -> str:
 
         Datamanager groups:
         - A datamanager group is created only when the new category does not have one yet.
-        - An EXISTING datamanager group is never modified. 
+        - An EXISTING datamanager group is never modified.
         - The datamanager group of the OLD category is left in place, including its category/subcategory.
 
         Example CSV:
