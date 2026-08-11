@@ -137,18 +137,8 @@ def _get_format_help_text() -> str:
 
         Datamanager groups:
         - A datamanager group is created only when the new category does not have one yet.
-          It is filed under its own category, so datamanager-<category> gets
-          category = <category> and subcategory = <category>.
-        - An EXISTING datamanager group is never modified. Its subcategory is left as it is
-          and the datamanagers given on the command line are NOT added to it, because doing
-          so would mean changing a group this script did not create. Any such group is
-          listed at the end of the run, together with what was left undone, so that it can
-          be corrected by hand in the portal group manager.
-        - The datamanager group of the OLD category is left in place, including its category.
-
-        After the changes have been applied, the result is read back from iRODS and reported.
-        The exit status is non-zero if a change did not take effect. Skipped rows do not
-        affect it: they are listed in the summary and the run itself did what it could.
+        - An EXISTING datamanager group is never modified. 
+        - The datamanager group of the OLD category is left in place, including its category/subcategory.
 
         Example CSV:
         groupname,category,subcategory
