@@ -5,7 +5,7 @@ Bulk (sub)category changes for Yoda research groups.
 import argparse
 import csv
 import sys
-from typing import List, Sequence, Set, Tuple, Type
+from typing import List, Optional, Sequence, Set, Tuple, Type
 
 from irods.models import Group, User, UserMeta
 
@@ -46,16 +46,34 @@ def entry() -> None:
     session = s.setup_session(yoda_version)
     rule_interface = RuleInterface(session, yoda_version)
 
+    exit_code = 0
+
     try:
         _ensure_rodsadmin(session)
         _run_online_checks(session, rule_interface, args, data)
-        _apply_data(session, rule_interface, args, data)
+        result = _apply_data(session, rule_interface, args, data)
+
+        if not args.dry_run:
+            problems, notes = _verify_changes(session, rule_interface, args, result)
+            _report_result(args, result, problems, notes)
+            # Only a failed verification is an error. A skipped row is the
+            # safety check declining to move a group that still has unprocessed
+            # publications: a normal outcome, reported in the summary above.
+            if problems:
+                exit_code = 1
 
     except KeyboardInterrupt:
         print("Script interrupted by user.\n", file=sys.stderr)
+        exit_code = 1
+
+    except Exception as e:
+        print("Error: {}".format(e), file=sys.stderr)
+        exit_code = 1
 
     finally:
         session.cleanup()
+
+    sys.exit(exit_code)
 
 
 def _get_args() -> argparse.Namespace:
@@ -112,7 +130,15 @@ def _get_format_help_text() -> str:
         Notes:
         - CSV delimiter may be ','
         - Empty rows are ignored.
-        - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
+        - Safety check: a row is skipped if the group still has unprocessed publications,
+          that is if /<zone>/home/datamanager-<old category>/vault-<group> exists. This is
+          checked per group, so the other rows are still applied and a skipped group stays
+          in its original category. Skipped rows are listed at the end of the run.
+
+        Datamanager groups:
+        - A datamanager group is created only when the new category does not have one yet.
+        - An EXISTING datamanager group is never modified.
+        - The datamanager group of the OLD category is left in place, including its category/subcategory.
 
         Example CSV:
         groupname,category,subcategory
@@ -355,7 +381,22 @@ def _run_online_checks(session, rule_interface: RuleInterface, args: argparse.Na
             )
 
 
-def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace, data: Sequence[RecatRow]) -> None:
+class ApplyResult:
+    """What a run actually changed, it can be verified afterwards."""
+
+    def __init__(self) -> None:
+        self.applied: List[Tuple[str, str, str]] = []      # (groupname, category, subcategory)
+        self.skipped: List[Tuple[int, str, str]] = []      # (row_number, groupname, reason)
+        self.created_datamanager_groups: List[str] = []    # category names
+
+    def categories_touched(self) -> List[str]:
+        return sorted({category for (_, category, _) in self.applied})
+
+
+def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace,
+                data: Sequence[RecatRow]) -> ApplyResult:
+    result = ApplyResult()
+
     for (groupname, category, subcategory, row_number) in data:
         # Basic output (non-verbose)
         _basic(args, "Row {}: processing {}".format(row_number, groupname))
@@ -377,6 +418,11 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
                 )
             )
             _basic(args, "Row {}: skipped (pending/unprocessed publications in old category '{}')".format(row_number, old_category))
+            result.skipped.append(
+                (row_number, groupname,
+                 "pending/unprocessed publications in old category '{}': {}".format(
+                     old_category, pending_collection))
+            )
             continue
 
         dm_groupname = "datamanager-{}".format(category)
@@ -409,15 +455,18 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
 
         _update_group_category_subcategory(rule_interface, groupname, category, subcategory, args)
 
-        _ensure_datamanager_group_and_assign_managers_if_created(
+        created = _ensure_datamanager_group_and_assign_managers_if_created(
             session=session,
             rule_interface=rule_interface,
             category=category,
-            subcategory=subcategory,
             datamanagers=args.datamanagers_new_category,
             row_number=row_number,
             args=args,
         )
+
+        result.applied.append((groupname, category, subcategory))
+        if created:
+            result.created_datamanager_groups.append(category)
 
         # Basic output (non-verbose)
         _basic(
@@ -429,6 +478,8 @@ def _apply_data(session, rule_interface: RuleInterface, args: argparse.Namespace
                 ", subcategory='{}'".format(subcategory) if subcategory else "",
             ),
         )
+
+    return result
 
 
 def _get_pending_collection_path(zone: str, groupname: str, old_category: str) -> str:
@@ -488,7 +539,6 @@ def _ensure_datamanager_group_exists(
     session,
     rule_interface: RuleInterface,
     category: str,
-    subcategory: str,
     row_number: int,
     args: argparse.Namespace,
 ) -> bool:
@@ -505,7 +555,10 @@ def _ensure_datamanager_group_exists(
     data_classification = ""
     schema_id = ""
     expiration_date = ""
-    subcategory_for_add = subcategory if subcategory is not None else ""
+
+    # A datamanager group is filed under its own category, and subcategory
+    # E.g, category: <category>, subcategory: <category>, dmgroup: datamanger-<category>
+    subcategory_for_add = category
 
     status, msg = rule_interface.call_uuGroupAdd(
         dm_groupname,
@@ -605,27 +658,27 @@ def _ensure_datamanager_group_and_assign_managers_if_created(
     session,
     rule_interface: RuleInterface,
     category: str,
-    subcategory: str,
     datamanagers: List[str],
     row_number: int,
     args: argparse.Namespace,
-) -> None:
+) -> bool:
     """
     Ensure the datamanager group exists.
 
     If it does not exist, create it and assign the provided datamanagers as managers.
     If it already exists, do not alter membership/roles.
+
+    Returns True if the group was created by this call.
     """
     created = _ensure_datamanager_group_exists(
         session=session,
         rule_interface=rule_interface,
         category=category,
-        subcategory=subcategory,
         row_number=row_number,
         args=args,
     )
     if not created:
-        return
+        return False
 
     dm_groupname = _datamanager_groupname(category)
     _assign_managers_to_new_datamanager_group(
@@ -635,6 +688,7 @@ def _ensure_datamanager_group_and_assign_managers_if_created(
         row_number=row_number,
         args=args,
     )
+    return True
 
 
 def are_roles_equivalent(role1: str, role2: str) -> bool:
@@ -663,3 +717,162 @@ def _get_group_metadata_single(session, groupname: str, attributename: str) -> s
     if len(meta) > 1:
         raise Exception("Attribute {} has multiple values".format(attributename))
     return meta[0][UserMeta.value]
+
+
+def _get_group_metadata_optional(session, groupname: str, attributename: str) -> Optional[str]:
+    """Return a single-valued group attribute, or None when it is absent or ambiguous."""
+    try:
+        return _get_group_metadata_single(session, groupname, attributename)
+    except Exception:
+        return None
+
+
+# ============================================================================
+# Post-run verification
+# ============================================================================
+
+def _verify_changes(session, rule_interface: RuleInterface, args: argparse.Namespace,
+                    result: ApplyResult) -> Tuple[List[str], List[str]]:
+    """
+    Re-read from iRODS what the run was supposed to change.
+    Returns (problems, notes). Problems mean the run did not do what was asked.
+    """
+    problems: List[str] = []
+    notes: List[str] = []
+
+    for (groupname, category, subcategory) in result.applied:
+        problems.extend(_verify_group_metadata(session, groupname, category, subcategory))
+
+    for category in result.categories_touched():
+        dm_groupname = _datamanager_groupname(category)
+
+        if category not in result.created_datamanager_groups:
+            notes.append(_describe_existing_datamanager_group(session, rule_interface, args, category))
+            continue
+
+        problems.extend(_verify_group_metadata(session, dm_groupname, category, category))
+        problems.extend(_verify_datamanager_members(rule_interface, dm_groupname, args))
+
+    return problems, notes
+
+
+def _describe_existing_datamanager_group(session, rule_interface: RuleInterface,
+                                         args: argparse.Namespace, category: str) -> str:
+    """
+    Describe a datamanager group this run did not create.
+
+    This script deliberately never modifies an existing datamanager group:
+    publications may still exist in the original datamanager group, and its
+    AVUs would be changed after recreation. It can be done by hand in the
+    portal group manager instead.
+    """
+    dm_groupname = _datamanager_groupname(category)
+
+    if not common_queries.group_exists(session, dm_groupname):
+        return "no datamanager group exists for category '{}'".format(category)
+
+    lines = ["{} already existed and was not modified".format(dm_groupname)]
+
+    if not _get_group_metadata_optional(session, dm_groupname, "subcategory"):
+        lines.append("it has no subcategory, so the portal will not display it")
+
+    not_managing = _datamanagers_not_managing(rule_interface, dm_groupname, args)
+    if not_managing:
+        lines.append("not added as manager: {}".format(", ".join(not_managing)))
+
+    if len(lines) > 1:
+        lines.append("adjust this group manually in the portal group manager if needed")
+
+    return "\n".join(lines)
+
+
+def _datamanagers_not_managing(rule_interface: RuleInterface, dm_groupname: str,
+                               args: argparse.Namespace) -> List[str]:
+    """Which of the requested datamanagers do not already manage this group."""
+    not_managing = []
+
+    for username in sorted(set(args.datamanagers_new_category or [])):
+        try:
+            role = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
+        except Exception:
+            # Reporting only.
+            continue
+        if not are_roles_equivalent("manager", role):
+            not_managing.append(username)
+
+    return not_managing
+
+
+def _verify_group_metadata(session, groupname: str, category: str, subcategory: str) -> List[str]:
+    """Check that a group carries the expected category and subcategory."""
+    problems: List[str] = []
+
+    actual_category = _get_group_metadata_optional(session, groupname, "category")
+    if actual_category != category:
+        problems.append("{}: category is {}, expected '{}'".format(
+            groupname, _quote_or_missing(actual_category), category))
+
+    # An empty subcategory in the CSV means "leave unchanged", so there is
+    # nothing to verify for it.
+    if subcategory:
+        actual_subcategory = _get_group_metadata_optional(session, groupname, "subcategory")
+        if actual_subcategory != subcategory:
+            problems.append("{}: subcategory is {}, expected '{}'".format(
+                groupname, _quote_or_missing(actual_subcategory), subcategory))
+
+    return problems
+
+
+def _verify_datamanager_members(rule_interface: RuleInterface, dm_groupname: str,
+                                args: argparse.Namespace) -> List[str]:
+    """Check that every datamanager passed on the command line manages the new group."""
+    problems: List[str] = []
+
+    for username in sorted(set(args.datamanagers_new_category or [])):
+        try:
+            role = rule_interface.call_uuGroupGetMemberType(dm_groupname, username)
+        except Exception as e:
+            problems.append("{}: could not read role of {} ({})".format(dm_groupname, username, e))
+            continue
+        if not are_roles_equivalent("manager", role):
+            problems.append("{}: {} has role '{}', expected 'manager'".format(
+                dm_groupname, username, role))
+
+    return problems
+
+
+def _quote_or_missing(value: Optional[str]) -> str:
+    return "missing" if value is None else "'{}'".format(value)
+
+
+def _report_result(args: argparse.Namespace, result: ApplyResult, problems: Sequence[str],
+                   notes: Sequence[str]) -> None:
+    """Print the end-of-run summary. Always printed, verbose or not."""
+    print("")
+    print("Summary: {} group(s) recategorized, {} datamanager group(s) created, {} row(s) skipped".format(
+        len(result.applied), len(set(result.created_datamanager_groups)), len(result.skipped)
+    ))
+
+    for (row_number, groupname, reason) in result.skipped:
+        print("  Skipped row {}: {} ({})".format(row_number, groupname, reason))
+
+    for note in notes:
+        first_line, _, remainder = note.partition("\n")
+        print("  Note: {}".format(first_line))
+        for line in remainder.splitlines():
+            print("        {}".format(line))
+
+    if problems:
+        print("")
+        sys.stdout.flush()
+        print("Verification FAILED - the following changes did not take effect:", file=sys.stderr)
+        for problem in problems:
+            print("  {}".format(problem), file=sys.stderr)
+        return
+
+    if result.applied:
+        print("Verification OK: all changes confirmed in iRODS.")
+
+    if result.skipped:
+        print("Not every row was applied: the skipped group(s) are still in their original")
+        print("category. Process the publications listed above, then re-run for those groups.")

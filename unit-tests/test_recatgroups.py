@@ -6,14 +6,16 @@ Unit tests for recategorize groups script (recatgroups.py)
 __copyright__ = 'Copyright (c) 2026, Utrecht University'
 __license__   = 'GPLv3, see LICENSE'
 
+import argparse
 import sys
 import tempfile
 from io import StringIO
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 sys.path.append("../yclienttools")
 
+import recatgroups
 from recatgroups import (
     _normalize_category,
     _split_datamanagers,
@@ -105,3 +107,28 @@ class RecatGroupsTest(TestCase):
         )
         with self.assertRaises(SystemExit):
             parse_csv_file_recat(path)
+
+
+class DatamanagerGroupCreationTest(TestCase):
+    def test_created_group_is_filed_under_its_own_category(self):
+        """
+        A new datamanager group gets its own category as subcategory.
+        """
+        rule_interface = MagicMock()
+        rule_interface.call_uuGroupAdd.return_value = ("0", "")
+
+        with patch.object(recatgroups.common_queries, "group_exists", return_value=False):
+            created = recatgroups._ensure_datamanager_group_exists(
+                session=None,
+                rule_interface=rule_interface,
+                category="dummycategory",
+                row_number=2,
+                args=argparse.Namespace(verbose=False, create_sram_co=False),
+            )
+
+        self.assertTrue(created)
+
+        groupname, category, subcategory = rule_interface.call_uuGroupAdd.call_args[0][:3]
+        self.assertEqual(groupname, "datamanager-dummycategory")
+        self.assertEqual(category, "dummycategory")
+        self.assertEqual(subcategory, "dummycategory")
