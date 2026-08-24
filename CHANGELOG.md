@@ -1,6 +1,6 @@
 # Change log
 
-## 2026-07-08 v3.1.0
+## UNRELEASED
 
 - Change default metadata schema of new groups created by the
   import groups tool: they now get the category or environment
