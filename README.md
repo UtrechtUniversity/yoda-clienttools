@@ -376,7 +376,15 @@ options:
         Notes:
         - CSV delimiter may be ','
         - Empty rows are ignored.
-        - Safety check: if pending/unprocessed publications exist for the OLD category, the row is skipped.
+        - Safety check: a row is skipped if the group still has unprocessed publications,
+          that is if /<zone>/home/datamanager-<old category>/vault-<group> exists. This is
+          checked per group, so the other rows are still applied and a skipped group stays
+          in its original category. Skipped rows are listed at the end of the run.
+
+        Datamanager groups:
+        - A datamanager group is created only when the new category does not have one yet.
+        - An EXISTING datamanager group is never modified.
+        - The datamanager group of the OLD category is left in place, including its category/subcategory.
 
         Example CSV:
         groupname,category,subcategory
@@ -386,6 +394,7 @@ options:
         Example usage:
         yrecatgroups input.csv --datamanagers-new-category 'dm1@example.org;dm2@example.org'
         yrecatgroups input.csv --datamanagers-new-category ''   # allow creating new categories without DMs
+
 ```
 
 ### yreport\_collectionsize
