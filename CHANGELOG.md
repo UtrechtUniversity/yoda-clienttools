@@ -1,5 +1,11 @@
 # Change log
 
+## UNRELEASED
+
+- Fixes for the recatgroups tool:
+    * After recategorization, a data manager group will have a subcategory name equal to the category name by default, which ensures that it does not have a missing subcategory.
+    * Report if the new category already has a data manager group and the tool will not overwrite it
+
 ## 2026-08-06 v3.1.1
 
 - Upgrade Python cryptography package to v50.0.0 (security update)
